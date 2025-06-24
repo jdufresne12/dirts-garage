@@ -2,8 +2,7 @@
 
 :root {
   --background: #ffffff;
-  --foreground: #ffffff;
-  /* --foreground: #171717; */
+  --foreground: #171717;
 }
 
 @theme inline {
@@ -15,9 +14,15 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    /* --background: #0a0a0a; */
+    /* --background: ; */
     --background: #ededed;
-    --foreground: #ededed;
+    --foreground: #0a0a0a;
+  }
+}
+
+@layer utilities {
+  .slow-spin {
+    animation: spin 4s linear infinite;
   }
 }
 
