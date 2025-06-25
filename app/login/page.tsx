@@ -15,7 +15,6 @@ export default function LoginPage() {
     const { login, isAuthenticated } = useAuth();
     const router = useRouter();
     const searchParams = useSearchParams();
-
     const redirectPath = searchParams.get('redirect') || '/';
 
     // Redirect if already authenticated
