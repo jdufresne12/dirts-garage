@@ -1,5 +1,6 @@
 'use client';
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { useLoading } from './LoadingContext'
 
 interface User {
     id: string;
@@ -9,7 +10,6 @@ interface User {
 
 interface AuthContextType {
     user: User | null;
-    isLoading: boolean;
     login: (username: string, password: string) => Promise<boolean>;
     logout: () => void;
     isAuthenticated: boolean;
@@ -34,8 +34,8 @@ const HARDCODED_USERS = [
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
+    const { showLoading, hideLoading } = useLoading();
     const [user, setUser] = useState<User | null>(null);
-    const [isLoading, setIsLoading] = useState(true);
 
     // Check for existing session on mount
     useEffect(() => {
@@ -44,6 +44,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     const checkAuthStatus = async () => {
         try {
+            showLoading('Authenticating...');
             const response = await fetch('/api/auth/check');
             if (response.ok) {
                 const userData = await response.json();
@@ -52,14 +53,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         } catch (error) {
             console.error('Auth check failed:', error);
         } finally {
-            setIsLoading(false);
+            hideLoading();
         }
     };
 
     const login = async (username: string, password: string): Promise<boolean> => {
         try {
-            setIsLoading(true);
+            showLoading('Logging in...');
 
+            await new Promise(resolve => setTimeout(resolve, 2000));
             // Find user in hardcoded list
             const foundUser = HARDCODED_USERS.find(
                 u => u.username === username && u.password === password
@@ -93,12 +95,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             console.error('Login failed:', error);
             return false;
         } finally {
-            setIsLoading(false);
+            hideLoading();
         }
     };
 
     const logout = async () => {
         try {
+            showLoading("Logging out...")
             await fetch('/api/auth/logout', {
                 method: 'POST',
             });
@@ -107,12 +110,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         } catch (error) {
             console.error('Logout failed:', error);
             setUser(null);
+        } finally {
+            hideLoading();
         }
     };
 
     const value: AuthContextType = {
         user,
-        isLoading,
         login,
         logout,
         isAuthenticated: !!user,
