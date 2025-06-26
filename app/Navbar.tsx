@@ -8,9 +8,7 @@ import {
     LayoutDashboard,
     Users,
     Wrench,
-    Package,
     Receipt,
-    BarChart3,
     Calendar,
     Settings,
     ChevronLeft,
@@ -18,7 +16,7 @@ import {
     X,
     Menu
 } from 'lucide-react';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from './contexts/AuthContext';
 
 interface NavbarProps {
     isMobile: boolean;
@@ -32,16 +30,16 @@ interface MenuItem {
 export default function Navbar({ isMobile }: NavbarProps) {
     const [isCollapsed, setIsCollapsed] = useState(false);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-    const pathname = usePathname();
+    const pathname = `/${usePathname().split('/')[1]}`;
     const { user } = useAuth();
 
     const menuItems: MenuItem[] = [
         { icon: LayoutDashboard, label: 'Dashboard', href: '/' },
         { icon: Users, label: 'Customers', href: '/customers' },
         { icon: Wrench, label: 'Jobs', href: '/jobs' },
-        { icon: Package, label: 'Inventory', href: '/inventory' },
-        { icon: Receipt, label: 'Invoicing', href: '/invoicing' },
-        { icon: BarChart3, label: 'Reports', href: '/reports' },
+        // { icon: Package, label: 'Inventory', href: '/inventory' },
+        { icon: Receipt, label: 'Invoicing', href: '/invoice' },
+        // { icon: BarChart3, label: 'Reports', href: '/reports' },
         { icon: Calendar, label: 'Schedule', href: '/schedule' },
         { icon: Settings, label: 'Settings', href: '/settings' },
     ];
@@ -142,11 +140,11 @@ export default function Navbar({ isMobile }: NavbarProps) {
                                 alt="Dirt's Garage Logo"
                                 width={500}
                                 height={500}
-                                className="size-7"
+                                className="size-5 md:size-7"
                                 priority
                             />
                         </div>
-                        <span className="text-xl font-bold text-orange-400">Dirt's Garage</span>
+                        <span className="text-md md:text-xl font-bold text-orange-400">Dirt's Garage</span>
                     </div>
                 )}
                 <button
@@ -154,9 +152,9 @@ export default function Navbar({ isMobile }: NavbarProps) {
                     className="p-1 rounded-full transition-colors hover:bg-slate-700"
                 >
                     {isCollapsed ? (
-                        <ChevronRight className="w-5 h-5" />
+                        <ChevronRight className="size-3 md:size-5" />
                     ) : (
-                        <ChevronLeft className="w-5 h-5" />
+                        <ChevronLeft className="size-3 md:size-5" />
                     )}
                 </button>
             </div>
