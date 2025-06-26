@@ -18,6 +18,7 @@ import {
     X,
     Menu
 } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
 
 interface NavbarProps {
     isMobile: boolean;
@@ -32,6 +33,7 @@ export default function Navbar({ isMobile }: NavbarProps) {
     const [isCollapsed, setIsCollapsed] = useState(false);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const pathname = usePathname();
+    const { user } = useAuth();
 
     const menuItems: MenuItem[] = [
         { icon: LayoutDashboard, label: 'Dashboard', href: '/' },
@@ -54,9 +56,9 @@ export default function Navbar({ isMobile }: NavbarProps) {
     if (isMobile) {
         return (
             <>
+                {/* Mobile Header */}
                 <div className="fixed top-0 left-0 right-0 bg-slate-800 text-white z-40 border-b border-slate-700">
                     <div className="flex items-center justify-between p-4">
-                        {/* Logo and Title */}
                         <div className="flex items-center space-x-3">
                             <Image
                                 src="/gear.png"
@@ -68,8 +70,6 @@ export default function Navbar({ isMobile }: NavbarProps) {
                             />
                             <span className="text-lg font-bold text-orange-400">Dirt's Garage</span>
                         </div>
-
-                        {/* Hamburger Menu Button */}
                         <button
                             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                             className="p-2 rounded-lg hover:bg-slate-700 transition-colors"
@@ -84,12 +84,10 @@ export default function Navbar({ isMobile }: NavbarProps) {
                 </div>
 
                 {/* Mobile Slide-out Menu */}
-                <div className={`
-                    fixed top-16 left-0 h-full bg-slate-800 text-white z-50 
+                <div className={`fixed top-16 left-0 h-full bg-slate-800 text-white z-50 
                     transition-transform duration-300 ease-in-out w-64
                     ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}
                 `}>
-                    {/* Navigation Items */}
                     <nav className="p-4">
                         <ul className="space-y-2">
                             {menuItems.map((item) => {
@@ -120,7 +118,7 @@ export default function Navbar({ isMobile }: NavbarProps) {
                     <div className="absolute bottom-15 left-0 right-0 p-4 border-t border-slate-700">
                         <div className="text-xs text-slate-400">
                             <p className="mb-1">Logged in as:</p>
-                            <p className="font-medium text-slate-300">Garage Admin</p>
+                            <p className="font-medium text-slate-300">{user?.username}</p>
                         </div>
                     </div>
                 </div>

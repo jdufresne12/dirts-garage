@@ -33,7 +33,7 @@ export default function LayoutWrapper({ children }: LayoutWrapperProps) {
     // Render without sidebar for auth pages, errors, etc.
     if (!shouldShowSidebar) {
         return (
-            <div className="min-h-screen bg-gray-50">
+            <div className="min-h-screen">
                 {children}
             </div>
         );
@@ -41,13 +41,10 @@ export default function LayoutWrapper({ children }: LayoutWrapperProps) {
 
     // Render with sidebar for dashboard pages
     return (
-        <div className="flex min-h-screen bg-gray-50">
+        <div className="flex min-h-screen">
             <Navbar isMobile={isMobile} />
-            <main className={`flex-1 transition-all duration-300 ${isMobile ? 'pt-16' : ''
-                }`}>
-                <div className="">
-                    {children}
-                </div>
+            <main className={`flex-1 ${isMobile ? 'pt-16' : ''}`}>
+                {children}
             </main>
         </div>
     );
