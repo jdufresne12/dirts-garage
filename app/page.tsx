@@ -15,27 +15,28 @@ import JobsRequiringAttention from './components/JobsRequiringAttention';
 
 export default function Home() {
   return (
-    <div className="flex bg-gray-50 min-h-screen">
-      <div className="flex-1 p-8">
+    <div className="min-h-screen bg-gray-50 w-full overflow-x-hidden">
+      <div className="w-full mx-auto p-4 sm:p-6 lg:p-8">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8 bg-white p-6 rounded-lg shadow-lg">
-          <h1 className="text-3xl font-bold text-gray-900">Dashboard Overview</h1>
-          <div className="flex space-x-3">
+        <div className="flex flex-col gap-4 p-4 rounded-lg lg:flex-row lg:items-center lg:justify-between lg:mb-8 lg:bg-white lg:p-6 lg:shadow-lg">
+          <h1 className="text-2xl p-4 min-w-0 text-center font-bold bg-white rounded-lg shadow-md text-gray-900 lg:p-0 lg:bg-none lg:rounded-none lg:shadow-none lg:text-3xl">Dashboard Overview</h1>
+          {/* Action Container */}
+          <div className="flex flex-row justify-center gap-2 sm:gap-3 w-full sm:w-auto">
             <Link
               href={"/customers/new-customer"}
-              className="w-fit px-4 py-2 bg-orange-400 text-white rounded-lg hover:bg-orange-500 transition-colors"
+              className="px-3 py-2 text-sm font-medium shadow-sm bg-orange-400 text-white rounded-lg hover:bg-orange-500 transition-colors text-center whitespace-nowrap lg:shadow-none"
             >
-              + New Customer
+              + <span className='hidden md:inline'>New</span> Customer
             </Link>
             <Link
               href={"/jobs/new-job"}
-              className="w-fit px-4 py-2 bg-orange-400 text-white rounded-lg hover:bg-orange-500 transition-colors"
+              className="px-3 py-2 text-sm font-medium shadow-sm bg-orange-400 text-white rounded-lg hover:bg-orange-500 transition-colors text-center whitespace-nowrap lg:shadow-none"
             >
-              + Start Job
+              + <span className='hidden md:inline'>Start</span> Job
             </Link>
             <Link
               href={"/invoice"}
-              className="w-fit px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors"
+              className="px-3 py-2 text-sm font-medium shadow-sm border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors text-center whitespace-nowrap lg:shadow-none"
             >
               Create Invoice
             </Link>
@@ -43,7 +44,7 @@ export default function Home() {
         </div>
 
         {/* Analytics Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8 w-full">
           <AnalyticsCard
             title="Active Jobs"
             value="12"
@@ -75,13 +76,19 @@ export default function Home() {
         </div>
 
         {/* Main Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          <RevenueTrendGraph />
-          <RecentActivity />
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mb-6 sm:mb-8 w-full">
+          <div className="w-full min-w-0">
+            <RevenueTrendGraph />
+          </div>
+          <div className="w-full min-w-0">
+            <RecentActivity />
+          </div>
         </div>
 
         {/* Jobs Requiring Attention */}
-        <JobsRequiringAttention />
+        <div className="w-full min-w-0">
+          <JobsRequiringAttention />
+        </div>
       </div>
     </div>
   );

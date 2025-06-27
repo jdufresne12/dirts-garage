@@ -1,5 +1,6 @@
 import React from 'react';
 import { AlertTriangle, Search, CheckCircle } from 'lucide-react';
+
 export default function JobsRequiringAttention() {
     const jobs = [
         {
@@ -35,29 +36,33 @@ export default function JobsRequiringAttention() {
     ];
 
     return (
-        <div className="bg-white rounded-lg p-6 shadow-sm">
-            <div className="flex items-center justify-between mb-6">
-                <h3 className="text-lg font-semibold text-gray-900">Jobs Requiring Attention</h3>
-                <button className="px-4 py-2 text-sm text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50">
+        <div className="bg-white rounded-lg p-3 sm:p-4 lg:p-6 shadow-sm">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-0 mb-4 sm:mb-6">
+                <h3 className="text-base sm:text-lg font-semibold text-gray-900">Jobs Requiring Attention</h3>
+                <button className="px-3 py-2 text-xs sm:text-sm text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors self-start sm:self-auto">
                     Manage All
                 </button>
             </div>
 
-            <div className="space-y-4">
+            <div className="space-y-3 sm:space-y-4">
                 {jobs.map(job => (
-                    <div key={job.id} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
-                        <div className="flex items-start space-x-3">
-                            <job.icon className={`h-5 w-5 mt-1 ${job.iconColor}`} />
-                            <div className="flex-1">
-                                <div className="font-medium text-gray-900">
-                                    {job.customer} - {job.vehicle}
+                    <div key={job.id} className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-0 sm:justify-between p-3 sm:p-4 border border-gray-200 rounded-lg">
+                        <div className="flex items-start space-x-3 flex-1 min-w-0">
+                            <job.icon className={`h-4 w-4 sm:h-5 sm:w-5 mt-0.5 sm:mt-1 flex-shrink-0 ${job.iconColor}`} />
+                            <div className="flex-1 min-w-0">
+                                <div className="font-medium text-sm sm:text-base text-gray-900 truncate">
+                                    <span className="sm:hidden">{job.customer}</span>
+                                    <span className="hidden sm:inline">{job.customer} - {job.vehicle}</span>
                                 </div>
-                                <div className="text-sm text-gray-600 mt-1">
+                                <div className="text-xs sm:hidden text-gray-600 mt-0.5 truncate">
+                                    {job.vehicle}
+                                </div>
+                                <div className="text-xs sm:text-sm text-gray-600 mt-1 line-clamp-2 sm:line-clamp-1">
                                     {job.issue}
                                 </div>
                             </div>
                         </div>
-                        <button className={`px-4 py-2 text-sm text-white rounded-lg ${job.actionColor} transition-colors`}>
+                        <button className={`px-3 py-2 text-xs sm:text-sm text-white rounded-lg ${job.actionColor} transition-colors whitespace-nowrap self-start sm:self-auto`}>
                             {job.action}
                         </button>
                     </div>
@@ -65,4 +70,4 @@ export default function JobsRequiringAttention() {
             </div>
         </div>
     );
-};
+}

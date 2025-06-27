@@ -28,18 +28,16 @@ interface MenuItem {
 }
 
 export default function Navbar({ isMobile }: NavbarProps) {
-    const [isCollapsed, setIsCollapsed] = useState(false);
-    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-    const pathname = `/${usePathname().split('/')[1]}`;
     const { user } = useAuth();
+    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+    const [isCollapsed, setIsCollapsed] = useState(false);
+    const pathname = `/${usePathname().split('/')[1]}`;
 
     const menuItems: MenuItem[] = [
         { icon: LayoutDashboard, label: 'Dashboard', href: '/' },
         { icon: Users, label: 'Customers', href: '/customers' },
         { icon: Wrench, label: 'Jobs', href: '/jobs' },
-        // { icon: Package, label: 'Inventory', href: '/inventory' },
         { icon: Receipt, label: 'Invoicing', href: '/invoice' },
-        // { icon: BarChart3, label: 'Reports', href: '/reports' },
         { icon: Calendar, label: 'Schedule', href: '/schedule' },
         { icon: Settings, label: 'Settings', href: '/settings' },
     ];
@@ -57,25 +55,25 @@ export default function Navbar({ isMobile }: NavbarProps) {
                 {/* Mobile Header */}
                 <div className="fixed top-0 left-0 right-0 bg-slate-800 text-white z-40 border-b border-slate-700">
                     <div className="flex items-center justify-between p-4">
-                        <div className="flex items-center space-x-3">
+                        <div className="flex items-center space-x-3 min-w-0">
                             <Image
                                 src="/gear.png"
                                 alt="Dirt's Garage Logo"
-                                width={500}
-                                height={500}
-                                className="size-7"
+                                width={28}
+                                height={28}
+                                className="flex-shrink-0"
                                 priority
                             />
-                            <span className="text-lg font-bold text-orange-400">Dirt's Garage</span>
+                            <span className="text-lg font-bold text-orange-400 truncate">Dirt's Garage</span>
                         </div>
                         <button
                             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                            className="p-2 rounded-lg hover:bg-slate-700 transition-colors"
+                            className="p-2 rounded-lg hover:bg-slate-700 transition-colors flex-shrink-0"
                         >
                             {mobileMenuOpen ? (
-                                <X className="w-6 h-6" />
+                                <X className="size-6" />
                             ) : (
-                                <Menu className="w-6 h-6" />
+                                <Menu className="size-6" />
                             )}
                         </button>
                     </div>
@@ -102,7 +100,7 @@ export default function Navbar({ isMobile }: NavbarProps) {
                                                 : 'text-slate-300 hover:bg-slate-700 hover:text-white'
                                                 }`}
                                         >
-                                            <Icon className={`w-5 h-5 flex-shrink-0 ${isActive ? 'text-white' : 'text-slate-400'
+                                            <Icon className={`size-5 flex-shrink-0 ${isActive ? 'text-white' : 'text-slate-400'
                                                 }`} />
                                             <span className="font-medium">{item.label}</span>
                                         </Link>
@@ -116,7 +114,7 @@ export default function Navbar({ isMobile }: NavbarProps) {
                     <div className="absolute bottom-15 left-0 right-0 p-4 border-t border-slate-700">
                         <div className="text-xs text-slate-400">
                             <p className="mb-1">Logged in as:</p>
-                            <p className="font-medium text-slate-300">{user?.username}</p>
+                            <p className="font-medium text-slate-300 truncate">{user?.username}</p>
                         </div>
                     </div>
                 </div>
@@ -124,43 +122,45 @@ export default function Navbar({ isMobile }: NavbarProps) {
         );
     }
 
-    // Desktop Sidebar
+    // Desktop Sidebar - Fixed height, no scrolling, but not position fixed
     return (
         <div className={`
-            relative min-h-screen flex flex-col bg-slate-800 text-white 
-            transition-all duration-300 ${isCollapsed ? 'w-16' : 'w-64'}
+            flex-shrink-0 h-screen flex flex-col bg-slate-800 text-white 
+            transition-all duration-300 ${isCollapsed ? 'w-16' : 'w-fit'}
         `}>
             {/* Header */}
-            <div className="flex items-center justify-between p-4 border-b border-slate-700">
+            <div className="flex items-center justify-between p-4 border-b border-slate-700 flex-shrink-0">
                 {!isCollapsed && (
-                    <div className="flex items-center space-x-3">
-                        <div className="items-center justify-center">
+                    <div className="flex items-center space-x-3 min-w-0 flex-1">
+                        <div className="flex-shrink-0">
                             <Image
                                 src="/gear.png"
                                 alt="Dirt's Garage Logo"
-                                width={500}
-                                height={500}
-                                className="size-5 md:size-7"
+                                width={28}
+                                height={28}
+                                className="size-4 lg:size-6"
                                 priority
                             />
                         </div>
-                        <span className="text-md md:text-xl font-bold text-orange-400">Dirt's Garage</span>
+                        <span className="text-md lg:text-xl font-bold text-orange-400 truncate">
+                            Dirt's Garage
+                        </span>
                     </div>
                 )}
                 <button
                     onClick={() => setIsCollapsed(!isCollapsed)}
-                    className="p-1 rounded-full transition-colors hover:bg-slate-700"
+                    className="p-1 ml-1 rounded-full transition-colors hover:bg-slate-700 flex-shrink-0"
                 >
                     {isCollapsed ? (
-                        <ChevronRight className="size-3 md:size-5" />
+                        <ChevronRight className="size-5" />
                     ) : (
-                        <ChevronLeft className="size-3 md:size-5" />
+                        <ChevronLeft className="size-5" />
                     )}
                 </button>
             </div>
 
             {/* Navigation Items */}
-            <nav className="flex-1 px-3 py-4">
+            <nav className="flex-1 px-3 py-4 overflow-hidden">
                 <ul className="space-y-2">
                     {menuItems.map((item) => {
                         const Icon = item.icon;
@@ -175,10 +175,10 @@ export default function Navbar({ isMobile }: NavbarProps) {
                                         : 'text-slate-300 hover:bg-slate-700 hover:text-white'
                                         }`}
                                 >
-                                    <Icon className={`w-5 h-5 flex-shrink-0 ${isActive ? 'text-white' : 'text-slate-400 group-hover:text-white'
+                                    <Icon className={`size-5 flex-shrink-0 ${isActive ? 'text-white' : 'text-slate-400 group-hover:text-white'
                                         }`} />
                                     {!isCollapsed && (
-                                        <span className="font-medium truncate">{item.label}</span>
+                                        <span className="text-sm lg:text-lg font-medium truncate">{item.label}</span>
                                     )}
                                 </Link>
 
@@ -195,11 +195,13 @@ export default function Navbar({ isMobile }: NavbarProps) {
             </nav>
 
             {/* Footer */}
-            <div className="p-4 border-t border-slate-700">
+            <div className="p-4 border-t border-slate-700 flex-shrink-0">
                 {!isCollapsed && (
                     <div className="text-xs text-slate-400">
                         <p className="mb-1">Logged in as:</p>
-                        <p className="font-medium text-slate-300">Garage Admin</p>
+                        <p className="font-medium text-slate-300 truncate">
+                            {user?.username || 'Garage Admin'}
+                        </p>
                     </div>
                 )}
             </div>
