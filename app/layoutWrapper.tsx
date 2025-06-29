@@ -30,22 +30,22 @@ export default function LayoutWrapper({ children }: LayoutWrapperProps) {
         return () => window.removeEventListener('resize', checkScreenSize);
     }, []);
 
-    // Render without sidebar for auth pages, errors, etc.
+    // Render without Navbar
     if (!shouldShowSidebar) {
         return (
-            <div className="min-h-screen w-full overflow-x-hidden">
+            <div className="min-h-screen">
                 {children}
             </div>
         );
     }
 
-    // Render with sidebar for dashboard pages 
+    // Render with Navbar
     return (
-        <div className="flex min-h-screen w-full overflow-x-hidden">
+        <div className="flex h-screen overflow-hidden">
             <Navbar isMobile={isMobile} />
-            <main className={`flex-1 min-w-0 w-full ${isMobile ? 'pt-16' : ''} overflow-x-hidden`}>
+            <main className={`flex-1 min-w-0 overflow-y-auto ${isMobile ? 'pt-16' : ''}`}>
                 {children}
             </main>
         </div>
     );
-}
+};

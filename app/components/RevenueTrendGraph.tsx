@@ -7,13 +7,13 @@ export default function RevenueTrendGraph() {
         { month: 'Mar', value: 14000 },
         { month: 'Apr', value: 17500 },
         { month: 'May', value: 16800 },
-        { month: 'Jun', value: 18540 }
+        { month: 'Jun', value: 20000 }
     ];
 
     const maxValue = Math.max(...data.map(d => d.value));
 
     return (
-        <div className="bg-white rounded-lg p-3 sm:p-4 lg:p-6 shadow-sm">
+        <div className="h-full bg-white rounded-lg p-3 sm:p-4 lg:p-6 shadow-sm">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-0 mb-4 sm:mb-6">
                 <h3 className="text-base sm:text-lg font-semibold text-gray-900">Revenue Trend</h3>
                 <button className="px-3 py-2 text-xs sm:text-sm text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-100 transition-colors self-start sm:self-auto">
