@@ -1,19 +1,29 @@
 'use client';
-import React from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import {
   Wrench,
   FileText,
   CheckCircle,
-  DollarSign
+  DollarSign,
+  Plus
 } from 'lucide-react';
 
-import AnalyticsCard from './components/AnalyticsCard';
-import RevenueTrendGraph from './components/RevenueTrendGraph';
-import RecentActivity from './components/RecentActivity';
-import JobsRequiringAttention from './components/JobsRequiringAttention';
+import AnalyticsCard from './components/dashboard/AnalyticsCard';
+import RevenueTrendGraph from './components/dashboard/RevenueTrendGraph';
+import RecentActivity from './components/dashboard/RecentActivity';
+import JobsRequiringAttention from './components/dashboard/JobsRequiringAttention';
+import StartJobModal from './components/jobs/StartJobModal';
 
 export default function Home() {
+  const [startJobModalOpen, setStartJobModalOpen] = useState(false);
+
+  const handleStartJob = (data: any) => {
+    console.log('New customer data:', data);
+    // Here you would typically save to your database or state management
+    // For now, we'll just log it
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 w-full overflow-x-hidden">
       <div className="w-full mx-auto p-4 sm:p-6 lg:p-8">
@@ -23,20 +33,20 @@ export default function Home() {
           {/* Action Container */}
           <div className="flex flex-row justify-center gap-2 sm:gap-3 w-full sm:w-auto">
             <Link
-              href={"/customers/new-customer"}
-              className="px-3 py-2 text-sm font-medium shadow-sm bg-orange-400 text-white rounded-lg hover:bg-orange-500 transition-colors text-center whitespace-nowrap lg:shadow-none"
-            >
-              + <span className='hidden md:inline'>New</span> Customer
-            </Link>
-            <Link
               href={"/jobs/new-job"}
-              className="px-3 py-2 text-sm font-medium shadow-sm bg-orange-400 text-white rounded-lg hover:bg-orange-500 transition-colors text-center whitespace-nowrap lg:shadow-none"
+              className="flex justify-center items-center p-2 text-sm font-medium shadow-sm bg-orange-400 text-white rounded-lg hover:bg-orange-500 transition-colors text-center whitespace-nowrap lg:shadow-none"
             >
-              + <span className='hidden md:inline'>Start</span> Job
+              <Plus className="size-3 mr-1 text-white md:size-4" /> Job
             </Link>
+            <button
+              onClick={() => setStartJobModalOpen(true)}
+              className="flex justify-center items-center px-3 py-2 text-sm font-medium shadow-sm bg-orange-400 text-white rounded-lg hover:bg-orange-500 transition-colors text-center whitespace-nowrap lg:shadow-none"
+            >
+              Start Job
+            </button>
             <Link
               href={"/invoice"}
-              className="px-3 py-2 text-sm font-medium shadow-sm border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors text-center whitespace-nowrap lg:shadow-none"
+              className="flex justify-center items-center px-3 py-2 text-sm font-medium border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors text-center whitespace-nowrap lg:shadow-none"
             >
               Create Invoice
             </Link>
@@ -90,6 +100,13 @@ export default function Home() {
           <JobsRequiringAttention />
         </div>
       </div>
+
+      {/* Add Customer Modal */}
+      <StartJobModal
+        isOpen={startJobModalOpen}
+        onClose={() => setStartJobModalOpen(false)}
+        onSubmit={handleStartJob}
+      />
     </div>
   );
 }

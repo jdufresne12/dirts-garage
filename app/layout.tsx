@@ -4,7 +4,7 @@ import { AuthProvider } from './contexts/AuthContext';
 import "./globals.css";
 import LayoutWrapper from "./layoutWrapper";
 import { LoadingProvider } from "./contexts/LoadingContext";
-import Loading from "./Loading";
+import Loading from "./components/Loading";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",

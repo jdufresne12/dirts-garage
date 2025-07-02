@@ -1,60 +1,9 @@
-import React from 'react';
+'use client';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import { Phone, Mail, Search, Plus, ChevronRight } from 'lucide-react';
-
-// Mock data - condensed for list view
-const customers = [
-    {
-        id: 1,
-        name: "Mike Johnson",
-        phone: "(555) 123-4567",
-        email: "mike.johnson@email.com",
-        totalSpent: 15840,
-        vehicleCount: 4,
-        status: "active", // active, waiting, completed, none
-        currentProject: "LS3 Engine Rebuild"
-    },
-    {
-        id: 2,
-        name: "Sarah Davis",
-        phone: "(555) 987-6543",
-        email: "sarah.davis@email.com",
-        totalSpent: 8420,
-        vehicleCount: 1,
-        status: "completed",
-        currentProject: "Transmission Rebuild"
-    },
-    {
-        id: 3,
-        name: "Tom Wilson",
-        phone: "(555) 456-7890",
-        email: "tom.wilson@email.com",
-        totalSpent: 24650,
-        vehicleCount: 1,
-        status: "waiting",
-        currentProject: "Parts approval needed"
-    },
-    {
-        id: 4,
-        name: "Classic Car Restoration LLC",
-        phone: "(555) 789-0123",
-        email: "orders@classiccarrestoration.com",
-        totalSpent: 45230,
-        vehicleCount: 0,
-        status: "active",
-        currentProject: "2x Engine Builds"
-    },
-    {
-        id: 5,
-        name: "Jennifer Martinez",
-        phone: "(555) 321-9876",
-        email: "jen.martinez@email.com",
-        totalSpent: 3200,
-        vehicleCount: 2,
-        status: "none",
-        currentProject: null
-    }
-];
+import { customers } from '../data/customers';
+import AddCustomerModal from '../components/customers/AddCustomerModal';
 
 const getStatusBadge = (status: string) => {
     const baseClasses = "px-2 py-1 rounded-full text-xs font-medium";
@@ -84,6 +33,14 @@ const getStatusText = (status: string) => {
 };
 
 export default function CustomersPage() {
+    const [addCustomerModalOpen, setAddCustomerModalOpen] = useState(false);
+
+    const handleAddCustomer = (customerData: any) => {
+        console.log('New customer data:', customerData);
+        // Here you would typically save to your database or state management
+        // For now, we'll just log it
+    };
+
     return (
         <div className="min-h-screen bg-gray-50 w-full overflow-x-hidden">
             <div className="w-full mx-auto p-4 sm:p-6 lg:p-8">
@@ -99,17 +56,17 @@ export default function CustomersPage() {
                             <input
                                 type="text"
                                 placeholder="Search customers..."
-                                className="w-50 pl-4 pr-4 py-2 mr-5 border border-gray-300 rounded-lg md:w-75"
+                                className="w-50 pl-4 pr-4 py-2 mr-5 border-1 border-gray-300 rounded-lg md:w-75 hover:border-orange-400"
                             />
                         </div>
 
-                        <Link
-                            href="/customers/new-customer"
-                            className="flex p-3 text-sm font-medium shadow-sm bg-orange-400 text-white rounded-lg hover:bg-orange-500 transition-colors text-center whitespace-nowrap lg:shadow-none"
+                        <button
+                            className="flex px-4 py-3 text-sm font-medium shadow-sm bg-orange-400 text-white rounded-lg hover:bg-orange-500 transition-colors text-center whitespace-nowrap lg:shadow-none"
+                            onClick={() => setAddCustomerModalOpen(true)}
                         >
                             <Plus className="size-5 text-white md:mr-1" />
                             <span className='hidden md:inline'>Add Customer</span>
-                        </Link>
+                        </button>
                     </div>
                 </div>
 
@@ -143,7 +100,8 @@ export default function CustomersPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                     {customers.map((customer) => (
                         <Link
-                            key={customer.id} className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow"
+                            key={customer.id}
+                            className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-transform hover:scale-103 "
                             href={`/customers/${customer.id}`}
                         >
                             {/* Header with name and status */}
@@ -183,6 +141,13 @@ export default function CustomersPage() {
                     ))}
                 </div>
             </div>
+
+            {/* Modal */}
+            <AddCustomerModal
+                isOpen={addCustomerModalOpen}
+                onClose={() => setAddCustomerModalOpen(false)}
+                onSubmit={handleAddCustomer}
+            />
         </div>
     );
 }

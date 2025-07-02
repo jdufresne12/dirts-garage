@@ -2,7 +2,7 @@
 
 import { usePathname } from 'next/navigation';
 import { useState, useEffect } from 'react';
-import Navbar from './Navbar';
+import Navbar from './components/Navbar';
 
 interface LayoutWrapperProps {
     children: React.ReactNode;
