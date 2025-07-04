@@ -1,0 +1,585 @@
+
+// Status definitions for reuse
+const STATUSES = {
+    ACTIVE: { type: "Active" as const, color: "bg-blue-100 text-blue-800", message: "Work in progress" },
+    WAITING: { type: "Waiting" as const, color: "bg-yellow-100 text-yellow-800", message: "Waiting for parts/approval" },
+    COMPLETED: { type: "Completed" as const, color: "bg-green-100 text-green-800", message: "Work completed" },
+    ON_HOLD: { type: "On Hold" as const, color: "bg-gray-100 text-gray-800", message: "Temporarily paused" },
+    PAYMENT: { type: "Payment" as const, color: "bg-red-100 text-red-800", message: "Payment required" },
+    NONE: { type: "none" as const, color: "bg-gray-100 text-gray-600", message: "No active status" }
+};
+
+// Mock Parts Data
+export const mockParts: Part[] = [
+    // Parts for Job 1 (LS3 Engine Rebuild)
+    { id: 1, jobId: 1, name: "Forged Pistons (.030 over)", description: "Summit Racing SUM-2618-030", quantity: 8, price: 459.99 },
+    { id: 2, jobId: 1, name: "Connecting Rods", description: "Eagle CRS6200A33D", quantity: 8, price: 389.99 },
+    { id: 3, jobId: 1, name: "ARP Head Studs", description: "ARP 234-4316", quantity: 1, price: 189.99 },
+    { id: 4, jobId: 1, name: "Engine Gasket Set", description: "Fel-Pro HS26332PT", quantity: 1, price: 129.99 },
+    { id: 5, jobId: 1, name: "Performance Camshaft", description: "Comp Cams 12-600-4", quantity: 1, price: 279.99 },
+
+    // Parts for Job 2 (Transmission Rebuild)
+    { id: 6, jobId: 2, name: "Transmission Rebuild Kit", description: "Complete overhaul kit", quantity: 1, price: 850.00 },
+    { id: 7, jobId: 2, name: "Torque Converter", description: "High-stall converter", quantity: 1, price: 425.00 },
+    { id: 8, jobId: 2, name: "Transmission Filter", description: "OEM replacement filter", quantity: 1, price: 45.99 },
+
+    // Parts for Job 3 (Brake System)
+    { id: 9, jobId: 3, name: "Brake Pads (Front)", description: "Ceramic brake pads", quantity: 1, price: 89.99 },
+    { id: 10, jobId: 3, name: "Brake Rotors (Front)", description: "Drilled and slotted rotors", quantity: 2, price: 199.99 },
+    { id: 11, jobId: 3, name: "Brake Fluid", description: "DOT 4 brake fluid", quantity: 2, price: 24.99 },
+
+    // Parts for Job 4 (Oil Change)
+    { id: 12, jobId: 4, name: "Engine Oil", description: "5W-30 Full Synthetic", quantity: 5, price: 35.99 },
+    { id: 13, jobId: 4, name: "Oil Filter", description: "OEM oil filter", quantity: 1, price: 12.99 },
+
+    // Parts for Job 5 (Carburetor Rebuild)
+    { id: 14, jobId: 5, name: "Carburetor Rebuild Kit", description: "Holley 4150 rebuild kit", quantity: 1, price: 125.00 },
+    { id: 15, jobId: 5, name: "Accelerator Pump", description: "Replacement pump diaphragm", quantity: 1, price: 35.00 },
+
+    // Parts for Job 6 (Suspension Work)
+    { id: 16, jobId: 6, name: "Coilover Kit", description: "Adjustable coilovers", quantity: 4, price: 1299.99 },
+    { id: 17, jobId: 6, name: "Sway Bar Links", description: "Performance sway bar links", quantity: 4, price: 89.99 },
+
+    // Parts for Job 7 (Exhaust System)
+    { id: 18, jobId: 7, name: "Cat-Back Exhaust", description: "Stainless steel exhaust system", quantity: 1, price: 899.99 },
+    { id: 19, jobId: 7, name: "Exhaust Tips", description: "4\" polished tips", quantity: 2, price: 149.99 },
+
+    // Parts for Job 8 (Air Intake)
+    { id: 20, jobId: 8, name: "Cold Air Intake", description: "Performance air intake system", quantity: 1, price: 299.99 },
+    { id: 21, jobId: 8, name: "Air Filter", description: "High-flow air filter", quantity: 1, price: 49.99 }
+];
+
+// Mock Vehicles Data
+export const mockVehicles: Vehicle[] = [
+    // Mike Johnson's vehicles
+    {
+        id: 1,
+        customerId: "CUST001",
+        year: 2018,
+        make: "Chevrolet",
+        model: "Camaro SS",
+        vin: "1G1FE1R7XJ0123456",
+        licensePlate: "ABC-123",
+        color: "Summit White",
+        mileage: 45200
+    },
+    {
+        id: 2,
+        customerId: "CUST001",
+        year: 1969,
+        make: "Chevrolet",
+        model: "Chevelle SS",
+        vin: "136379L123456",
+        licensePlate: "CLASSIC1",
+        color: "Rally Green",
+        mileage: 89000
+    },
+
+    // Sarah Davis's vehicle
+    {
+        id: 3,
+        customerId: "CUST002",
+        year: 1969,
+        make: "Ford",
+        model: "Mustang Boss 429",
+        vin: "9F02R123456",
+        licensePlate: "BOSS429",
+        color: "Grabber Blue",
+        mileage: 45000
+    },
+
+    // Tom Wilson's vehicle
+    {
+        id: 4,
+        customerId: "CUST003",
+        year: 1970,
+        make: "Plymouth",
+        model: "Cuda 440",
+        vin: "BS23R0B123456",
+        licensePlate: "CUDA70",
+        color: "Plum Crazy Purple",
+        mileage: 67000
+    },
+
+    // Alex Martinez's vehicle
+    {
+        id: 5,
+        customerId: "CUST004",
+        year: 1970,
+        make: "Chevrolet",
+        model: "Chevelle SS",
+        vin: "136370B123456",
+        licensePlate: "SS1970",
+        color: "Cranberry Red",
+        mileage: 52000
+    },
+
+    // Jennifer Lee's vehicle
+    {
+        id: 6,
+        customerId: "CUST005",
+        year: 2019,
+        make: "Chevrolet",
+        model: "Corvette Z06",
+        vin: "1G1YY26E095123456",
+        licensePlate: "Z06-19",
+        color: "Torch Red",
+        mileage: 8500
+    },
+
+    // Robert Garcia's vehicle
+    {
+        id: 7,
+        customerId: "CUST006",
+        year: 2017,
+        make: "Toyota",
+        model: "Tacoma",
+        vin: "3TMCZ5AN9HM123456",
+        licensePlate: "TACO17",
+        color: "Army Green",
+        mileage: 95000
+    },
+
+    // Lisa Brown's vehicle
+    {
+        id: 8,
+        customerId: "CUST007",
+        year: 2015,
+        make: "Ford",
+        model: "F-150",
+        vin: "1FTFW1ET5FKE123456",
+        licensePlate: "F150-15",
+        color: "Oxford White",
+        mileage: 125000
+    }
+];
+
+// Mock Jobs Data
+export const mockJobs: Job[] = [
+    {
+        id: 1,
+        title: "LS3 Engine Rebuild",
+        description: "Complete engine rebuild with performance upgrades including forged internals, performance camshaft, and precision machining.",
+        status: STATUSES.ACTIVE,
+        estimatedStartDate: "2025-06-20",
+        estimatedEndDay: "2025-07-15",
+        startDate: "2025-06-20",
+        estimatedCompletion: "2025-07-15",
+        estimatedCost: 8500,
+        actualCost: 6200,
+        priority: "High",
+        parts: mockParts.filter(part => part.jobId === 1),
+        customerId: "CUST001",
+        vehicleId: 1,
+        notes: "Customer approved performance upgrades. Waiting for custom pistons to arrive.",
+        invoiced: false
+    },
+    {
+        id: 2,
+        title: "4L80E Transmission Rebuild",
+        description: "Complete transmission rebuild with upgraded components and torque converter replacement.",
+        status: STATUSES.ACTIVE,
+        estimatedStartDate: "2025-06-25",
+        estimatedEndDay: "2025-07-20",
+        startDate: "2025-06-25",
+        estimatedCompletion: "2025-07-20",
+        estimatedCost: 4200,
+        actualCost: 2800,
+        priority: "Medium",
+        parts: mockParts.filter(part => part.jobId === 2),
+        customerId: "CUST002",
+        vehicleId: 3,
+        notes: "Customer approved additional work on valve body.",
+        invoiced: false
+    },
+    {
+        id: 3,
+        title: "Brake System Overhaul",
+        description: "Front brake replacement including pads, rotors, and brake fluid flush.",
+        status: STATUSES.COMPLETED,
+        estimatedStartDate: "2025-06-10",
+        estimatedEndDay: "2025-06-18",
+        startDate: "2025-06-10",
+        endDate: "2025-06-18",
+        estimatedCompletion: "2025-06-18",
+        estimatedCost: 800,
+        actualCost: 750,
+        priority: "Medium",
+        parts: mockParts.filter(part => part.jobId === 3),
+        customerId: "CUST006",
+        vehicleId: 7,
+        notes: "Work completed successfully. Customer satisfied with results.",
+        invoiced: true,
+        invoiceAmount: 750
+    },
+    {
+        id: 4,
+        title: "Oil Change & Inspection",
+        description: "Routine oil change with full vehicle inspection and fluid top-off.",
+        status: STATUSES.COMPLETED,
+        estimatedStartDate: "2025-06-15",
+        estimatedEndDay: "2025-06-15",
+        startDate: "2025-06-15",
+        endDate: "2025-06-15",
+        estimatedCompletion: "2025-06-15",
+        estimatedCost: 150,
+        actualCost: 145,
+        priority: "Low",
+        parts: mockParts.filter(part => part.jobId === 4),
+        customerId: "CUST007",
+        vehicleId: 8,
+        notes: "Routine maintenance completed. Recommended brake inspection in 6 months.",
+        invoiced: true,
+        invoiceAmount: 145
+    },
+    {
+        id: 5,
+        title: "Carburetor Rebuild",
+        description: "Complete carburetor rebuild for vintage Chevelle including cleaning and calibration.",
+        status: STATUSES.WAITING,
+        estimatedStartDate: "2025-07-01",
+        estimatedEndDay: "2025-07-10",
+        startDate: "2025-07-01",
+        estimatedCompletion: "2025-07-10",
+        estimatedCost: 650,
+        actualCost: 0,
+        priority: "Medium",
+        parts: mockParts.filter(part => part.jobId === 5),
+        customerId: "CUST001",
+        vehicleId: 2,
+        notes: "Waiting for carburetor rebuild kit to arrive.",
+        waitingReason: "Parts Delivery",
+        invoiced: false
+    },
+    {
+        id: 6,
+        title: "Suspension Overhaul",
+        description: "Complete suspension upgrade with coilovers and performance components.",
+        status: STATUSES.WAITING,
+        estimatedStartDate: "2025-07-05",
+        estimatedEndDay: "2025-07-25",
+        startDate: "2025-07-05",
+        estimatedCompletion: "2025-07-25",
+        estimatedCost: 3200,
+        actualCost: 0,
+        priority: "Low",
+        parts: mockParts.filter(part => part.jobId === 6),
+        customerId: "CUST005",
+        vehicleId: 6,
+        notes: "Waiting for customer approval on upgraded components.",
+        waitingReason: "Customer Approval",
+        invoiced: false
+    },
+    {
+        id: 7,
+        title: "Performance Exhaust Install",
+        description: "Cat-back exhaust system installation with custom tips.",
+        status: STATUSES.ON_HOLD,
+        estimatedStartDate: "2025-06-28",
+        estimatedEndDay: "2025-07-05",
+        startDate: "2025-06-28",
+        estimatedCompletion: "2025-07-05",
+        estimatedCost: 1500,
+        actualCost: 400,
+        priority: "Low",
+        parts: mockParts.filter(part => part.jobId === 7),
+        customerId: "CUST004",
+        vehicleId: 5,
+        notes: "On hold due to shop scheduling conflicts.",
+        invoiced: false
+    },
+    {
+        id: 8,
+        title: "Cold Air Intake Install",
+        description: "Performance cold air intake system installation and tuning.",
+        status: STATUSES.COMPLETED,
+        estimatedStartDate: "2025-06-12",
+        estimatedEndDay: "2025-06-14",
+        startDate: "2025-06-12",
+        endDate: "2025-06-14",
+        estimatedCompletion: "2025-06-14",
+        estimatedCost: 450,
+        actualCost: 425,
+        priority: "Low",
+        parts: mockParts.filter(part => part.jobId === 8),
+        customerId: "CUST003",
+        vehicleId: 4,
+        notes: "Installation completed. Customer very happy with performance gains.",
+        invoiced: true,
+        invoiceAmount: 425
+    }
+];
+
+// Mock Invoices Data
+export const mockInvoices: Invoice[] = [
+    {
+        id: 1,
+        date: "2025-06-18",
+        amount: 750.00,
+        amountPaid: 750.00,
+        status: STATUSES.COMPLETED,
+        dueDate: "2025-07-18",
+        paidDate: "2025-06-20",
+        customerId: "CUST006",
+        jobId: "3",
+        customer: null, // Will be populated by relationship
+        job: null // Will be populated by relationship
+    },
+    {
+        id: 2,
+        date: "2025-06-15",
+        amount: 145.00,
+        amountPaid: 145.00,
+        status: STATUSES.COMPLETED,
+        dueDate: "2025-07-15",
+        paidDate: "2025-06-16",
+        customerId: "CUST007",
+        jobId: "4",
+        customer: null,
+        job: null
+    },
+    {
+        id: 3,
+        date: "2025-06-14",
+        amount: 425.00,
+        amountPaid: 425.00,
+        status: STATUSES.COMPLETED,
+        dueDate: "2025-07-14",
+        paidDate: "2025-06-18",
+        customerId: "CUST003",
+        jobId: "8",
+        customer: null,
+        job: null
+    },
+    {
+        id: 4,
+        date: "2025-06-25",
+        amount: 1250.00,
+        amountPaid: 0.00,
+        status: STATUSES.PAYMENT,
+        dueDate: "2025-07-25",
+        customerId: "CUST001",
+        jobId: "1",
+        customer: null,
+        job: null
+    },
+    {
+        id: 5,
+        date: "2025-06-30",
+        amount: 2100.00,
+        amountPaid: 1000.00,
+        status: STATUSES.PAYMENT,
+        dueDate: "2025-07-30",
+        customerId: "CUST002",
+        jobId: "2",
+        customer: null,
+        job: null
+    }
+];
+
+// Mock Customers Data (with relationships populated)
+export const mockCustomers: Customer[] = [
+    {
+        id: "CUST001",
+        firstName: "Mike",
+        lastName: "Johnson",
+        phone: "(555) 123-4567",
+        email: "mike.johnson@email.com",
+        address: "123 Main St, Springfield, IL 62701",
+        vehicleCount: 2,
+        jobCount: 2,
+        vehicles: mockVehicles.filter(v => v.customerId === "CUST001"),
+        jobs: mockJobs.filter(j => j.customerId === "CUST001"),
+        invoices: mockInvoices.filter(i => i.customerId === "CUST001"),
+        status: STATUSES.ACTIVE,
+        totalSpent: 15840.00,
+        amountOwed: 1250.00,
+        notes: ""
+    },
+    {
+        id: "CUST002",
+        firstName: "Sarah",
+        lastName: "Davis",
+        phone: "(555) 987-6543",
+        email: "sarah.davis@email.com",
+        address: "456 Oak Avenue, Springfield, IL 62702",
+        vehicleCount: 1,
+        jobCount: 1,
+        vehicles: mockVehicles.filter(v => v.customerId === "CUST002"),
+        jobs: mockJobs.filter(j => j.customerId === "CUST002"),
+        invoices: mockInvoices.filter(i => i.customerId === "CUST002"),
+        status: STATUSES.ACTIVE,
+        totalSpent: 8420.00,
+        amountOwed: 1100.00,
+        notes: ""
+    },
+    {
+        id: "CUST003",
+        firstName: "Tom",
+        lastName: "Wilson",
+        phone: "(555) 456-7890",
+        email: "tom.wilson@email.com",
+        address: "789 Pine Street, Springfield, IL 62703",
+        vehicleCount: 1,
+        jobCount: 1,
+        vehicles: mockVehicles.filter(v => v.customerId === "CUST003"),
+        jobs: mockJobs.filter(j => j.customerId === "CUST003"),
+        invoices: mockInvoices.filter(i => i.customerId === "CUST003"),
+        status: STATUSES.COMPLETED,
+        totalSpent: 24650.00,
+        amountOwed: 0.00,
+        notes: ""
+    },
+    {
+        id: "CUST004",
+        firstName: "Alex",
+        lastName: "Martinez",
+        phone: "(555) 321-6547",
+        email: "alex.martinez@email.com",
+        address: "321 Elm Drive, Springfield, IL 62704",
+        vehicleCount: 1,
+        jobCount: 1,
+        vehicles: mockVehicles.filter(v => v.customerId === "CUST004"),
+        jobs: mockJobs.filter(j => j.customerId === "CUST004"),
+        invoices: mockInvoices.filter(i => i.customerId === "CUST004"),
+        status: STATUSES.ON_HOLD,
+        totalSpent: 5200.00,
+        amountOwed: 0.00,
+        notes: ""
+    },
+    {
+        id: "CUST005",
+        firstName: "Jennifer",
+        lastName: "Lee",
+        phone: "(555) 654-3210",
+        email: "jennifer.lee@email.com",
+        address: "654 Maple Lane, Springfield, IL 62705",
+        vehicleCount: 1,
+        jobCount: 1,
+        vehicles: mockVehicles.filter(v => v.customerId === "CUST005"),
+        jobs: mockJobs.filter(j => j.customerId === "CUST005"),
+        invoices: mockInvoices.filter(i => i.customerId === "CUST005"),
+        status: STATUSES.WAITING,
+        totalSpent: 3200.00,
+        amountOwed: 0.00,
+        notes: ""
+    },
+    {
+        id: "CUST006",
+        firstName: "Robert",
+        lastName: "Garcia",
+        phone: "(555) 789-0123",
+        email: "robert.garcia@email.com",
+        address: "987 Cedar Court, Springfield, IL 62706",
+        vehicleCount: 1,
+        jobCount: 1,
+        vehicles: mockVehicles.filter(v => v.customerId === "CUST006"),
+        jobs: mockJobs.filter(j => j.customerId === "CUST006"),
+        invoices: mockInvoices.filter(i => i.customerId === "CUST006"),
+        status: STATUSES.COMPLETED,
+        totalSpent: 2800.00,
+        amountOwed: 0.00,
+        notes: ""
+    },
+    {
+        id: "CUST007",
+        firstName: "Lisa",
+        lastName: "Brown",
+        phone: "(555) 147-2580",
+        email: "lisa.brown@email.com",
+        address: "147 Birch Boulevard, Springfield, IL 62707",
+        vehicleCount: 1,
+        jobCount: 1,
+        vehicles: mockVehicles.filter(v => v.customerId === "CUST007"),
+        jobs: mockJobs.filter(j => j.customerId === "CUST007"),
+        invoices: mockInvoices.filter(i => i.customerId === "CUST007"),
+        status: STATUSES.COMPLETED,
+        totalSpent: 1450.00,
+        amountOwed: 0.00,
+        notes: ""
+    }
+];
+
+// Helper function to get customer by ID
+export const getCustomerById = (id: string): Customer | undefined => {
+    return mockCustomers.find(customer => customer.id === id);
+};
+
+// Helper function to get job by ID
+export const getJobById = (id: number): Job | undefined => {
+    return mockJobs.find(job => job.id === id);
+};
+
+// Helper function to get vehicle by ID
+export const getVehicleById = (id: number): Vehicle | undefined => {
+    return mockVehicles.find(vehicle => vehicle.id === id);
+};
+
+// Helper function to get jobs by status
+export const getJobsByStatus = (statusType: string): Job[] => {
+    return mockJobs.filter(job => job.status.type === statusType);
+};
+
+// Helper function to get active jobs (for dashboard)
+export const getActiveJobs = (): Job[] => {
+    return mockJobs.filter(job => job.status.type === "Active");
+};
+
+// Helper function to get jobs requiring attention
+export const getJobsRequiringAttention = (): Job[] => {
+    return mockJobs.filter(job =>
+        job.status.type === "Waiting" ||
+        job.status.type === "Payment" ||
+        (job.status.type === "Completed" && !job.invoiced)
+    );
+};
+
+// Helper function to get overdue invoices
+export const getOverdueInvoices = (): Invoice[] => {
+    const today = new Date();
+    return mockInvoices.filter(invoice => {
+        const dueDate = new Date(invoice.dueDate);
+        return dueDate < today && invoice.amountPaid < invoice.amount;
+    });
+};
+
+// Helper function to get recent activity (last 30 days)
+export const getRecentActivity = (): (Job | Invoice)[] => {
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+    const recentJobs = mockJobs.filter(job => {
+        const startDate = new Date(job.startDate);
+        return startDate >= thirtyDaysAgo;
+    });
+
+    const recentInvoices = mockInvoices.filter(invoice => {
+        const invoiceDate = new Date(invoice.date);
+        return invoiceDate >= thirtyDaysAgo;
+    });
+
+    return [...recentJobs, ...recentInvoices].sort((a, b) => {
+        const dateA = 'startDate' in a ? new Date(a.startDate) : new Date(a.date);
+        const dateB = 'startDate' in b ? new Date(b.startDate) : new Date(b.date);
+        return dateB.getTime() - dateA.getTime();
+    });
+};
+
+// Export everything as default for easy importing
+export default {
+    customers: mockCustomers,
+    jobs: mockJobs,
+    vehicles: mockVehicles,
+    invoices: mockInvoices,
+    parts: mockParts,
+    statuses: STATUSES,
+    // Helper functions
+    getCustomerById,
+    getJobById,
+    getVehicleById,
+    getJobsByStatus,
+    getActiveJobs,
+    getJobsRequiringAttention,
+    getOverdueInvoices,
+    getRecentActivity
+};

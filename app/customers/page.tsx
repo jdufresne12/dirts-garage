@@ -1,115 +1,124 @@
-'use client';
-import React, { useState } from 'react';
+'use client'
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Phone, Mail, Search, Plus, ChevronRight } from 'lucide-react';
-import { customers } from '../data/customers';
+import { Phone, Mail, Search, Plus } from 'lucide-react';
 import AddCustomerModal from '../components/customers/AddCustomerModal';
 
-const getStatusBadge = (status: string) => {
-    const baseClasses = "px-2 py-1 rounded-full text-xs font-medium";
-    switch (status) {
-        case "active":
-            return `${baseClasses} bg-blue-100 text-blue-800`;
-        case "waiting":
-            return `${baseClasses} bg-yellow-100 text-yellow-800`;
-        case "completed":
-            return `${baseClasses} bg-green-100 text-green-800`;
-        default:
-            return `${baseClasses} bg-gray-100 text-gray-600`;
-    }
-};
+import mockData from '../data/mock-data';
 
-const getStatusText = (status: string) => {
-    switch (status) {
-        case "active":
-            return "Active Job";
-        case "waiting":
-            return "Waiting";
-        case "completed":
-            return "Ready for Pickup";
-        default:
-            return "No Active Jobs";
-    }
-};
+const allCustomers = mockData.customers;
 
 export default function CustomersPage() {
-    const [addCustomerModalOpen, setAddCustomerModalOpen] = useState(false);
+    const [customers, setCustomers] = useState<Customer[]>(mockData.customers);
+    const [showAddCustomerModal, setShowAddCustomerModal] = useState<boolean>(false)
+    const [searchTerm, setSearchTerm] = useState<string>("");
 
-    const handleAddCustomer = (customerData: any) => {
-        console.log('New customer data:', customerData);
-        // Here you would typically save to your database or state management
-        // For now, we'll just log it
+    useEffect(() => {
+        if (searchTerm === "") {
+            setCustomers(allCustomers)
+        } else {
+            const term = searchTerm.toLowerCase();
+
+            // Will need to call an API with real data
+            const filteredCustomers: Customer[] = allCustomers.filter((customer: Customer) => {
+                return customer.firstName.toLowerCase().includes(term) ||
+                    customer.lastName.toLowerCase().includes(term) ||
+                    customer.email.toLowerCase().includes(term)
+            });
+            setCustomers(filteredCustomers);
+        }
+    }, [searchTerm])
+
+    const getStatusBadge = (status: string) => {
+        const baseClasses = "px-2 py-1 rounded-full text-xs font-medium";
+        switch (status) {
+            case "Active":
+                return `${baseClasses} bg-blue-100 text-blue-800`;
+            case "Waiting":
+                return `${baseClasses} bg-yellow-100 text-yellow-800`;
+            case "On Hold":
+                return `${baseClasses} bg-orange-100 text-orange-800`;
+            case "Payment":
+                return `${baseClasses} bg-red-100 text-red-800`;
+            default:
+                return `${baseClasses} bg-gray-100 text-gray-600`;
+        }
     };
+
+    const getStatusText = (status: string) => {
+        switch (status) {
+            case "Active":
+                return "Active Job";
+            case "Waiting":
+                return "Waiting";
+            case "On Hold":
+                return "On Hold";
+            case "Payment":
+                return "Awaiting Payment"
+            default:
+                return "No Active Jobs";
+        }
+    };
+
+    const getCurrentJob = (customer: Customer) => {
+        if (customer.jobs && customer.jobs.length > 0) {
+            const activeJob = customer.jobs.find((job: Job) =>
+                job.status.type != 'Waiting' &&
+                job.status.type != 'Completed' &&
+                job.status.type != 'none'
+            )
+            return activeJob ? activeJob.title : "No Active Jobs";
+        }
+    }
+
+    const handleAddCustomer = (customer: Customer) => {
+        console.log("New Customer Info");
+        console.log(customer);
+    }
 
     return (
         <div className="min-h-screen bg-gray-50 w-full overflow-x-hidden">
             <div className="w-full mx-auto p-4 sm:p-6 lg:p-8">
-                {/* Header */}
-                <div className="flex flex-col gap-4 p-4 rounded-lg lg:flex-row lg:items-center lg:justify-between lg:mb-8 lg:bg-white lg:p-6 lg:shadow-lg">
-                    <h1 className="text-2xl p-4 min-w-0 text-center font-bold bg-white rounded-lg shadow-md text-gray-900 lg:p-0 lg:bg-none lg:rounded-none lg:shadow-none lg:text-3xl">Customers</h1>
-                    {/* Action Container */}
-                    <div className="flex flex-row justify-center items-center gap-2 sm:gap-3 w-full sm:w-auto">
-                        <button>
-                            <Search className="size-5 text-gray-500 hover:scale-125" />
-                        </button>
-                        <div className="relative">
-                            <input
-                                type="text"
-                                placeholder="Search customers..."
-                                className="w-50 pl-4 pr-4 py-2 mr-5 border-1 border-gray-300 rounded-lg md:w-75 hover:border-orange-400"
-                            />
-                        </div>
+                <h1 className="text-2xl font-bold text-gray-900 lg:text-3xl">Customers</h1>
 
-                        <button
-                            className="flex px-4 py-3 text-sm font-medium shadow-sm bg-orange-400 text-white rounded-lg hover:bg-orange-500 transition-colors text-center whitespace-nowrap lg:shadow-none"
-                            onClick={() => setAddCustomerModalOpen(true)}
-                        >
-                            <Plus className="size-5 text-white md:mr-1" />
-                            <span className='hidden md:inline'>Add Customer</span>
-                        </button>
+                {/* Action Buttons */}
+                <div className="flex flex-row w-full items-center my-4 gap-5 hover">
+                    <div className="flex items-center relative border border-gray-300 rounded-lg hover:border-orange-400 focus-within:border-orange-400">
+                        <div>
+                            <Search className="size-4 mx-2 text-gray-500" />
+                        </div>
+                        <input
+                            type="text"
+                            placeholder="Search customers..."
+                            className="w-50 py-1.5 md:w-75 focus:ring-0 focus:outline-none"
+                            onChange={(e: any) => setSearchTerm(e.target.value)}
+                        />
                     </div>
-                </div>
 
-                {/* Summary Stats */}
-                <div className="my-6 grid grid-cols-1 sm:grid-cols-4 gap-4">
-                    <div className="bg-white p-4 rounded-lg border border-gray-200">
-                        <div className="text-2xl font-bold text-gray-900">{customers.length}</div>
-                        <div className="text-sm text-gray-600">Total Customers</div>
-                    </div>
-                    <div className="bg-white p-4 rounded-lg border border-gray-200">
-                        <div className="text-2xl font-bold text-blue-600">
-                            {customers.filter(c => c.status === 'active').length}
-                        </div>
-                        <div className="text-sm text-gray-600">Active Jobs</div>
-                    </div>
-                    <div className="bg-white p-4 rounded-lg border border-gray-200">
-                        <div className="text-2xl font-bold text-yellow-400">
-                            {customers.filter(c => c.status === 'waiting').length}
-                        </div>
-                        <div className="text-sm text-gray-600">Waiting</div>
-                    </div>
-                    <div className="bg-white p-4 rounded-lg border border-gray-200">
-                        <div className="text-2xl font-bold text-green-600">
-                            {customers.filter(c => c.status === 'completed').length}
-                        </div>
-                        <div className="text-sm text-gray-600">Ready for Pickup</div>
-                    </div>
+
+                    <button
+                        onClick={() => setShowAddCustomerModal(true)}
+                        className="flex p-2 text-sm text-center font-medium shadow-sm bg-orange-400 text-white rounded-lg hover:bg-orange-500 
+                            transition-colors border border-orange-400 whitespace-nowrap lg:shadow-none"
+                    >
+                        <Plus className="size-5 text-white md:mr-1" />
+                        <span className='hidden md:inline'>Add Customer</span>
+                    </button>
                 </div>
 
                 {/* Customer Cards */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                     {customers.map((customer) => (
                         <Link
-                            key={customer.id}
-                            className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-transform hover:scale-103 "
+                            key={customer.id} className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow"
                             href={`/customers/${customer.id}`}
                         >
                             {/* Header with name and status */}
                             <div className="flex items-start justify-between mb-4">
                                 <div className="flex-1 min-w-0">
-                                    <h3 className="font-semibold text-gray-900 truncate">{customer.name}</h3>
-                                    <span className={`${getStatusBadge(customer.status)} mt-2 inline-block`}>
-                                        {getStatusText(customer.status)}
+                                    <h3 className="font-semibold text-gray-900 truncate">{customer.firstName} {customer.lastName}</h3>
+                                    <span className={`${getStatusBadge(customer.status.type)} mt-2 inline-block`}>
+                                        {getStatusText(customer.status.type)}
                                     </span>
                                 </div>
                             </div>
@@ -127,10 +136,10 @@ export default function CustomersPage() {
                             </div>
 
                             {/* Current Project */}
-                            {customer.currentProject ? (
+                            {customer.jobs ? (
                                 <div>
                                     <div className="text-xs text-gray-500 mb-1">Current Project</div>
-                                    <div className="text-sm font-medium text-gray-900">{customer.currentProject}</div>
+                                    <div className="text-sm font-medium text-gray-900">{getCurrentJob(customer)}</div>
                                 </div>
                             ) : (
                                 <div>
@@ -142,10 +151,9 @@ export default function CustomersPage() {
                 </div>
             </div>
 
-            {/* Modal */}
             <AddCustomerModal
-                isOpen={addCustomerModalOpen}
-                onClose={() => setAddCustomerModalOpen(false)}
+                isOpen={showAddCustomerModal}
+                onClose={() => setShowAddCustomerModal(false)}
                 onSubmit={handleAddCustomer}
             />
         </div>

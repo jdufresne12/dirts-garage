@@ -1,5 +1,5 @@
 'use client'
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
     User,
     Phone,
@@ -14,132 +14,53 @@ import {
     Calendar,
     FileText,
     TrendingUp,
-    AlertCircle,
-    CheckCircle
+    CheckCircle,
+    ChevronLeft
 } from 'lucide-react';
+import Link from 'next/link';
+import { useParams } from 'next/navigation';
+import mockData from '../../data/mock-data'; // Import the new mock data
 
 const CustomerDetailsPage = () => {
+    const { id } = useParams();
     const [activeTab, setActiveTab] = useState('jobs');
     const [isEditing, setIsEditing] = useState(false);
     const [showAddVehicle, setShowAddVehicle] = useState(false);
 
-    // Mock customer data
-    const [customerData, setCustomerData] = useState({
-        id: 1,
-        name: "Mike Johnson",
-        phone: "(555) 123-4567",
-        email: "mike.johnson@email.com",
-        address: "123 Main St, Springfield, IL 62701",
-        totalSpent: 15840,
-        jobCount: 8,
-        customerSince: "2019",
-        status: "VIP",
-        balanceDue: 1250.00,
-        activeJobs: 2
-    });
-
-    const vehicles = [
-        {
-            id: 1,
-            year: 2018,
-            make: "Chevrolet",
-            model: "Camaro SS",
-            vin: "1G1FE1R7XJ0123456",
-            mileage: "45,200",
-            color: "Summit White",
-            licensePlate: "ABC-123"
-        },
-        {
-            id: 2,
-            year: 1969,
-            make: "Chevrolet",
-            model: "Chevelle",
-            vin: "136379L123456",
-            mileage: "Restored",
-            color: "Rally Green",
-            licensePlate: "CLASSIC1"
-        }
-    ];
-
-    const jobs = [
-        {
-            id: 1,
-            vehicleId: 1,
-            vehicle: "2018 Camaro SS",
-            description: "LS3 Engine Rebuild",
-            status: "In Progress",
-            startDate: "2025-06-20",
-            estimatedCompletion: "2025-07-15",
-            estimatedCost: 4500,
-            actualCost: 3200,
-            statusColor: "bg-blue-100 text-blue-800"
-        },
-        {
-            id: 2,
-            vehicleId: 1,
-            vehicle: "2018 Camaro SS",
-            description: "Transmission Service",
-            status: "Completed",
-            startDate: "2025-05-10",
-            completedDate: "2025-05-15",
-            estimatedCost: 850,
-            actualCost: 825,
-            statusColor: "bg-green-100 text-green-800"
-        },
-        {
-            id: 3,
-            vehicleId: 2,
-            vehicle: "1969 Chevelle",
-            description: "Carburetor Rebuild",
-            status: "Pending Parts",
-            startDate: "2025-06-25",
-            estimatedCompletion: "2025-07-10",
-            estimatedCost: 1200,
-            actualCost: 0,
-            statusColor: "bg-yellow-100 text-yellow-800"
-        }
-    ];
-
-    const invoices = [
-        {
-            id: "INV-001",
-            jobId: 2,
-            description: "Transmission Service - 2018 Camaro SS",
-            amount: 825,
-            date: "2025-05-15",
-            dueDate: "2025-06-15",
-            status: "Paid",
-            statusColor: "bg-green-100 text-green-800"
-        },
-        {
-            id: "INV-002",
-            jobId: 1,
-            description: "LS3 Engine Rebuild - Progress Payment",
-            amount: 1250,
-            date: "2025-06-25",
-            dueDate: "2025-07-25",
-            status: "Overdue",
-            statusColor: "bg-red-100 text-red-800"
-        }
-    ];
+    // Get customer data using the new mock data structure
+    const customer = mockData.getCustomerById(id as string);
+    const [customerData, setCustomerData] = useState<Customer | undefined>(mockData.getCustomerById(id as string));
 
     const handleSave = () => {
         setIsEditing(false);
         // Here you would save the data to your backend
+        console.log('Saving customer data:', customerData);
     };
 
     const handleCancel = () => {
         setIsEditing(false);
-        // Here you would reset the form data
+        // Reset to original customer data
+        setCustomerData(customer);
     };
 
-    const getStatusBadge = (status: any, colorClass: any) => (
-        <span className={`px-2 py-1 rounded text-xs font-medium ${colorClass}`}>
-            {status}
+    const getStatusBadge = (status: Status) => (
+        <span className={`px-2 py-1 rounded text-xs font-medium ${status.color}`}>
+            {status.type}
         </span>
     );
 
-    const VehicleCard = ({ vehicle }) => (
+    useEffect(() => {
+        // Fetch customer data when the component mounts
+        const fetchCustomerData = async () => {
+            const customer = await mockData.getCustomerById(id as string);
+            console.log(`${id}`)
+            setCustomerData(customer);
+        };
+
+        if (id) fetchCustomerData();
+    }, [id]);
+
+    const VehicleCard = ({ vehicle }: { vehicle: Vehicle }) => (
         <div className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
             <div className="flex items-start justify-between mb-3">
                 <div className="flex items-center">
@@ -153,10 +74,10 @@ const CustomerDetailsPage = () => {
                 </button>
             </div>
             <div className="grid grid-cols-2 gap-2 text-sm text-gray-600">
-                <div><span className="font-medium">VIN:</span> {vehicle.vin}</div>
-                <div><span className="font-medium">Mileage:</span> {vehicle.mileage}</div>
-                <div><span className="font-medium">Color:</span> {vehicle.color}</div>
-                <div><span className="font-medium">License:</span> {vehicle.licensePlate}</div>
+                <div><span className="font-medium">VIN:</span> {vehicle.vin || 'N/A'}</div>
+                <div><span className="font-medium">Mileage:</span> {vehicle.mileage?.toLocaleString() || 'N/A'}</div>
+                <div><span className="font-medium">Color:</span> {vehicle.color || 'N/A'}</div>
+                <div><span className="font-medium">License:</span> {vehicle.licensePlate || 'N/A'}</div>
             </div>
         </div>
     );
@@ -200,20 +121,35 @@ const CustomerDetailsPage = () => {
         </div>
     );
 
+    // Handle case where customer is not found
+    if (!customerData) {
+        return (
+            <div className="min-h-screen bg-gray-50 p-6 flex items-center justify-center">
+                <div className="text-center">
+                    <h1 className="text-2xl font-bold text-gray-900 mb-2">Customer Not Found</h1>
+                    <p className="text-gray-600">The customer with ID "{id}" could not be found.</p>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className="min-h-screen bg-gray-50 p-6">
             {/* Header */}
-            <div className="mb-6">
-                <div className="flex items-center justify-between">
-                    <div>
-                        <h1 className="text-3xl font-bold text-gray-900">Customer Details</h1>
-                        <p className="text-gray-600 mt-1">Manage customer information and history</p>
+            <div className="mb-2 md:mb-6">
+                <div className="flex flex-col md:flex-row md:items-center justify-between">
+                    <div className="flex">
+                        <Link className="flex items-center md:items-baseline md:p-1" href="/customers">
+                            <ChevronLeft className="size-4 font-bold text-black md:size-6 lg:size-8 hover:text-gray-800 hover:scale-110" />
+                        </Link>
+                        <div className='ml-5'>
+                            <h1 className="text-xl md:text-2xl lg:text-3xl font-bold text-gray-900">Customer Details</h1>
+                            <p className="text-xs md:text-sm text-gray-600 mt-1">Manage customer information and history</p>
+                        </div>
                     </div>
-                    <div className="flex gap-3">
-                        <button className="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors">
-                            + New Job
-                        </button>
-                        <button className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+                    <div className="flex gap-3 mt-4 ">
+
+                        <button className="p-2 border text-sm border-gray-300 rounded-lg hover:bg-gray-50 transition-colors ">
                             Create Invoice
                         </button>
                     </div>
@@ -221,65 +157,94 @@ const CustomerDetailsPage = () => {
             </div>
 
             {/* Customer Information Card */}
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
-                <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-xl font-semibold text-gray-900">Customer Information</h2>
-                    {!isEditing ? (
-                        <button
-                            onClick={() => setIsEditing(true)}
-                            className="flex items-center gap-2 px-3 py-2 text-gray-600 hover:text-gray-800 border border-gray-300 rounded-lg hover:bg-gray-50"
-                        >
-                            <Edit3 className="w-4 h-4" />
-                            Edit
-                        </button>
-                    ) : (
-                        <div className="flex gap-2">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+                    <div className="flex items-center justify-between mb-4">
+                        <h2 className="text-xl font-semibold text-gray-900">Customer Information</h2>
+                        {!isEditing ? (
                             <button
-                                onClick={handleSave}
-                                className="flex items-center gap-2 px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                                onClick={() => setIsEditing(true)}
+                                className="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 hover:text-gray-800 border border-gray-300 rounded-lg hover:bg-gray-50"
                             >
-                                <Save className="w-4 h-4" />
-                                Save
+                                <Edit3 className="size-4" />
+                                Edit
                             </button>
-                            <button
-                                onClick={handleCancel}
-                                className="flex items-center gap-2 px-3 py-2 border border-gray-300 text-gray-600 rounded-lg hover:bg-gray-50"
-                            >
-                                <X className="w-4 h-4" />
-                                Cancel
-                            </button>
-                        </div>
-                    )}
-                </div>
+                        ) : (
+                            <div className="flex gap-2">
+                                <button
+                                    onClick={handleSave}
+                                    className="flex items-center gap-2 px-3 py-2 text-sm bg-green-600 text-white rounded-lg hover:bg-green-700"
+                                >
+                                    <Save className="size-4" />
+                                    Save
+                                </button>
+                                <button
+                                    onClick={handleCancel}
+                                    className="flex items-center gap-2 px-3 py-2 text-sm border border-gray-300 text-gray-600 rounded-lg hover:bg-gray-50"
+                                >
+                                    <X className="size-4" />
+                                    Cancel
+                                </button>
+                            </div>
+                        )}
+                    </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    {/* Basic Info */}
-                    <div className="space-y-4">
+                    <div className="space-y-5">
+                        {/* Name Section */}
                         <div>
-                            <label className="flex items-center text-sm font-medium text-gray-700 mb-2">
-                                <User className="w-4 h-4 mr-2" />
-                                Name
-                            </label>
                             {isEditing ? (
-                                <input
-                                    value={customerData.name}
-                                    onChange={(e) => setCustomerData({ ...customerData, name: e.target.value })}
-                                    className="w-full border border-gray-300 rounded-lg px-3 py-2"
-                                />
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="flex items-center text-xs font-medium text-gray-700 mb-2">
+                                            First Name
+                                        </label>
+                                        <input
+                                            value={customerData.firstName}
+                                            onChange={(e) => setCustomerData({
+                                                ...customerData,
+                                                firstName: e.target.value
+                                            })}
+                                            className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="flex items-center text-xs font-medium text-gray-700 mb-2">
+                                            Last Name
+                                        </label>
+                                        <input
+                                            value={customerData.lastName}
+                                            onChange={(e) => setCustomerData({
+                                                ...customerData,
+                                                lastName: e.target.value
+                                            })}
+                                            className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                                        />
+                                    </div>
+                                </div>
                             ) : (
-                                <p className="text-gray-900">{customerData.name}</p>
+                                <>
+                                    <label className="flex items-center text-xs font-medium text-gray-700 mb-2">
+                                        <User className="size-3 mr-2" />
+                                        Name
+                                    </label>
+                                    <p className="text-gray-900">{customerData.firstName} {customerData.lastName}</p>
+                                </>
                             )}
                         </div>
 
+                        {/* Phone */}
                         <div>
-                            <label className="flex items-center text-sm font-medium text-gray-700 mb-2">
-                                <Phone className="w-4 h-4 mr-2" />
+                            <label className="flex items-center text-xs font-medium text-gray-700 mb-2">
+                                <Phone className="size-3 mr-2" />
                                 Phone
                             </label>
                             {isEditing ? (
                                 <input
                                     value={customerData.phone}
-                                    onChange={(e) => setCustomerData({ ...customerData, phone: e.target.value })}
+                                    onChange={(e) => setCustomerData({
+                                        ...customerData,
+                                        phone: e.target.value
+                                    })}
                                     className="w-full border border-gray-300 rounded-lg px-3 py-2"
                                 />
                             ) : (
@@ -287,73 +252,81 @@ const CustomerDetailsPage = () => {
                             )}
                         </div>
 
+                        {/* Email */}
                         <div>
-                            <label className="flex items-center text-sm font-medium text-gray-700 mb-2">
-                                <MapPin className="w-4 h-4 mr-2" />
+                            <label className="flex items-center text-xs font-medium text-gray-700 mb-2">
+                                Email
+                            </label>
+                            {isEditing ? (
+                                <input
+                                    value={customerData.email}
+                                    onChange={(e) => setCustomerData({
+                                        ...customerData,
+                                        email: e.target.value
+                                    })}
+                                    className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                                />
+                            ) : (
+                                <p className="text-gray-900">{customerData.email}</p>
+                            )}
+                        </div>
+
+                        {/* Address */}
+                        <div>
+                            <label className="flex items-center text-xs font-medium text-gray-700 mb-2">
+                                <MapPin className="size-3 mr-2" />
                                 Address
                             </label>
                             {isEditing ? (
                                 <textarea
-                                    value={customerData.address}
-                                    onChange={(e) => setCustomerData({ ...customerData, address: e.target.value })}
+                                    value={customerData.address || ''}
+                                    onChange={(e) => setCustomerData({
+                                        ...customerData,
+                                        address: e.target.value
+                                    })}
                                     className="w-full border border-gray-300 rounded-lg px-3 py-2"
                                     rows={2}
                                 />
                             ) : (
-                                <p className="text-gray-900">{customerData.address}</p>
+                                <p className="text-gray-900">{customerData.address || 'No address provided'}</p>
                             )}
                         </div>
                     </div>
+                </div>
 
-                    {/* Status & Stats */}
+                {/* Customer Stats */}
+                <div className="hidden md:block bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Customer Overview</h3>
+
                     <div className="space-y-4">
                         <div>
                             <label className="text-sm font-medium text-gray-700 mb-2 block">Status</label>
-                            <span className="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm font-medium">
-                                {customerData.status}
-                            </span>
+                            {getStatusBadge(customerData.status)}
                         </div>
 
-                        <div>
-                            <label className="text-sm font-medium text-gray-700 mb-2 block">Customer Since</label>
-                            <p className="text-gray-900">{customerData.customerSince}</p>
-                        </div>
-
-                        <div>
-                            <label className="text-sm font-medium text-gray-700 mb-2 block">Total Jobs</label>
-                            <p className="text-gray-900">{customerData.jobCount}</p>
-                        </div>
-                    </div>
-
-                    {/* Current Status */}
-                    <div className="space-y-4">
-                        <div className="bg-blue-50 border-l-4 border-blue-400 p-4 rounded">
-                            <div className="flex items-center">
-                                <Wrench className="w-5 h-5 text-blue-600 mr-2" />
-                                <div>
-                                    <p className="text-sm font-medium text-blue-800">Active Jobs</p>
-                                    <p className="text-lg font-bold text-blue-900">{customerData.activeJobs}</p>
-                                </div>
+                        <div className="grid grid-cols-2 gap-4">
+                            <div>
+                                <label className="text-sm font-medium text-gray-700 mb-2 block">Total Vehicles</label>
+                                <p className="text-2xl font-bold text-gray-900">{customerData.vehicleCount}</p>
+                            </div>
+                            <div>
+                                <label className="text-sm font-medium text-gray-700 mb-2 block">Total Jobs</label>
+                                <p className="text-2xl font-bold text-gray-900">{customerData.jobCount}</p>
                             </div>
                         </div>
 
-                        <div className="bg-red-50 border-l-4 border-red-400 p-4 rounded">
-                            <div className="flex items-center">
-                                <DollarSign className="w-5 h-5 text-red-600 mr-2" />
-                                <div>
-                                    <p className="text-sm font-medium text-red-800">Balance Due</p>
-                                    <p className="text-lg font-bold text-red-900">${customerData.balanceDue.toFixed(2)}</p>
-                                </div>
+                        <div className="grid grid-cols-2 gap-4">
+                            <div>
+                                <label className="text-sm font-medium text-gray-700 mb-2 block">Total Spent</label>
+                                <p className="text-xl font-bold text-green-600">
+                                    ${customerData.totalSpent ? customerData.totalSpent.toLocaleString() : 0}
+                                </p>
                             </div>
-                        </div>
-
-                        <div className="bg-green-50 border-l-4 border-green-400 p-4 rounded">
-                            <div className="flex items-center">
-                                <TrendingUp className="w-5 h-5 text-green-600 mr-2" />
-                                <div>
-                                    <p className="text-sm font-medium text-green-800">Total Spent</p>
-                                    <p className="text-lg font-bold text-green-900">${customerData.totalSpent.toLocaleString()}</p>
-                                </div>
+                            <div>
+                                <label className="text-sm font-medium text-gray-700 mb-2 block">Amount Owed</label>
+                                <p className={`text-xl font-bold ${customerData.amountOwed && customerData.amountOwed > 0 ? 'text-red-600' : 'text-green-600'}`}>
+                                    ${customerData.amountOwed ? customerData.amountOwed.toLocaleString() : 0}
+                                </p>
                             </div>
                         </div>
                     </div>
@@ -366,17 +339,23 @@ const CustomerDetailsPage = () => {
                     <h2 className="text-xl font-semibold text-gray-900">Vehicles</h2>
                     <button
                         onClick={() => setShowAddVehicle(true)}
-                        className="flex items-center gap-2 px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors"
+                        className="flex items-center text-sm gap-2 px-4 py-2 bg-orange-400 text-white rounded-lg hover:bg-orange-500 transition-colors"
                     >
-                        <Plus className="w-4 h-4" />
+                        <Plus className="size-3 md:size-4" />
                         Add Vehicle
                     </button>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {vehicles.map(vehicle => (
-                        <VehicleCard key={vehicle.id} vehicle={vehicle} />
-                    ))}
+                    {customerData.vehicles && customerData.vehicles.length > 0 ? (
+                        customerData.vehicles.map(vehicle => (
+                            <VehicleCard key={vehicle.id} vehicle={vehicle} />
+                        ))
+                    ) : (
+                        <div className="col-span-full text-center py-8 text-gray-500">
+                            No vehicles registered for this customer
+                        </div>
+                    )}
                 </div>
             </div>
 
@@ -405,101 +384,133 @@ const CustomerDetailsPage = () => {
                 </div>
 
                 <div className="p-6">
+
                     {activeTab === 'jobs' && (
                         <div>
-                            <div className="overflow-x-auto">
-                                <table className="min-w-full divide-y divide-gray-200">
-                                    <thead className="bg-gray-50">
-                                        <tr>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Vehicle</th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Start Date</th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Est. Cost</th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="bg-white divide-y divide-gray-200">
-                                        {jobs.map(job => (
-                                            <tr key={job.id} className="hover:bg-gray-50">
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                                    {job.vehicle}
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                                    {job.description}
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap">
-                                                    {getStatusBadge(job.status, job.statusColor)}
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                                    {job.startDate}
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                                    ${job.estimatedCost.toLocaleString()}
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                                    <button className="text-orange-600 hover:text-orange-900 mr-3">View</button>
-                                                    <button className="text-gray-600 hover:text-gray-900">Edit</button>
-                                                </td>
+                            <Link
+                                href="/jobs/new-job"
+                                className="flex w-fit items-center mb-2 p-1 text-center text-sm font-medium transition-colors whitespace-nowrap
+                            text-orange-400 rounded-lg hover:border-orange-400 hover:border-1"
+                            >
+                                <Plus className="size-3 mr-1 text-orange-400 md:size-4" /> New Job
+                            </Link>
+                            {customerData.jobs && customerData.jobs.length > 0 ? (
+                                <div className="overflow-x-auto">
+                                    <table className="min-w-full divide-y divide-gray-200">
+                                        <thead className="bg-gray-50">
+                                            <tr>
+                                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Job</th>
+                                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Vehicle</th>
+                                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Start Date</th>
+                                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Est. Cost</th>
+                                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                                             </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
+                                        </thead>
+                                        <tbody className="bg-white divide-y divide-gray-200">
+                                            {customerData.jobs.map(job => {
+                                                const vehicle = customerData.vehicles?.find(v => v.id === job.vehicleId);
+                                                return (
+                                                    <tr key={job.id} className="hover:bg-gray-50">
+                                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                                            {job.title}
+                                                        </td>
+                                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                                            {vehicle ? `${vehicle.year} ${vehicle.make} ${vehicle.model}` : 'Unknown Vehicle'}
+                                                        </td>
+                                                        <td className="px-6 py-4 whitespace-nowrap">
+                                                            {getStatusBadge(job.status)}
+                                                        </td>
+                                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                                            {job.startDate}
+                                                        </td>
+                                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                                            ${job.estimatedCost.toLocaleString()}
+                                                        </td>
+                                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                                            <button className="text-orange-600 hover:text-orange-900 mr-3">View</button>
+                                                            <button className="text-gray-600 hover:text-gray-900">Edit</button>
+                                                        </td>
+                                                    </tr>
+                                                );
+                                            })}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            ) : (
+                                <div className="text-center py-8 text-gray-500">
+                                    No jobs found for this customer
+                                </div>
+                            )}
                         </div>
                     )}
 
                     {activeTab === 'invoices' && (
                         <div>
-                            <div className="overflow-x-auto">
-                                <table className="min-w-full divide-y divide-gray-200">
-                                    <thead className="bg-gray-50">
-                                        <tr>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Invoice #</th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="bg-white divide-y divide-gray-200">
-                                        {invoices.map(invoice => (
-                                            <tr key={invoice.id} className="hover:bg-gray-50">
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                                    {invoice.id}
-                                                </td>
-                                                <td className="px-6 py-4 text-sm text-gray-900">
-                                                    {invoice.description}
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                                    ${invoice.amount.toLocaleString()}
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                                    {invoice.date}
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap">
-                                                    {getStatusBadge(invoice.status, invoice.statusColor)}
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                                    <button className="text-orange-600 hover:text-orange-900 mr-3">View</button>
-                                                    <button className="text-gray-600 hover:text-gray-900">Download</button>
-                                                </td>
+                            <Link
+                                href="/jobs/new-job"
+                                className="flex w-fit items-center mb-2 p-1 text-center text-sm font-medium transition-colors whitespace-nowrap
+                            text-orange-400 rounded-lg hover:border-orange-400 hover:border-1"
+                            >
+                                <Plus className="size-3 mr-1 text-orange-400 md:size-4" /> Create Invoice
+                            </Link>
+                            {customerData.invoices && customerData.invoices.length > 0 ? (
+                                <div className="overflow-x-auto">
+                                    <table className="min-w-full divide-y divide-gray-200">
+                                        <thead className="bg-gray-50">
+                                            <tr>
+                                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Invoice #</th>
+                                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
+                                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Paid</th>
+                                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                                             </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
+                                        </thead>
+                                        <tbody className="bg-white divide-y divide-gray-200">
+                                            {customerData.invoices.map(invoice => (
+                                                <tr key={invoice.id} className="hover:bg-gray-50">
+                                                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                                        INV-{invoice.id.toString().padStart(3, '0')}
+                                                    </td>
+                                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                                        ${invoice.amount.toLocaleString()}
+                                                    </td>
+                                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                                        ${invoice.amountPaid.toLocaleString()}
+                                                    </td>
+                                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                                        {invoice.date}
+                                                    </td>
+                                                    <td className="px-6 py-4 whitespace-nowrap">
+                                                        {getStatusBadge(invoice.status)}
+                                                    </td>
+                                                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                                        <button className="text-orange-600 hover:text-orange-900 mr-3">View</button>
+                                                        <button className="text-gray-600 hover:text-gray-900">Download</button>
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            ) : (
+                                <div className="text-center py-8 text-gray-500">
+                                    No invoices found for this customer
+                                </div>
+                            )}
                         </div>
                     )}
 
-                    {activeTab === 'analytics' && (
+                    {/* {activeTab === 'analytics' && (
                         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                                 <div className="flex items-center justify-between">
                                     <div>
                                         <p className="text-sm font-medium text-blue-600">Average Job Value</p>
-                                        <p className="text-2xl font-bold text-blue-900">${(customerData.totalSpent / customerData.jobCount).toFixed(0)}</p>
+                                        <p className="text-2xl font-bold text-blue-900">
+                                            ${customerData.jobCount > 0 ? (customerData.totalSpent / customerData.jobCount).toFixed(0) : '0'}
+                                        </p>
                                     </div>
                                     <DollarSign className="w-8 h-8 text-blue-500" />
                                 </div>
@@ -508,24 +519,28 @@ const CustomerDetailsPage = () => {
                             <div className="bg-green-50 border border-green-200 rounded-lg p-4">
                                 <div className="flex items-center justify-between">
                                     <div>
-                                        <p className="text-sm font-medium text-green-600">Completion Rate</p>
-                                        <p className="text-2xl font-bold text-green-900">92%</p>
+                                        <p className="text-sm font-medium text-green-600">Active Jobs</p>
+                                        <p className="text-2xl font-bold text-green-900">
+                                            {customerData.jobs?.filter(job => job.status.type === 'Active').length || 0}
+                                        </p>
                                     </div>
-                                    <CheckCircle className="w-8 h-8 text-green-500" />
+                                    <Wrench className="w-8 h-8 text-green-500" />
                                 </div>
                             </div>
 
                             <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
                                 <div className="flex items-center justify-between">
                                     <div>
-                                        <p className="text-sm font-medium text-orange-600">Avg. Days to Complete</p>
-                                        <p className="text-2xl font-bold text-orange-900">12</p>
+                                        <p className="text-sm font-medium text-orange-600">Completed Jobs</p>
+                                        <p className="text-2xl font-bold text-orange-900">
+                                            {customerData.jobs?.filter(job => job.status.type === 'Completed').length || 0}
+                                        </p>
                                     </div>
-                                    <Calendar className="w-8 h-8 text-orange-500" />
+                                    <CheckCircle className="w-8 h-8 text-orange-500" />
                                 </div>
                             </div>
                         </div>
-                    )}
+                    )} */}
                 </div>
             </div>
 

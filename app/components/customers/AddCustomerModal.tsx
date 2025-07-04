@@ -1,45 +1,41 @@
 'use client';
 import React, { useState, useEffect } from "react";
 import { X, User, Phone, Mail, MapPin } from "lucide-react";
+import helpers from "@/app/utils/helpers";
 
 interface Props {
     isOpen: boolean;
     onClose: () => void;
-    onSubmit?: (customerData: CustomerFormData) => void;
-}
-
-interface CustomerFormData {
-    firstName: string;
-    lastName: string;
-    email: string;
-    phone: string;
-    address: string;
-    notes: string;
+    onSubmit?: (customerData: Customer) => void;
 }
 
 export default function AddCustomerModal({ isOpen, onClose, onSubmit }: Props) {
-    const [formData, setFormData] = useState<CustomerFormData>({
+    const [formData, setFormData] = useState<Customer>({
+        id: helpers.generateUniqueID(),
         firstName: "",
         lastName: "",
         email: "",
         phone: "",
         address: "",
-        notes: ""
+        notes: "",
+        status: helpers.STATUSES.NONE
     });
 
-    const [errors, setErrors] = useState<Partial<CustomerFormData>>({});
+    const [errors, setErrors] = useState<Partial<Customer>>({});
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     // Reset form data
     useEffect(() => {
         if (!isOpen) {
             setFormData({
+                id: helpers.generateUniqueID(),
                 firstName: "",
                 lastName: "",
                 email: "",
                 phone: "",
                 address: "",
-                notes: ""
+                notes: "",
+                status: helpers.STATUSES.NONE
             });
             setErrors({});
             setIsSubmitting(false);
@@ -67,7 +63,7 @@ export default function AddCustomerModal({ isOpen, onClose, onSubmit }: Props) {
     }, [isOpen, onClose]);
 
     const validateForm = (): boolean => {
-        const newErrors: Partial<CustomerFormData> = {};
+        const newErrors: Partial<Customer> = {};
 
         if (!formData.firstName.trim()) {
             newErrors.firstName = "First name is required";
@@ -124,7 +120,7 @@ export default function AddCustomerModal({ isOpen, onClose, onSubmit }: Props) {
         }));
 
         // Clear error when user starts typing
-        if (errors[name as keyof CustomerFormData]) {
+        if (errors[name as keyof Customer]) {
             setErrors(prev => ({
                 ...prev,
                 [name]: undefined

@@ -8,6 +8,7 @@ import {
   DollarSign,
   Plus
 } from 'lucide-react';
+import mockData from './data/mock-data';
 
 import AnalyticsCard from './components/dashboard/AnalyticsCard';
 import RevenueTrendGraph from './components/dashboard/RevenueTrendGraph';
