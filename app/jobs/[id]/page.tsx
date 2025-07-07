@@ -22,7 +22,6 @@ import {
 } from 'lucide-react';
 
 const JobDetailsPage = () => {
-    const [isNewJob, setIsNewJob] = useState(false);
     const [showCustomerModal, setShowCustomerModal] = useState(false);
     const [showVehicleModal, setShowVehicleModal] = useState(false);
     const [showAddProgressModal, setShowAddProgressModal] = useState(false);

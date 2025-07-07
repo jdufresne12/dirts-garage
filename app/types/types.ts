@@ -5,20 +5,19 @@ interface Customer {
     phone: string;
     email: string;
     address?: string;
-    notes: string;
+    notes?: string;
     status: Status;
     vehicleCount?: number;
     jobCount?: number;
     vehicles?: Vehicle[] | null;
     jobs?: Job[] | null;
     invoices?: Invoice[] | null;
-
     totalSpent?: number;
     amountOwed?: number
 };
 
 interface Job {
-    id: number;
+    id: string;
     title: string;
     description: string;
     status: Status;
@@ -32,7 +31,7 @@ interface Job {
     priority: "Low" | "Medium" | "High";
     parts: Part[] | null;
     customerId: string | null;
-    vehicleId: number | null;
+    vehicleId: string | null;
     notes?: string;
     waitingReason?: string;
     invoiced?: boolean;
@@ -40,7 +39,7 @@ interface Job {
 };
 
 interface Invoice {
-    id: number;
+    id: string;
     date: string;
     amount: number;
     amountPaid: number;
@@ -54,7 +53,7 @@ interface Invoice {
 };
 
 interface Vehicle {
-    id: number;
+    id: string;
     year: number;
     make: string;
     model: string;
@@ -67,12 +66,13 @@ interface Vehicle {
 };
 
 interface Part {
-    id: number;
+    id: string;
     jobId: number | null;
     name: string;
     description?: string;
     quantity: number;
     price: number;
+    partNumber: string;
 };
 
 interface Status {

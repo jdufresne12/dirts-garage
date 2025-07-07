@@ -1,5 +1,7 @@
 'use client'
 import React, { useEffect, useState } from 'react';
+import { useParams } from 'next/navigation';
+import Link from 'next/link';
 import {
     User,
     Phone,
@@ -8,7 +10,6 @@ import {
     Save,
     X,
     Plus,
-    Car,
     Wrench,
     DollarSign,
     Calendar,
@@ -17,9 +18,10 @@ import {
     CheckCircle,
     ChevronLeft
 } from 'lucide-react';
-import Link from 'next/link';
-import { useParams } from 'next/navigation';
-import mockData from '../../data/mock-data'; // Import the new mock data
+
+import mockData from '../../data/mock-data';
+import VehicleCard from '@/app/components/customers/VehicleCard';
+import AddVehicleModal from '@/app/components/customers/AddVehicleModal';
 
 const CustomerDetailsPage = () => {
     const { id } = useParams();
@@ -30,6 +32,16 @@ const CustomerDetailsPage = () => {
     // Get customer data using the new mock data structure
     const customer = mockData.getCustomerById(id as string);
     const [customerData, setCustomerData] = useState<Customer | undefined>(mockData.getCustomerById(id as string));
+
+    useEffect(() => {
+        const fetchCustomerData = async () => {
+            const customer = await mockData.getCustomerById(id as string);
+            console.log(`${id}`)
+            setCustomerData(customer);
+        };
+
+        if (id) fetchCustomerData();
+    }, [id]);
 
     const handleSave = () => {
         setIsEditing(false);
@@ -49,77 +61,20 @@ const CustomerDetailsPage = () => {
         </span>
     );
 
-    useEffect(() => {
-        // Fetch customer data when the component mounts
-        const fetchCustomerData = async () => {
-            const customer = await mockData.getCustomerById(id as string);
-            console.log(`${id}`)
-            setCustomerData(customer);
-        };
+    const handleAddVehicle = (vehicle: Vehicle) => {
+        console.log("New vehicle Info");
+        console.log(vehicle);
 
-        if (id) fetchCustomerData();
-    }, [id]);
+        setCustomerData(prev => {
+            if (!prev) return prev;
 
-    const VehicleCard = ({ vehicle }: { vehicle: Vehicle }) => (
-        <div className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
-            <div className="flex items-start justify-between mb-3">
-                <div className="flex items-center">
-                    <Car className="w-5 h-5 text-orange-500 mr-2" />
-                    <h4 className="font-semibold text-gray-900">
-                        {vehicle.year} {vehicle.make} {vehicle.model}
-                    </h4>
-                </div>
-                <button className="text-gray-400 hover:text-gray-600">
-                    <Edit3 className="w-4 h-4" />
-                </button>
-            </div>
-            <div className="grid grid-cols-2 gap-2 text-sm text-gray-600">
-                <div><span className="font-medium">VIN:</span> {vehicle.vin || 'N/A'}</div>
-                <div><span className="font-medium">Mileage:</span> {vehicle.mileage?.toLocaleString() || 'N/A'}</div>
-                <div><span className="font-medium">Color:</span> {vehicle.color || 'N/A'}</div>
-                <div><span className="font-medium">License:</span> {vehicle.licensePlate || 'N/A'}</div>
-            </div>
-        </div>
-    );
-
-    const AddVehicleModal = () => (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg p-6 w-full max-w-md">
-                <div className="flex justify-between items-center mb-4">
-                    <h3 className="text-lg font-semibold">Add New Vehicle</h3>
-                    <button onClick={() => setShowAddVehicle(false)}>
-                        <X className="w-5 h-5" />
-                    </button>
-                </div>
-                <div className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
-                        <input placeholder="Year" className="border rounded px-3 py-2" />
-                        <input placeholder="Make" className="border rounded px-3 py-2" />
-                    </div>
-                    <input placeholder="Model" className="w-full border rounded px-3 py-2" />
-                    <input placeholder="VIN" className="w-full border rounded px-3 py-2" />
-                    <div className="grid grid-cols-2 gap-4">
-                        <input placeholder="Mileage" className="border rounded px-3 py-2" />
-                        <input placeholder="Color" className="border rounded px-3 py-2" />
-                    </div>
-                    <input placeholder="License Plate" className="w-full border rounded px-3 py-2" />
-                    <div className="flex gap-3 pt-4">
-                        <button
-                            className="flex-1 bg-orange-500 text-white py-2 rounded hover:bg-orange-600"
-                        >
-                            Add Vehicle
-                        </button>
-                        <button
-                            onClick={() => setShowAddVehicle(false)}
-                            className="flex-1 border border-gray-300 py-2 rounded hover:bg-gray-50"
-                        >
-                            Cancel
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    );
+            return {
+                ...prev,
+                vehicles: [...(prev.vehicles || []), vehicle],
+                vehicleCount: (prev.vehicleCount || 0) + 1
+            };
+        });
+    }
 
     // Handle case where customer is not found
     if (!customerData) {
@@ -349,7 +304,7 @@ const CustomerDetailsPage = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {customerData.vehicles && customerData.vehicles.length > 0 ? (
                         customerData.vehicles.map(vehicle => (
-                            <VehicleCard key={vehicle.id} vehicle={vehicle} />
+                            <VehicleCard key={vehicle.id} vehicle={vehicle} customerId={customer!.id} onUpdate={handleAddVehicle} />
                         ))
                     ) : (
                         <div className="col-span-full text-center py-8 text-gray-500">
@@ -366,7 +321,7 @@ const CustomerDetailsPage = () => {
                         {[
                             { id: 'jobs', label: 'Jobs', icon: Wrench },
                             { id: 'invoices', label: 'Invoices', icon: FileText },
-                            { id: 'analytics', label: 'Analytics', icon: TrendingUp }
+                            // { id: 'analytics', label: 'Analytics', icon: TrendingUp }
                         ].map(tab => (
                             <button
                                 key={tab.id}
@@ -384,7 +339,6 @@ const CustomerDetailsPage = () => {
                 </div>
 
                 <div className="p-6">
-
                     {activeTab === 'jobs' && (
                         <div>
                             <Link
@@ -545,7 +499,12 @@ const CustomerDetailsPage = () => {
             </div>
 
             {/* Add Vehicle Modal */}
-            {showAddVehicle && <AddVehicleModal />}
+            <AddVehicleModal
+                isOpen={showAddVehicle}
+                onClose={() => setShowAddVehicle(false)}
+                onSubmit={handleAddVehicle}
+                customerId={customer!.id}
+            />
         </div>
     );
 };
