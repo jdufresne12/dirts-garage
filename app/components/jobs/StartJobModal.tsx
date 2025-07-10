@@ -1,5 +1,6 @@
 'use client';
 import React, { useState, useEffect } from 'react';
+import Modal from '../Modal';
 
 interface StartJobModalProps {
     isOpen: boolean;
@@ -56,19 +57,8 @@ export default function StartJobModal({ isOpen, onClose, onSubmit }: StartJobMod
 
     if (!isOpen) return null;
     return (
-        <div className="fixed inset-0 z-50 overflow-y-auto ease-out">
-            {/* Backdrop */}
-            <div
-                onClick={onClose}
-                className="fixed inset-0 bg-black opacity-75"
-            />
-
-            {/* Modal */}
-            <div className='flex min-h-full items-center justify-center p-4'>
-                <div className="relative max-h-[90vh] max-w-2xl w-full bg-white rounded-lg shadow-xl overflow-y-auto">
-                    <h1>Start Job Modal</h1>
-                </div>
-            </div>
-        </div>
+        <Modal isOpen={isOpen} onClose={onClose}>
+            <h1>Start Job Modal</h1>
+        </Modal>
     )
 }

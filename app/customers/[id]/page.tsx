@@ -16,12 +16,14 @@ import {
     FileText,
     TrendingUp,
     CheckCircle,
-    ChevronLeft
+    ChevronLeft,
+    Mail
 } from 'lucide-react';
 
 import mockData from '../../data/mock-data';
 import VehicleCard from '@/app/components/customers/VehicleCard';
 import AddVehicleModal from '@/app/components/customers/AddVehicleModal';
+import helpers from '@/app/utils/helpers';
 
 const CustomerDetailsPage = () => {
     const { id } = useParams();
@@ -64,17 +66,31 @@ const CustomerDetailsPage = () => {
     const handleAddVehicle = (vehicle: Vehicle) => {
         console.log("New vehicle Info");
         console.log(vehicle);
+        if (customer?.vehicles?.find(v => v.id === vehicle.id)) {
+            setCustomerData(prev => {
+                if (!prev || !prev.vehicles) return prev;
 
-        setCustomerData(prev => {
-            if (!prev) return prev;
+                const updatedVehicles = prev.vehicles.map(v =>
+                    v.id === vehicle.id ? vehicle : v
+                );
 
-            return {
-                ...prev,
-                vehicles: [...(prev.vehicles || []), vehicle],
-                vehicleCount: (prev.vehicleCount || 0) + 1
-            };
-        });
-    }
+                return {
+                    ...prev,
+                    vehicles: updatedVehicles
+                };
+            });
+        } else {
+            setCustomerData(prev => {
+                if (!prev) return prev;
+
+                return {
+                    ...prev,
+                    vehicles: [...(prev.vehicles || []), vehicle],
+                    vehicleCount: (prev.vehicleCount || 0) + 1
+                };
+            });
+        }
+    };
 
     // Handle case where customer is not found
     if (!customerData) {
@@ -91,7 +107,7 @@ const CustomerDetailsPage = () => {
     return (
         <div className="min-h-screen bg-gray-50 p-6">
             {/* Header */}
-            <div className="mb-2 md:mb-6">
+            <div className="mt-2 mb-4 md:mb-6">
                 <div className="flex flex-col md:flex-row md:items-center justify-between">
                     <div className="flex">
                         <Link className="flex items-center md:items-baseline md:p-1" href="/customers">
@@ -101,12 +117,6 @@ const CustomerDetailsPage = () => {
                             <h1 className="text-xl md:text-2xl lg:text-3xl font-bold text-gray-900">Customer Details</h1>
                             <p className="text-xs md:text-sm text-gray-600 mt-1">Manage customer information and history</p>
                         </div>
-                    </div>
-                    <div className="flex gap-3 mt-4 ">
-
-                        <button className="p-2 border text-sm border-gray-300 rounded-lg hover:bg-gray-50 transition-colors ">
-                            Create Invoice
-                        </button>
                     </div>
                 </div>
             </div>
@@ -198,7 +208,7 @@ const CustomerDetailsPage = () => {
                                     value={customerData.phone}
                                     onChange={(e) => setCustomerData({
                                         ...customerData,
-                                        phone: e.target.value
+                                        phone: helpers.formatPhoneNumber(e.target.value)
                                     })}
                                     className="w-full border border-gray-300 rounded-lg px-3 py-2"
                                 />
@@ -210,6 +220,7 @@ const CustomerDetailsPage = () => {
                         {/* Email */}
                         <div>
                             <label className="flex items-center text-xs font-medium text-gray-700 mb-2">
+                                <Mail className="size-3 mr-2" />
                                 Email
                             </label>
                             {isEditing ? (
@@ -226,24 +237,69 @@ const CustomerDetailsPage = () => {
                             )}
                         </div>
 
-                        {/* Address */}
                         <div>
                             <label className="flex items-center text-xs font-medium text-gray-700 mb-2">
                                 <MapPin className="size-3 mr-2" />
                                 Address
                             </label>
+
                             {isEditing ? (
-                                <textarea
-                                    value={customerData.address || ''}
-                                    onChange={(e) => setCustomerData({
-                                        ...customerData,
-                                        address: e.target.value
-                                    })}
-                                    className="w-full border border-gray-300 rounded-lg px-3 py-2"
-                                    rows={2}
-                                />
+                                <div className="space-y-2">
+                                    <textarea
+                                        placeholder="Street Address"
+                                        value={customerData.address || ''}
+                                        onChange={(e) =>
+                                            setCustomerData({ ...customerData, address: e.target.value })
+                                        }
+                                        className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                                        rows={2}
+                                    />
+                                    <div className="grid grid-cols-3 gap-2">
+                                        <input
+                                            type="text"
+                                            placeholder="City"
+                                            value={customerData.city || ''}
+                                            onChange={(e) =>
+                                                setCustomerData({ ...customerData, city: e.target.value })
+                                            }
+                                            className="border border-gray-300 rounded-lg px-3 py-2"
+                                        />
+                                        <select
+                                            value={customerData.state || ''}
+                                            onChange={(e) =>
+                                                setCustomerData({ ...customerData, state: e.target.value })
+                                            }
+                                            className="border border-gray-300 rounded-lg px-3 py-2"
+                                        >
+                                            <option value="">Select State</option>
+                                            {helpers.US_STATES.map((state) => (
+                                                <option key={state.abbreviation} value={state.abbreviation}>
+                                                    {state.name}
+                                                </option>
+                                            ))}
+                                        </select>
+                                        <input
+                                            type="text"
+                                            placeholder="ZIP Code"
+                                            value={customerData.zipcode || ''}
+                                            onChange={(e) =>
+                                                setCustomerData({ ...customerData, zipcode: e.target.value })
+                                            }
+                                            className="border border-gray-300 rounded-lg px-3 py-2"
+                                        />
+                                    </div>
+                                </div>
                             ) : (
-                                <p className="text-gray-900">{customerData.address || 'No address provided'}</p>
+                                <p className="text-gray-900">
+                                    {customerData.address || 'No address provided'}
+                                    {customerData.city || customerData.state || customerData.zipcode ? (
+                                        <>
+                                            {customerData.city ? `, ${customerData.city}` : ''}
+                                            {customerData.state ? `, ${customerData.state}` : ''}
+                                            {customerData.zipcode ? ` ${customerData.zipcode}` : ''}
+                                        </>
+                                    ) : null}
+                                </p>
                             )}
                         </div>
                     </div>
@@ -455,46 +511,6 @@ const CustomerDetailsPage = () => {
                             )}
                         </div>
                     )}
-
-                    {/* {activeTab === 'analytics' && (
-                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                                <div className="flex items-center justify-between">
-                                    <div>
-                                        <p className="text-sm font-medium text-blue-600">Average Job Value</p>
-                                        <p className="text-2xl font-bold text-blue-900">
-                                            ${customerData.jobCount > 0 ? (customerData.totalSpent / customerData.jobCount).toFixed(0) : '0'}
-                                        </p>
-                                    </div>
-                                    <DollarSign className="w-8 h-8 text-blue-500" />
-                                </div>
-                            </div>
-
-                            <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                                <div className="flex items-center justify-between">
-                                    <div>
-                                        <p className="text-sm font-medium text-green-600">Active Jobs</p>
-                                        <p className="text-2xl font-bold text-green-900">
-                                            {customerData.jobs?.filter(job => job.status.type === 'Active').length || 0}
-                                        </p>
-                                    </div>
-                                    <Wrench className="w-8 h-8 text-green-500" />
-                                </div>
-                            </div>
-
-                            <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
-                                <div className="flex items-center justify-between">
-                                    <div>
-                                        <p className="text-sm font-medium text-orange-600">Completed Jobs</p>
-                                        <p className="text-2xl font-bold text-orange-900">
-                                            {customerData.jobs?.filter(job => job.status.type === 'Completed').length || 0}
-                                        </p>
-                                    </div>
-                                    <CheckCircle className="w-8 h-8 text-orange-500" />
-                                </div>
-                            </div>
-                        </div>
-                    )} */}
                 </div>
             </div>
 

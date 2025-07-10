@@ -84,7 +84,7 @@ export default function CustomersPage() {
     return (
         <div className="min-h-screen bg-gray-50 w-full overflow-x-hidden">
             <div className="w-full mx-auto p-4 sm:p-6 lg:p-8">
-                <h1 className="pb-4 text-2xl font-bold text-gray-900 lg:text-3xl">Customers</h1>
+                <h1 className="mt-5 text-2xl font-bold text-gray-900 md:mt-0 md:pb-4 lg:text-3xl">Customers</h1>
 
                 {/* Action Buttons */}
                 <div className="flex flex-row w-full items-center my-4 gap-5 hover">
@@ -159,7 +159,7 @@ export default function CustomersPage() {
                                 <div className="bg-gray-50 rounded-full p-6 mb-4">
                                     <Users className="size-12 text-gray-400" />
                                 </div>
-                                <h3 className="text-lg font-semibold text-gray-900 mb-2">No customers to show</h3>
+                                <h3 className="text-lg font-semibold text-gray-400 mb-2">No customers to show</h3>
                             </div>
                         )
                     }

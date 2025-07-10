@@ -1,4 +1,3 @@
-
 // Status definitions for reuse
 const STATUSES = {
     ACTIVE: { type: "Active" as const, color: "bg-blue-100 text-blue-800", message: "Work in progress" },
@@ -12,48 +11,48 @@ const STATUSES = {
 // Mock Parts Data
 export const mockParts: Part[] = [
     // Parts for Job 1 (LS3 Engine Rebuild)
-    { id: 1, jobId: 1, name: "Forged Pistons (.030 over)", description: "Summit Racing SUM-2618-030", quantity: 8, price: 459.99 },
-    { id: 2, jobId: 1, name: "Connecting Rods", description: "Eagle CRS6200A33D", quantity: 8, price: 389.99 },
-    { id: 3, jobId: 1, name: "ARP Head Studs", description: "ARP 234-4316", quantity: 1, price: 189.99 },
-    { id: 4, jobId: 1, name: "Engine Gasket Set", description: "Fel-Pro HS26332PT", quantity: 1, price: 129.99 },
-    { id: 5, jobId: 1, name: "Performance Camshaft", description: "Comp Cams 12-600-4", quantity: 1, price: 279.99 },
+    { id: "1", jobId: 1, name: "Forged Pistons (.030 over)", description: "Summit Racing SUM-2618-030", quantity: 8, price: 459.99, partNumber: "SUM-2618-030" },
+    { id: "2", jobId: 1, name: "Connecting Rods", description: "Eagle CRS6200A33D", quantity: 8, price: 389.99, partNumber: "CRS6200A33D" },
+    { id: "3", jobId: 1, name: "ARP Head Studs", description: "ARP 234-4316", quantity: 1, price: 189.99, partNumber: "ARP-234-4316" },
+    { id: "4", jobId: 1, name: "Engine Gasket Set", description: "Fel-Pro HS26332PT", quantity: 1, price: 129.99, partNumber: "HS26332PT" },
+    { id: "5", jobId: 1, name: "Performance Camshaft", description: "Comp Cams 12-600-4", quantity: 1, price: 279.99, partNumber: "12-600-4" },
 
     // Parts for Job 2 (Transmission Rebuild)
-    { id: 6, jobId: 2, name: "Transmission Rebuild Kit", description: "Complete overhaul kit", quantity: 1, price: 850.00 },
-    { id: 7, jobId: 2, name: "Torque Converter", description: "High-stall converter", quantity: 1, price: 425.00 },
-    { id: 8, jobId: 2, name: "Transmission Filter", description: "OEM replacement filter", quantity: 1, price: 45.99 },
+    { id: "6", jobId: 2, name: "Transmission Rebuild Kit", description: "Complete overhaul kit", quantity: 1, price: 850.00, partNumber: "TRK-4L80E" },
+    { id: "7", jobId: 2, name: "Torque Converter", description: "High-stall converter", quantity: 1, price: 425.00, partNumber: "TC-3000" },
+    { id: "8", jobId: 2, name: "Transmission Filter", description: "OEM replacement filter", quantity: 1, price: 45.99, partNumber: "TF-4L80E" },
 
     // Parts for Job 3 (Brake System)
-    { id: 9, jobId: 3, name: "Brake Pads (Front)", description: "Ceramic brake pads", quantity: 1, price: 89.99 },
-    { id: 10, jobId: 3, name: "Brake Rotors (Front)", description: "Drilled and slotted rotors", quantity: 2, price: 199.99 },
-    { id: 11, jobId: 3, name: "Brake Fluid", description: "DOT 4 brake fluid", quantity: 2, price: 24.99 },
+    { id: "9", jobId: 3, name: "Brake Pads (Front)", description: "Ceramic brake pads", quantity: 1, price: 89.99, partNumber: "BP-CER-F" },
+    { id: "10", jobId: 3, name: "Brake Rotors (Front)", description: "Drilled and slotted rotors", quantity: 2, price: 199.99, partNumber: "BR-DS-F" },
+    { id: "11", jobId: 3, name: "Brake Fluid", description: "DOT 4 brake fluid", quantity: 2, price: 24.99, partNumber: "BF-DOT4" },
 
     // Parts for Job 4 (Oil Change)
-    { id: 12, jobId: 4, name: "Engine Oil", description: "5W-30 Full Synthetic", quantity: 5, price: 35.99 },
-    { id: 13, jobId: 4, name: "Oil Filter", description: "OEM oil filter", quantity: 1, price: 12.99 },
+    { id: "12", jobId: 4, name: "Engine Oil", description: "5W-30 Full Synthetic", quantity: 5, price: 35.99, partNumber: "OIL-5W30" },
+    { id: "13", jobId: 4, name: "Oil Filter", description: "OEM oil filter", quantity: 1, price: 12.99, partNumber: "OF-OEM" },
 
     // Parts for Job 5 (Carburetor Rebuild)
-    { id: 14, jobId: 5, name: "Carburetor Rebuild Kit", description: "Holley 4150 rebuild kit", quantity: 1, price: 125.00 },
-    { id: 15, jobId: 5, name: "Accelerator Pump", description: "Replacement pump diaphragm", quantity: 1, price: 35.00 },
+    { id: "14", jobId: 5, name: "Carburetor Rebuild Kit", description: "Holley 4150 rebuild kit", quantity: 1, price: 125.00, partNumber: "HRK-4150" },
+    { id: "15", jobId: 5, name: "Accelerator Pump", description: "Replacement pump diaphragm", quantity: 1, price: 35.00, partNumber: "AP-DIAPHRAGM" },
 
     // Parts for Job 6 (Suspension Work)
-    { id: 16, jobId: 6, name: "Coilover Kit", description: "Adjustable coilovers", quantity: 4, price: 1299.99 },
-    { id: 17, jobId: 6, name: "Sway Bar Links", description: "Performance sway bar links", quantity: 4, price: 89.99 },
+    { id: "16", jobId: 6, name: "Coilover Kit", description: "Adjustable coilovers", quantity: 4, price: 1299.99, partNumber: "COK-ADJ-4" },
+    { id: "17", jobId: 6, name: "Sway Bar Links", description: "Performance sway bar links", quantity: 4, price: 89.99, partNumber: "SBL-PERF-4" },
 
     // Parts for Job 7 (Exhaust System)
-    { id: 18, jobId: 7, name: "Cat-Back Exhaust", description: "Stainless steel exhaust system", quantity: 1, price: 899.99 },
-    { id: 19, jobId: 7, name: "Exhaust Tips", description: "4\" polished tips", quantity: 2, price: 149.99 },
+    { id: "18", jobId: 7, name: "Cat-Back Exhaust", description: "Stainless steel exhaust system", quantity: 1, price: 899.99, partNumber: "CBE-SS" },
+    { id: "19", jobId: 7, name: "Exhaust Tips", description: "4\" polished tips", quantity: 2, price: 149.99, partNumber: "ET-4IN-POL" },
 
     // Parts for Job 8 (Air Intake)
-    { id: 20, jobId: 8, name: "Cold Air Intake", description: "Performance air intake system", quantity: 1, price: 299.99 },
-    { id: 21, jobId: 8, name: "Air Filter", description: "High-flow air filter", quantity: 1, price: 49.99 }
+    { id: "20", jobId: 8, name: "Cold Air Intake", description: "Performance air intake system", quantity: 1, price: 299.99, partNumber: "CAI-PERF" },
+    { id: "21", jobId: 8, name: "Air Filter", description: "High-flow air filter", quantity: 1, price: 49.99, partNumber: "AF-HF" }
 ];
 
 // Mock Vehicles Data
 export const mockVehicles: Vehicle[] = [
     // Mike Johnson's vehicles
     {
-        id: 1,
+        id: "1",
         customerId: "CUST001",
         year: 2018,
         make: "Chevrolet",
@@ -64,7 +63,7 @@ export const mockVehicles: Vehicle[] = [
         mileage: 45200
     },
     {
-        id: 2,
+        id: "2",
         customerId: "CUST001",
         year: 1969,
         make: "Chevrolet",
@@ -77,7 +76,7 @@ export const mockVehicles: Vehicle[] = [
 
     // Sarah Davis's vehicle
     {
-        id: 3,
+        id: "3",
         customerId: "CUST002",
         year: 1969,
         make: "Ford",
@@ -90,7 +89,7 @@ export const mockVehicles: Vehicle[] = [
 
     // Tom Wilson's vehicle
     {
-        id: 4,
+        id: "4",
         customerId: "CUST003",
         year: 1970,
         make: "Plymouth",
@@ -103,7 +102,7 @@ export const mockVehicles: Vehicle[] = [
 
     // Alex Martinez's vehicle
     {
-        id: 5,
+        id: "5",
         customerId: "CUST004",
         year: 1970,
         make: "Chevrolet",
@@ -116,7 +115,7 @@ export const mockVehicles: Vehicle[] = [
 
     // Jennifer Lee's vehicle
     {
-        id: 6,
+        id: "6",
         customerId: "CUST005",
         year: 2019,
         make: "Chevrolet",
@@ -129,7 +128,7 @@ export const mockVehicles: Vehicle[] = [
 
     // Robert Garcia's vehicle
     {
-        id: 7,
+        id: "7",
         customerId: "CUST006",
         year: 2017,
         make: "Toyota",
@@ -142,7 +141,7 @@ export const mockVehicles: Vehicle[] = [
 
     // Lisa Brown's vehicle
     {
-        id: 8,
+        id: "8",
         customerId: "CUST007",
         year: 2015,
         make: "Ford",
@@ -157,7 +156,7 @@ export const mockVehicles: Vehicle[] = [
 // Mock Jobs Data
 export const mockJobs: Job[] = [
     {
-        id: 1,
+        id: "1",
         title: "LS3 Engine Rebuild",
         description: "Complete engine rebuild with performance upgrades including forged internals, performance camshaft, and precision machining.",
         status: STATUSES.ACTIVE,
@@ -170,12 +169,12 @@ export const mockJobs: Job[] = [
         priority: "High",
         parts: mockParts.filter(part => part.jobId === 1),
         customerId: "CUST001",
-        vehicleId: 1,
+        vehicleId: "1",
         notes: "Customer approved performance upgrades. Waiting for custom pistons to arrive.",
         invoiced: false
     },
     {
-        id: 2,
+        id: "2",
         title: "4L80E Transmission Rebuild",
         description: "Complete transmission rebuild with upgraded components and torque converter replacement.",
         status: STATUSES.ACTIVE,
@@ -188,12 +187,12 @@ export const mockJobs: Job[] = [
         priority: "Medium",
         parts: mockParts.filter(part => part.jobId === 2),
         customerId: "CUST002",
-        vehicleId: 3,
+        vehicleId: "3",
         notes: "Customer approved additional work on valve body.",
         invoiced: false
     },
     {
-        id: 3,
+        id: "3",
         title: "Brake System Overhaul",
         description: "Front brake replacement including pads, rotors, and brake fluid flush.",
         status: STATUSES.COMPLETED,
@@ -207,13 +206,13 @@ export const mockJobs: Job[] = [
         priority: "Medium",
         parts: mockParts.filter(part => part.jobId === 3),
         customerId: "CUST006",
-        vehicleId: 7,
+        vehicleId: "7",
         notes: "Work completed successfully. Customer satisfied with results.",
         invoiced: true,
         invoiceAmount: 750
     },
     {
-        id: 4,
+        id: "4",
         title: "Oil Change & Inspection",
         description: "Routine oil change with full vehicle inspection and fluid top-off.",
         status: STATUSES.COMPLETED,
@@ -227,13 +226,13 @@ export const mockJobs: Job[] = [
         priority: "Low",
         parts: mockParts.filter(part => part.jobId === 4),
         customerId: "CUST007",
-        vehicleId: 8,
+        vehicleId: "8",
         notes: "Routine maintenance completed. Recommended brake inspection in 6 months.",
         invoiced: true,
         invoiceAmount: 145
     },
     {
-        id: 5,
+        id: "5",
         title: "Carburetor Rebuild",
         description: "Complete carburetor rebuild for vintage Chevelle including cleaning and calibration.",
         status: STATUSES.WAITING,
@@ -246,13 +245,13 @@ export const mockJobs: Job[] = [
         priority: "Medium",
         parts: mockParts.filter(part => part.jobId === 5),
         customerId: "CUST001",
-        vehicleId: 2,
+        vehicleId: "2",
         notes: "Waiting for carburetor rebuild kit to arrive.",
         waitingReason: "Parts Delivery",
         invoiced: false
     },
     {
-        id: 6,
+        id: "6",
         title: "Suspension Overhaul",
         description: "Complete suspension upgrade with coilovers and performance components.",
         status: STATUSES.WAITING,
@@ -265,13 +264,13 @@ export const mockJobs: Job[] = [
         priority: "Low",
         parts: mockParts.filter(part => part.jobId === 6),
         customerId: "CUST005",
-        vehicleId: 6,
+        vehicleId: "6",
         notes: "Waiting for customer approval on upgraded components.",
         waitingReason: "Customer Approval",
         invoiced: false
     },
     {
-        id: 7,
+        id: "7",
         title: "Performance Exhaust Install",
         description: "Cat-back exhaust system installation with custom tips.",
         status: STATUSES.ON_HOLD,
@@ -284,12 +283,12 @@ export const mockJobs: Job[] = [
         priority: "Low",
         parts: mockParts.filter(part => part.jobId === 7),
         customerId: "CUST004",
-        vehicleId: 5,
+        vehicleId: "5",
         notes: "On hold due to shop scheduling conflicts.",
         invoiced: false
     },
     {
-        id: 8,
+        id: "8",
         title: "Cold Air Intake Install",
         description: "Performance cold air intake system installation and tuning.",
         status: STATUSES.COMPLETED,
@@ -303,7 +302,7 @@ export const mockJobs: Job[] = [
         priority: "Low",
         parts: mockParts.filter(part => part.jobId === 8),
         customerId: "CUST003",
-        vehicleId: 4,
+        vehicleId: "4",
         notes: "Installation completed. Customer very happy with performance gains.",
         invoiced: true,
         invoiceAmount: 425
@@ -313,7 +312,7 @@ export const mockJobs: Job[] = [
 // Mock Invoices Data
 export const mockInvoices: Invoice[] = [
     {
-        id: 1,
+        id: "1",
         date: "2025-06-18",
         amount: 750.00,
         amountPaid: 750.00,
@@ -326,7 +325,7 @@ export const mockInvoices: Invoice[] = [
         job: null // Will be populated by relationship
     },
     {
-        id: 2,
+        id: "2",
         date: "2025-06-15",
         amount: 145.00,
         amountPaid: 145.00,
@@ -339,7 +338,7 @@ export const mockInvoices: Invoice[] = [
         job: null
     },
     {
-        id: 3,
+        id: "3",
         date: "2025-06-14",
         amount: 425.00,
         amountPaid: 425.00,
@@ -352,7 +351,7 @@ export const mockInvoices: Invoice[] = [
         job: null
     },
     {
-        id: 4,
+        id: "4",
         date: "2025-06-25",
         amount: 1250.00,
         amountPaid: 0.00,
@@ -364,7 +363,7 @@ export const mockInvoices: Invoice[] = [
         job: null
     },
     {
-        id: 5,
+        id: "5",
         date: "2025-06-30",
         amount: 2100.00,
         amountPaid: 1000.00,
@@ -377,7 +376,7 @@ export const mockInvoices: Invoice[] = [
     }
 ];
 
-// Mock Customers Data (with relationships populated)
+// Mock Customers Data
 export const mockCustomers: Customer[] = [
     {
         id: "CUST001",
@@ -385,7 +384,10 @@ export const mockCustomers: Customer[] = [
         lastName: "Johnson",
         phone: "(555) 123-4567",
         email: "mike.johnson@email.com",
-        address: "123 Main St, Springfield, IL 62701",
+        address: "123 Main St",
+        city: "Springfield",
+        state: "IL",
+        zipcode: "62701",
         vehicleCount: 2,
         jobCount: 2,
         vehicles: mockVehicles.filter(v => v.customerId === "CUST001"),
@@ -402,7 +404,10 @@ export const mockCustomers: Customer[] = [
         lastName: "Davis",
         phone: "(555) 987-6543",
         email: "sarah.davis@email.com",
-        address: "456 Oak Avenue, Springfield, IL 62702",
+        address: "456 Oak Avenue",
+        city: "Springfield",
+        state: "IL",
+        zipcode: "62702",
         vehicleCount: 1,
         jobCount: 1,
         vehicles: mockVehicles.filter(v => v.customerId === "CUST002"),
@@ -419,7 +424,10 @@ export const mockCustomers: Customer[] = [
         lastName: "Wilson",
         phone: "(555) 456-7890",
         email: "tom.wilson@email.com",
-        address: "789 Pine Street, Springfield, IL 62703",
+        address: "789 Pine Street",
+        city: "Springfield",
+        state: "IL",
+        zipcode: "62703",
         vehicleCount: 1,
         jobCount: 1,
         vehicles: mockVehicles.filter(v => v.customerId === "CUST003"),
@@ -436,7 +444,10 @@ export const mockCustomers: Customer[] = [
         lastName: "Martinez",
         phone: "(555) 321-6547",
         email: "alex.martinez@email.com",
-        address: "321 Elm Drive, Springfield, IL 62704",
+        address: "321 Elm Drive",
+        city: "Springfield",
+        state: "IL",
+        zipcode: "62704",
         vehicleCount: 1,
         jobCount: 1,
         vehicles: mockVehicles.filter(v => v.customerId === "CUST004"),
@@ -453,7 +464,10 @@ export const mockCustomers: Customer[] = [
         lastName: "Lee",
         phone: "(555) 654-3210",
         email: "jennifer.lee@email.com",
-        address: "654 Maple Lane, Springfield, IL 62705",
+        address: "654 Maple Lane",
+        city: "Springfield",
+        state: "IL",
+        zipcode: "62705",
         vehicleCount: 1,
         jobCount: 1,
         vehicles: mockVehicles.filter(v => v.customerId === "CUST005"),
@@ -470,7 +484,10 @@ export const mockCustomers: Customer[] = [
         lastName: "Garcia",
         phone: "(555) 789-0123",
         email: "robert.garcia@email.com",
-        address: "987 Cedar Court, Springfield, IL 62706",
+        address: "987 Cedar Court",
+        city: "Springfield",
+        state: "IL",
+        zipcode: "62706",
         vehicleCount: 1,
         jobCount: 1,
         vehicles: mockVehicles.filter(v => v.customerId === "CUST006"),
@@ -487,7 +504,10 @@ export const mockCustomers: Customer[] = [
         lastName: "Brown",
         phone: "(555) 147-2580",
         email: "lisa.brown@email.com",
-        address: "147 Birch Boulevard, Springfield, IL 62707",
+        address: "147 Birch Boulevard",
+        city: "Springfield",
+        state: "IL",
+        zipcode: "62707",
         vehicleCount: 1,
         jobCount: 1,
         vehicles: mockVehicles.filter(v => v.customerId === "CUST007"),
@@ -506,12 +526,12 @@ export const getCustomerById = (id: string): Customer | undefined => {
 };
 
 // Helper function to get job by ID
-export const getJobById = (id: number): Job | undefined => {
+export const getJobById = (id: string): Job | undefined => {
     return mockJobs.find(job => job.id === id);
 };
 
 // Helper function to get vehicle by ID
-export const getVehicleById = (id: number): Vehicle | undefined => {
+export const getVehicleById = (id: string): Vehicle | undefined => {
     return mockVehicles.find(vehicle => vehicle.id === id);
 };
 

@@ -5,6 +5,9 @@ interface Customer {
     phone: string;
     email: string;
     address?: string;
+    city?: string;
+    state?: string;
+    zipcode?: string;
     notes?: string;
     status: Status;
     vehicleCount?: number;
@@ -57,6 +60,8 @@ interface Vehicle {
     year: number;
     make: string;
     model: string;
+    engine?: string;
+    transmission?: string;
     vin?: string;
     licensePlate?: string;
     color?: string;
@@ -67,13 +72,40 @@ interface Vehicle {
 
 interface Part {
     id: string;
-    jobId: number | null;
+    jobId: string | null;
     name: string;
     description?: string;
     quantity: number;
     price: number;
     partNumber: string;
+    status: string
 };
+
+interface Note {
+    id: string;
+    note: string;
+    timestamp: string;
+}
+
+interface JobStep {
+    id: string;
+    title: string;
+    description: string;
+    startDate?: string;
+    completedDate?: string;
+    order?: number;
+    status: string;
+    estimatedHours?: number;
+    actualHours?: number;
+    technician?: string;
+}
+
+interface CostSummary {
+    partsAndMaterials: number,
+    hours: number,
+    labor: number,
+    total: number,
+}
 
 interface Status {
     type: "Active" | "Waiting" | "Completed" | 'On Hold' | "Payment" | "none";

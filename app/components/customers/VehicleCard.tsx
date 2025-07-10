@@ -35,7 +35,7 @@ export default function VehicleCard({ vehicle, customerId, onUpdate }: VehicleCa
                         <Edit3 className="w-4 h-4" />
                     </button>
                 </div>
-                <div className="grid grid-cols-2 gap-2 text-sm text-gray-600">
+                <div className="grid grid-cols-1 gap-2 text-sm text-gray-600">
                     <div><span className="font-medium">VIN:</span> {vehicle.vin || 'N/A'}</div>
                     <div><span className="font-medium">Mileage:</span> {vehicle.mileage?.toLocaleString() || 'N/A'}</div>
                     <div><span className="font-medium">Color:</span> {vehicle.color || 'N/A'}</div>
@@ -49,7 +49,7 @@ export default function VehicleCard({ vehicle, customerId, onUpdate }: VehicleCa
                 onClose={() => setShowEditModal(false)}
                 onSubmit={handleEditSubmit}
                 customerId={customerId}
-                vehicle={{ ...vehicle, customerId }} // make sure customerId is passed
+                vehicle={{ ...vehicle, customerId }}
             />
         </>
     );

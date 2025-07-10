@@ -115,9 +115,16 @@ export default function AddCustomerModal({ isOpen, onClose, onSubmit }: AddCusto
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
+
+        let formattedValue = value;
+
+        if (name === "phone") {
+            formattedValue = helpers.formatPhoneNumber(value)
+        }
+
         setFormData(prev => ({
             ...prev,
-            [name]: value
+            [name]: formattedValue
         }));
 
         // Clear error when user starts typing
@@ -201,7 +208,7 @@ export default function AddCustomerModal({ isOpen, onClose, onSubmit }: AddCusto
                     <div>
                         <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
                             <Mail className="inline h-4 w-4 mr-1" />
-                            Email Address *
+                            Email *
                         </label>
                         <input
                             type="email"
@@ -299,3 +306,4 @@ export default function AddCustomerModal({ isOpen, onClose, onSubmit }: AddCusto
         </Modal>
     );
 }
+

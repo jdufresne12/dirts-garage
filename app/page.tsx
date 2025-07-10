@@ -29,7 +29,7 @@ export default function Home() {
     <div className="min-h-screen bg-gray-50 w-full overflow-x-hidden">
       <div className="w-full mx-auto p-4 sm:p-6 lg:p-8">
         {/* Header */}
-        <div className="flex flex-col gap-4 p-4 rounded-lg lg:flex-row lg:items-center lg:justify-between lg:mb-8 lg:bg-white lg:p-6 lg:shadow-lg">
+        <div className="flex flex-col gap-4 p-4 rounded-lg lg:flex-row lg:items-center lg:justify-between lg:mb-8 lg:bg-white lg:p-6 lg:shadow-md">
           <h1 className="text-2xl p-4 min-w-0 text-center font-bold bg-white rounded-lg shadow-md text-gray-900 lg:p-0 lg:bg-none lg:rounded-none lg:shadow-none lg:text-3xl">Dashboard Overview</h1>
           {/* Action Container */}
           <div className="flex flex-row justify-center gap-2 sm:gap-3 w-full sm:w-auto">
