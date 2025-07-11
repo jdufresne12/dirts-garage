@@ -42,7 +42,7 @@ export default function JobSteps({ steps }: JobStepsProps) {
         if (selectedStep) {
             setSelectedStep(undefined);
         }
-        setShowAddProgressModal
+        setShowAddProgressModal(false);
     };
 
     return (
@@ -73,27 +73,13 @@ export default function JobSteps({ steps }: JobStepsProps) {
                     <div
                         key={step.id}
                         onClick={() => handleClickedStep(step)}
-                        className={`border-l-4 ${getStatusColor(step.status)} pl-6 relative hover:scale-102`}
+                        className={`border-l-4 ${getStatusColor(step.status)} pl-6 relative hover:scale-y-105 hover:scale-x-101`}
                     >
                         <div className="pb-4">
                             <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
                                 <div className="flex-1">
                                     <h3 className="font-semibold text-gray-900">{step.title}</h3>
-                                    <p className="text-gray-600 mt-1">{step.description}</p>
-
-                                    <div className="flex flex-wrap gap-4 text-sm text-gray-500 mt-2">
-                                        {step.status === 'completed' && step.completedDate && (
-                                            <span>Completed {new Date(step.completedDate).toLocaleDateString()}</span>
-                                        )}
-                                        {step.status === 'in-progress' && step.startDate && (
-                                            <span>Started {new Date(step.startDate).toLocaleDateString()}</span>
-                                        )}
-                                    </div>
-                                </div>
-
-                                <div className="flex flex-col sm:items-end gap-2">
-                                    {/* Time tracking info */}
-                                    <div className="flex flex-col sm:items-end text-sm">
+                                    <div className="text-sm space-x-3">
                                         {step.estimatedHours && (
                                             <span className="text-gray-600">Est: {step.estimatedHours} hrs</span>
                                         )}
@@ -101,6 +87,15 @@ export default function JobSteps({ steps }: JobStepsProps) {
                                             <span className="font-medium text-gray-900">
                                                 Actual: {step.actualHours} hrs
                                             </span>
+                                        )}
+                                    </div>
+                                    <p className="text-gray-600 mt-1">{step.description}</p>
+                                    <div className="flex flex-wrap gap-4 text-sm text-gray-500 mt-2">
+                                        {step.status === 'completed' && step.completedDate && (
+                                            <span>Completed {new Date(step.completedDate).toLocaleDateString()}</span>
+                                        )}
+                                        {step.status === 'in-progress' && step.startDate && (
+                                            <span>Started {new Date(step.startDate).toLocaleDateString()}</span>
                                         )}
                                     </div>
                                 </div>
@@ -113,7 +108,7 @@ export default function JobSteps({ steps }: JobStepsProps) {
             {/* Modals */}
             <AddJobStepModal
                 isOpen={showAddProgressModal}
-                onClose={() => setShowAddProgressModal(false)}
+                onClose={handleClose}
                 onSave={selectedStep ? handleEditStep : handleAddStep}
                 stepData={selectedStep ? selectedStep : undefined}
             />

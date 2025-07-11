@@ -45,27 +45,33 @@ const JobDetailsPage = () => {
             title: "Initial Inspection & Teardown",
             description: "Engine removed from vehicle. Initial inspection completed. Block and heads sent for cleaning and inspection.",
             status: "completed",
-            completedDate: "June 21, 2025 2:30 PM"
+            completedDate: "June 21, 2025 2:30 PM",
+            estimatedHours: 5,
+            actualHours: 5
         },
         {
             id: "2",
             title: "Machine Shop Work",
             description: "Block bored .030 over, decked, and honed. Heads reconditioned with new valves and guides.",
             status: "completed",
-            completedDate: "June 23, 2025 4:00 PM"
+            completedDate: "June 23, 2025 4:00 PM",
+            estimatedHours: 5,
+            actualHours: 5
         },
         {
             id: "3",
             title: "Engine Assembly",
             description: "Currently installing pistons and connecting rods. Waiting for torque plates to arrive for final assembly.",
             status: "in-progress",
-            startDate: "June 24, 2025 8:00 AM"
+            startDate: "June 24, 2025 8:00 AM",
+            estimatedHours: 5,
         },
         {
             id: "4",
             title: "Installation & Final Inspection",
             description: "Install engine back into vehicle and perform final quality checks.",
             status: "pending",
+            estimatedHours: 5,
         }
     ];
 
@@ -75,12 +81,6 @@ const JobDetailsPage = () => {
         { id: "1", jobId: jobData.id, name: "ARP Head Studs", partNumber: "ARP 234-4316", quantity: 1, price: 189.99, status: "ordered" },
         { id: "1", jobId: jobData.id, name: "Engine Gasket Set", partNumber: "Fel-Pro HS26332PT", quantity: 1, price: 129.99, status: "received" },
         { id: "1", jobId: jobData.id, name: "Performance Camshaft", partNumber: "Comp Cams 12-600-4", quantity: 1, price: 279.99, status: "needed" }
-    ];
-
-    const timeTracking = [
-        { task: "Engine Teardown", technician: "John Doe", date: "June 21, 2025 8:00 AM - 12:00 PM", hours: 4.0 },
-        { task: "Block Preparation", technician: "Mike Smith", date: "June 22, 2025 9:00 AM - 11:30 AM", hours: 2.5 },
-        { task: "Assembly Work", technician: "Mike Smith", date: "June 24, 2025 8:00 AM - 5:00 PM (In Progress)", hours: 9.0 }
     ];
 
     const Notes: Note[] = [

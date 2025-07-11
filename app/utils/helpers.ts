@@ -24,6 +24,10 @@ export const formatPhoneNumber = (value: string) => {
     return `(${area}) ${middle}-${last}`;
 };
 
+export const displayDateAndTime = (date: Date) => {
+    console.log(date)
+}
+
 export const US_STATES = [
     { name: 'Alabama', abbreviation: 'AL' },
     { name: 'Alaska', abbreviation: 'AK' },
@@ -77,7 +81,6 @@ export const US_STATES = [
     { name: 'Wyoming', abbreviation: 'WY' }
 ];
 
-
 export const STATUSES = {
     ACTIVE: { type: "Active" as const, color: "bg-blue-100 text-blue-800", message: "Work in progress" },
     WAITING: { type: "Waiting" as const, color: "bg-yellow-100 text-yellow-800", message: "Waiting for parts/approval" },
@@ -91,6 +94,7 @@ export default {
     generateUniqueID,
     checkNoActiveJobs,
     formatPhoneNumber,
+    displayDateAndTime,
     US_STATES,
     STATUSES
 }
