@@ -24,8 +24,32 @@ export const formatPhoneNumber = (value: string) => {
     return `(${area}) ${middle}-${last}`;
 };
 
-export const displayDateAndTime = (date: Date) => {
-    console.log(date)
+export const displayDateAndTimeLong = (dateString: string): string => {
+    const months = [
+        "January", "February", "March", "April", "May", "June",
+        "July", "August", "September", "October", "November", "December"
+    ];
+    const [date, time] = dateString.split("T")
+    const [year, month, day] = date.split("-");
+    const [hours, minutes] = time.split(":");
+
+    let formattedDate: string = `
+        ${months[parseInt(month) - 1]} ${day}, ${year} at ${parseInt(hours) > 12 ? parseInt(hours) - 12 : hours}:${minutes.padStart(2, '0')} ${parseInt(hours) >= 12 ? 'PM' : 'AM'}
+    `;
+
+    return formattedDate;
+}
+
+export const displayDateAndTimeShort = (dateString: string): string => {
+    const [date, time] = dateString.split("T")
+    const [year, month, day] = date.split("-");
+    const [hours, minutes] = time.split(":");
+
+    let formattedDate: string = `
+        ${month}/${day}/${year}, ${parseInt(hours) > 12 ? parseInt(hours) - 12 : hours}:${minutes.padStart(2, '0')} ${parseInt(hours) >= 12 ? 'PM' : 'AM'}
+    `;
+
+    return formattedDate;
 }
 
 export const US_STATES = [
@@ -94,7 +118,8 @@ export default {
     generateUniqueID,
     checkNoActiveJobs,
     formatPhoneNumber,
-    displayDateAndTime,
+    displayDateAndTimeLong,
+    displayDateAndTimeShort,
     US_STATES,
     STATUSES
 }

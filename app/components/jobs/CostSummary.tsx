@@ -1,10 +1,11 @@
 import React from 'react';
 
 interface CostSummaryProps {
-    costSummary: CostSummary
+    costSummary: CostSummary;
 }
 
 export default function CostSummary({ costSummary }: CostSummaryProps) {
+    const total = costSummary.partsAndMaterials + costSummary.labor;
     return (
         <div className="bg-white rounded-lg border border-gray-200 p-4">
             <div className="flex items-center justify-between mb-4">
@@ -26,7 +27,7 @@ export default function CostSummary({ costSummary }: CostSummaryProps) {
                 <hr className="my-2" />
                 <div className="flex justify-between font-bold text-lg">
                     <span>Total:</span>
-                    <span>${costSummary.total.toLocaleString()}</span>
+                    <span>${total.toLocaleString()}</span>
                 </div>
             </div>
 

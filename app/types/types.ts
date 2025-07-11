@@ -10,10 +10,10 @@ interface Customer {
     zipcode?: string;
     notes?: string;
     status: Status;
-    vehicleCount?: number;
+    jobs?: Job[] | null;
     jobCount?: number;
     vehicles?: Vehicle[] | null;
-    jobs?: Job[] | null;
+    vehicleCount?: number;
     invoices?: Invoice[] | null;
     totalSpent?: number;
     amountOwed?: number
@@ -25,17 +25,15 @@ interface Job {
     description: string;
     status: Status;
     estimatedStartDate: string;
-    estimatedEndDay?: string;
+    estimatedCompletion?: string;
     startDate: string;
     endDate?: string;
-    estimatedCompletion?: string;
     estimatedCost: number;
     actualCost: number;
     priority: "Low" | "Medium" | "High";
     parts: Part[] | null;
     customerId: string | null;
     vehicleId: string | null;
-    notes?: string;
     waitingReason?: string;
     invoiced?: boolean;
     invoiceAmount?: number;
@@ -104,7 +102,6 @@ interface CostSummary {
     partsAndMaterials: number,
     hours: number,
     labor: number,
-    total: number,
 }
 
 interface Status {

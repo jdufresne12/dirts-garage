@@ -2,17 +2,19 @@
 import React, { useState } from 'react';
 import AddJobStepModal from './AddJobStepModal';
 import { Timer, X } from 'lucide-react';
+import helpers from '@/app/utils/helpers';
 
 interface JobStepsProps {
-    steps: JobStep[];
+    jobSteps: JobStep[];
+    setJobSteps: React.Dispatch<React.SetStateAction<JobStep[]>>;
 }
 
-export default function JobSteps({ steps }: JobStepsProps) {
+export default function JobSteps({ jobSteps, setJobSteps }: JobStepsProps) {
     const [showAddProgressModal, setShowAddProgressModal] = useState(false);
     const [selectedStep, setSelectedStep] = useState<JobStep>();
 
-    const totalEstimatedHours = steps.reduce((sum, step) => sum + (step.estimatedHours || 0), 0);
-    const totalActualHours = steps.reduce((sum, step) => sum + (step.actualHours || 0), 0);
+    const totalEstimatedHours = jobSteps.reduce((sum, step) => sum + (step.estimatedHours || 0), 0);
+    const totalActualHours = jobSteps.reduce((sum, step) => sum + (step.actualHours || 0), 0);
 
     const getStatusColor = (status: string) => {
         switch (status) {
@@ -25,17 +27,35 @@ export default function JobSteps({ steps }: JobStepsProps) {
         }
     };
 
-    const handleAddStep = (stepData: JobStep) => {
-        console.log(stepData)
-    };
-
-    const handleEditStep = (stepData: JobStep) => {
-        console.log(stepData)
-    };
-
     const handleClickedStep = (stepData: JobStep) => {
         setSelectedStep(stepData);
         setShowAddProgressModal(true);
+    };
+
+    const handleAddStep = (stepData: JobStep) => {
+        // API call to add step to db
+        // If successful, update the steps state
+        console.log(stepData)
+        setJobSteps((prevSteps) => [
+            ...prevSteps,
+            stepData
+        ]);
+    };
+
+    const handleEditStep = (stepData: JobStep) => {
+        // API call to update step to db
+        // If successful, update the steps state
+        console.log(stepData)
+        setJobSteps((prevSteps) =>
+            prevSteps.map(step => step.id === stepData.id ? stepData : step)
+        );
+    };
+
+    const handleDeleteStep = (id: string) => {
+        // API call to delete step to db
+        // If successful, update the steps state
+        console.log(id)
+        setJobSteps(prev => prev.filter(step => step.id !== id));
     };
 
     const handleClose = () => {
@@ -69,7 +89,7 @@ export default function JobSteps({ steps }: JobStepsProps) {
             </div>
 
             <div className="space-y-6">
-                {steps.map((step) => (
+                {jobSteps.map((step) => (
                     <div
                         key={step.id}
                         onClick={() => handleClickedStep(step)}
@@ -92,10 +112,10 @@ export default function JobSteps({ steps }: JobStepsProps) {
                                     <p className="text-gray-600 mt-1">{step.description}</p>
                                     <div className="flex flex-wrap gap-4 text-sm text-gray-500 mt-2">
                                         {step.status === 'completed' && step.completedDate && (
-                                            <span>Completed {new Date(step.completedDate).toLocaleDateString()}</span>
+                                            <span>Completed {helpers.displayDateAndTimeShort(step.completedDate)}</span>
                                         )}
                                         {step.status === 'in-progress' && step.startDate && (
-                                            <span>Started {new Date(step.startDate).toLocaleDateString()}</span>
+                                            <span>Started {helpers.displayDateAndTimeShort(step.startDate)}</span>
                                         )}
                                     </div>
                                 </div>
@@ -110,6 +130,7 @@ export default function JobSteps({ steps }: JobStepsProps) {
                 isOpen={showAddProgressModal}
                 onClose={handleClose}
                 onSave={selectedStep ? handleEditStep : handleAddStep}
+                onDelete={handleDeleteStep}
                 stepData={selectedStep ? selectedStep : undefined}
             />
         </div>
