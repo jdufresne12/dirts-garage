@@ -34,7 +34,7 @@ export default function CustomersPage() {
     const getStatusBadge = (status: string) => {
         const baseClasses = "px-2 py-1 rounded-full text-xs font-medium";
         switch (status) {
-            case "Active":
+            case "In Progress":
                 return `${baseClasses} bg-blue-100 text-blue-800`;
             case "Waiting":
                 return `${baseClasses} bg-yellow-100 text-yellow-800`;
@@ -49,7 +49,7 @@ export default function CustomersPage() {
 
     const getStatusText = (status: string) => {
         switch (status) {
-            case "Active":
+            case "In Progress":
                 return "Active Job";
             case "Waiting":
                 return "Waiting";
@@ -65,9 +65,9 @@ export default function CustomersPage() {
     const getCurrentJob = (customer: Customer) => {
         if (customer.jobs && customer.jobs.length > 0) {
             const activeJob = customer.jobs.find((job: Job) =>
-                job.status.type != 'Waiting' &&
-                job.status.type != 'Completed' &&
-                job.status.type != 'none'
+                job.status != 'Waiting' &&
+                job.status != 'Completed' &&
+                job.status != 'none'
             )
             return activeJob ? activeJob.title : "No Active Jobs";
         }
@@ -124,8 +124,8 @@ export default function CustomersPage() {
                                 <div className="flex items-start justify-between mb-4">
                                     <div className="flex-1 min-w-0">
                                         <h3 className="font-semibold text-gray-900 truncate">{customer.firstName} {customer.lastName}</h3>
-                                        <span className={`${getStatusBadge(customer.status.type)} mt-2 inline-block`}>
-                                            {getStatusText(customer.status.type)}
+                                        <span className={`${getStatusBadge(customer.status)} mt-2 inline-block`}>
+                                            {getStatusText(customer.status)}
                                         </span>
                                     </div>
                                 </div>

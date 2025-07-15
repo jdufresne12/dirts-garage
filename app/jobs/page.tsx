@@ -62,7 +62,7 @@ const JobsPage = () => {
                     <nav className="-mb-px flex">
                         {[
                             { label: 'All', value: 'all' },
-                            { label: 'In Progress', value: 'active' },
+                            { label: 'In Progress', value: 'inprogress' },
                             { label: 'Waiting', value: 'waiting' },
                             { label: 'Completed', value: 'completed' },
                             { label: 'On Hold', value: 'onHold' },
@@ -78,7 +78,7 @@ const JobsPage = () => {
                                 {tab.label} ({
                                     tab.value === 'all'
                                         ? jobs.length
-                                        : jobs.filter((j) => j.status.type.toLowerCase().replace(' ', '') === tab.value.toLowerCase()).length
+                                        : jobs.filter((j) => j.status.toLowerCase().replace(' ', '') === tab.value.toLowerCase()).length
                                 })
                             </button>
                         ))}

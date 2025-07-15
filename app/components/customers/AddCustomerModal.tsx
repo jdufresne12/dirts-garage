@@ -19,7 +19,7 @@ export default function AddCustomerModal({ isOpen, onClose, onSubmit }: AddCusto
         phone: "",
         address: "",
         notes: "",
-        status: helpers.STATUSES.NONE
+        status: 'None'
     });
 
     const [errors, setErrors] = useState<Partial<Customer>>({});
@@ -36,7 +36,7 @@ export default function AddCustomerModal({ isOpen, onClose, onSubmit }: AddCusto
                 phone: "",
                 address: "",
                 notes: "",
-                status: helpers.STATUSES.NONE
+                status: 'None'
             });
             setErrors({});
             setIsSubmitting(false);
@@ -98,7 +98,7 @@ export default function AddCustomerModal({ isOpen, onClose, onSubmit }: AddCusto
         setIsSubmitting(true);
 
         try {
-            // Simulate API call
+            // Simulate API call - remove once apis created
             await new Promise(resolve => setTimeout(resolve, 1000));
 
             if (onSubmit) {

@@ -9,7 +9,7 @@ interface Customer {
     state?: string;
     zipcode?: string;
     notes?: string;
-    status: Status;
+    status: string;
     jobs?: Job[] | null;
     jobCount?: number;
     vehicles?: Vehicle[] | null;
@@ -21,20 +21,21 @@ interface Customer {
 
 interface Job {
     id: string;
+    customerId: string | null;
+    vehicleId: string | null;
     title: string;
     description: string;
-    status: Status;
-    estimatedStartDate: string;
+    status: string;
+    waitingReason?: string;
+    latestUpdate?: string;
+    estimatedStartDate?: string;
     estimatedCompletion?: string;
-    startDate: string;
-    endDate?: string;
+    startDate?: string;
+    completionDate?: string;
     estimatedCost: number;
     actualCost: number;
     priority: "Low" | "Medium" | "High";
-    parts: Part[] | null;
-    customerId: string | null;
-    vehicleId: string | null;
-    waitingReason?: string;
+    parts?: Part[] | null;
     invoiced?: boolean;
     invoiceAmount?: number;
 };
@@ -44,7 +45,7 @@ interface Invoice {
     date: string;
     amount: number;
     amountPaid: number;
-    status: Status;
+    status: string;
     dueDate: string;
     paidDate?: string;
     customerId: string;
@@ -76,6 +77,7 @@ interface Part {
     quantity: number;
     price: number;
     partNumber: string;
+    url?: string;
     status: string
 };
 
@@ -103,10 +105,4 @@ interface CostSummary {
     hours: number,
     labor: number,
 }
-
-interface Status {
-    type: "Active" | "Waiting" | "Completed" | 'On Hold' | "Payment" | "none";
-    color: string;
-    message?: string
-}''
 

@@ -3,7 +3,7 @@ export const generateUniqueID = (): string => {
 }
 
 export const checkNoActiveJobs = (customer: Customer) => {
-    return customer.status.type === "none" || customer.status.type === "Completed" || customer.status.type === "Waiting" ? true : false;
+    return customer.status === "none" || customer.status === "Completed" || customer.status === "Waiting" ? true : false;
 }
 
 export const formatPhoneNumber = (value: string) => {
@@ -50,6 +50,16 @@ export const displayDateAndTimeShort = (dateString: string): string => {
     `;
 
     return formattedDate;
+}
+
+export const getLocalDateTimeString = () => {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
 }
 
 export const US_STATES = [
@@ -120,6 +130,7 @@ export default {
     formatPhoneNumber,
     displayDateAndTimeLong,
     displayDateAndTimeShort,
+    getLocalDateTimeString,
     US_STATES,
     STATUSES
 }

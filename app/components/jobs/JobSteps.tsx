@@ -6,7 +6,7 @@ import helpers from '@/app/utils/helpers';
 
 interface JobStepsProps {
     jobSteps: JobStep[];
-    setJobSteps: React.Dispatch<React.SetStateAction<JobStep[]>>;
+    setJobSteps: React.Dispatch<React.SetStateAction<JobStep[] | undefined>>;
 }
 
 export default function JobSteps({ jobSteps, setJobSteps }: JobStepsProps) {
@@ -37,7 +37,7 @@ export default function JobSteps({ jobSteps, setJobSteps }: JobStepsProps) {
         // If successful, update the steps state
         console.log(stepData)
         setJobSteps((prevSteps) => [
-            ...prevSteps,
+            ...(prevSteps ?? []),
             stepData
         ]);
     };
@@ -47,7 +47,7 @@ export default function JobSteps({ jobSteps, setJobSteps }: JobStepsProps) {
         // If successful, update the steps state
         console.log(stepData)
         setJobSteps((prevSteps) =>
-            prevSteps.map(step => step.id === stepData.id ? stepData : step)
+            (prevSteps ?? []).map(step => step.id === stepData.id ? stepData : step)
         );
     };
 
@@ -55,7 +55,7 @@ export default function JobSteps({ jobSteps, setJobSteps }: JobStepsProps) {
         // API call to delete step to db
         // If successful, update the steps state
         console.log(id)
-        setJobSteps(prev => prev.filter(step => step.id !== id));
+        setJobSteps(prev => (prev ?? []).filter(step => step.id !== id));
     };
 
     const handleClose = () => {

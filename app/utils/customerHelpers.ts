@@ -9,7 +9,7 @@ export function newCustomer(customer: Customer): Customer {
         email: customer.email,
         address: customer.address || undefined,
         notes: customer.notes || undefined,
-        status: customer.status || helpers.STATUSES.NONE,
+        status: customer.status || "None",
         vehicleCount: 0,
         jobCount: 0,
         vehicles: undefined,

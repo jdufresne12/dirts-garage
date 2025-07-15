@@ -49,15 +49,31 @@ const JobsTable: React.FC<JobsTableProps> = ({
         return `px-2 py-1 rounded text-xs font-medium ${colors[priority] || 'bg-gray-100 text-gray-800'}`;
     };
 
-    const getStatusBadge = (status: Status) => `px-2 py-1 rounded text-xs font-medium ${status.color}`;
+    const getStatusBadge = (status: string) => {
+        const baseClasses = "px-2 py-1 rounded text-xs font-medium";
+        switch (status) {
+            case "In Progress":
+                return `${baseClasses} bg-blue-100 text-blue-800`;
+            case "Waiting":
+                return `${baseClasses} bg-yellow-100 text-yellow-800`;
+            case "On Hold":
+                return `${baseClasses} bg-orange-100 text-orange-800`;
+            case "Payment":
+                return `${baseClasses} bg-red-100 text-red-800`;
+            case "Completed":
+                return `${baseClasses} bg-red-100 text-green-800`;
+            default:
+                return `${baseClasses} bg-gray-100 text-gray-600`;
+        }
+    };
 
     const filteredJobs = jobs.filter(job => {
         const matchesTab =
             activeTab === 'all' ||
-            (activeTab === 'active' && job.status.type === 'Active') ||
-            (activeTab === 'waiting' && job.status.type === 'Waiting') ||
-            (activeTab === 'completed' && job.status.type === 'Completed') ||
-            (activeTab === 'onHold' && job.status.type === 'On Hold');
+            (activeTab === 'inprogress' && job.status === 'In Progress') ||
+            (activeTab === 'waiting' && job.status === 'Waiting') ||
+            (activeTab === 'completed' && job.status === 'Completed') ||
+            (activeTab === 'onHold' && job.status === 'On Hold');
 
         const customerName = getCustomerName(job.customerId).toLowerCase();
         const vehicleInfo = getVehicleInfo(job.vehicleId).toLowerCase();
@@ -108,14 +124,18 @@ const JobsTable: React.FC<JobsTableProps> = ({
                             <tr key={job.id} className="hover:bg-gray-50" onClick={() => router.push(`/jobs/${job.id}`)}>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{job.id}</td>
                                 <td className="px-6 py-4">
-                                    <div>
-                                        <div className="text-sm font-medium text-gray-900">{getCustomerName(job.customerId)}</div>
-                                        <div className="text-sm text-gray-500">{getVehicleInfo(job.vehicleId)}</div>
-                                    </div>
+                                    {job.customerId
+                                        ?
+                                        <div>
+                                            <div className="text-sm font-medium text-gray-900">{getCustomerName(job.customerId)}</div>
+                                            {job.vehicleId && <div className="text-sm text-gray-500">{getVehicleInfo(job.vehicleId)}</div>}
+                                        </div>
+                                        : <span className="text-sm font-medium text-gray-900">N/A</span>
+                                    }
                                 </td>
                                 <td className="px-6 py-4">
                                     <div className="text-sm text-gray-900">{job.title}</div>
-                                    {job.notes && <div className="text-xs text-gray-500 mt-1">{job.notes}</div>}
+                                    {job.latestUpdate && <div className="text-xs text-gray-500 mt-1">{job.latestUpdate}</div>}
                                 </td>
                                 {activeTab === 'waiting' && (
                                     <td className="px-6 py-4">
@@ -126,7 +146,7 @@ const JobsTable: React.FC<JobsTableProps> = ({
                                 )}
                                 {activeTab === 'completed' && (
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                        {formatDate(job.endDate || job.estimatedCompletion)}
+                                        {formatDate(job.completionDate || job.estimatedCompletion)}
                                     </td>
                                 )}
                                 {activeTab !== 'completed' && (
@@ -146,7 +166,7 @@ const JobsTable: React.FC<JobsTableProps> = ({
                                     <span className={getPriorityBadge(job.priority)}>{job.priority}</span>
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap">
-                                    <span className={getStatusBadge(job.status)}>{job.status.type}</span>
+                                    <span className={getStatusBadge(job.status)}>{job.status}</span>
                                 </td>
                             </tr>
                         ))}
@@ -208,7 +228,6 @@ const JobsTable: React.FC<JobsTableProps> = ({
 
                                 {/* Page numbers */}
                                 {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => {
-                                    // Show first page, last page, current page, and pages around current page
                                     if (
                                         page === 1 ||
                                         page === totalPages ||

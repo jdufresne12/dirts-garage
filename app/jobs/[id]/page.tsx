@@ -1,40 +1,33 @@
 'use client'
 import React, { useEffect, useState } from 'react';
 import { ArrowLeft } from 'lucide-react';
+import Loading from '@/app/components/Loading';
 
-import VehicleDetails from '@/app/components/jobs/VehicleDetails';
+import VehicleInfo from '@/app/components/jobs/VehicalInfoCard';
 import CustomerInfo from '@/app/components/jobs/CustomerInfoCard';
 import CostSummary from '@/app/components/jobs/CostSummary';
 import JobNotes from '@/app/components/jobs/JobNotes';
 import JobSteps from '@/app/components/jobs/JobSteps';
 import PartsAndMaterials from '@/app/components/jobs/PartsAndMaterials';
 import PhotoDocumentation from '@/app/components/jobs/PhotoDocumentation';
+import JobDetailsCard from '@/app/components/jobs/JobDetailsCard';
 import Link from 'next/link';
+import mockData from '@/app/data/mock-data';
 
-const mockJobData = {
+const mockJobData: Job = {
     id: "2025-0156",
+    customerId: "CUST001",
+    vehicleId: "1",
     title: "LS3 Engine Rebuild",
-    customer: {
-        name: "Mike Johnson",
-        phone: "(555) 123-4567",
-        email: "mike.johnson@email.com",
-        address: "123 Main St, City, ST 12345",
-        isVIP: true,
-        totalSpent: 15840
-    },
-    vehicle: {
-        year: "2018",
-        make: "Chevrolet",
-        model: "Camaro SS",
-        vin: "1G1FE1R7XJ0123456",
-        mileage: "45,200",
-        color: "Summit White",
-        engine: "6.2L LS3 V8",
-        transmission: "6-Speed Manual"
-    },
-    startDate: "June 20, 2025",
-    estimatedCompletion: "July 5, 2025",
-    status: "In Progress"
+    description: "Complete engine rebuild including bore, hone, and performance upgrades. Customer wants forged internals for future power goals.",
+    status: "In Progress",
+    priority: "High",
+    estimatedStartDate: "2025-06-20",
+    startDate: "2025-06-20",
+    estimatedCompletion: "2025-07-05",
+    estimatedCost: 3500.00,
+    actualCost: 0,
+    invoiced: false,
 };
 
 const mockJobSteps: JobStep[] = [
@@ -78,11 +71,11 @@ const mockJobSteps: JobStep[] = [
 ];
 
 const mockParts: Part[] = [
-    { id: "1", jobId: "1", name: "Forged Pistons (.030 over)", partNumber: "Summit Racing SUM-2618-030", quantity: 8, price: 459.99, status: "received" },
-    { id: "1", jobId: "1", name: "Connecting Rods", partNumber: "Eagle CRS6200A33D", quantity: 8, price: 389.99, status: "received" },
-    { id: "1", jobId: "1", name: "ARP Head Studs", partNumber: "ARP 234-4316", quantity: 1, price: 189.99, status: "ordered" },
-    { id: "1", jobId: "1", name: "Engine Gasket Set", partNumber: "Fel-Pro HS26332PT", quantity: 1, price: 129.99, status: "received" },
-    { id: "1", jobId: "1", name: "Performance Camshaft", partNumber: "Comp Cams 12-600-4", quantity: 1, price: 279.99, status: "needed" }
+    { id: "1", jobId: "2025-0156", name: "Forged Pistons (.030 over)", partNumber: "Summit Racing SUM-2618-030", quantity: 8, price: 459.99, status: "received" },
+    { id: "2", jobId: "2025-0156", name: "Connecting Rods", partNumber: "Eagle CRS6200A33D", quantity: 8, price: 389.99, status: "received" },
+    { id: "3", jobId: "2025-0156", name: "ARP Head Studs", partNumber: "ARP 234-4316", quantity: 1, price: 189.99, status: "ordered" },
+    { id: "4", jobId: "2025-0156", name: "Engine Gasket Set", partNumber: "Fel-Pro HS26332PT", quantity: 1, price: 129.99, status: "received" },
+    { id: "5", jobId: "2025-0156", name: "Performance Camshaft", partNumber: "Comp Cams 12-600-4", quantity: 1, price: 279.99, status: "needed" }
 ];
 
 const mockNotes: Note[] = [
@@ -105,100 +98,105 @@ const mockNotes: Note[] = [
 
 // Main Component
 const JobDetailsPage = () => {
-    const [jobData, setJobData] = useState(mockJobData);
-    const [jobSteps, setJobSteps] = useState<JobStep[]>(mockJobSteps);
-    const [parts, setParts] = useState<Part[]>(mockParts);
-    const [notes, setNotes] = useState<Note[]>(mockNotes);
-    const [costSummary, setCostSummary] = useState<CostSummary>()
+    const [isLoading, setIsLoading] = useState(true);
+    const [jobData, setJobData] = useState<Job>();
+    const [jobSteps, setJobSteps] = useState<JobStep[]>();
+    const [parts, setParts] = useState<Part[]>();
+    const [notes, setNotes] = useState<Note[]>([]);
+
+    const [customer, setCustomer] = useState<Customer>();
+    const [vehicle, setVehicle] = useState<Vehicle | undefined>();
 
     useEffect(() => {
         // Fetch job data, steps, parts, notes from API
         setJobData(mockJobData);
+        setCustomer(mockData.customers[0]);
+        setVehicle(mockData.vehicles[0]);
         setJobSteps(mockJobSteps);
         setParts(mockParts);
         setNotes(mockNotes);
-        setCostSummary(calculateCostSummary())
+
+        setIsLoading(false);
     }, [])
 
     const calculateCostSummary = (): CostSummary => {
         return {
-            partsAndMaterials: parts.reduce((sum, part) => sum + (part.price * part.quantity), 0),
-            labor: jobSteps.reduce((sum, step) => sum + (step.actualHours || 0) * 125, 0),
-            hours: jobSteps.reduce((sum, step) => sum + (step.actualHours || 0), 0),
+            partsAndMaterials: parts ? parts.reduce((sum, part) => sum + (part.price * part.quantity), 0) : 0,
+            labor: jobSteps ? jobSteps.reduce((sum, step) => sum + (step.actualHours || 0) * 125, 0) : 0,
+            hours: jobSteps ? jobSteps.reduce((sum, step) => sum + (step.actualHours || 0), 0) : 0,
         };
     };
 
-    const getStatusBadge = (status: string) => {
-        const baseClasses = "px-2 py-1 rounded-full text-xs font-medium";
-        switch (status) {
-            case "In Progress":
-                return `${baseClasses} bg-blue-100 text-blue-800`;
-            case "Waiting":
-                return `${baseClasses} bg-yellow-100 text-yellow-800`;
-            case "On Hold":
-                return `${baseClasses} bg-orange-100 text-orange-800`;
-            case "Payment":
-                return `${baseClasses} bg-red-100 text-red-800`;
-            case "Completed":
-                return `${baseClasses} bg-red-100 text-green-800`;
-            default:
-                return `${baseClasses} bg-gray-100 text-gray-600`;
-        }
+    const handleJobUpdate = (updatedFields: Partial<Job>) => {
+        setJobData(prev => prev ? { ...prev, ...updatedFields } : prev);
+        // Here you would typically make an API call to update the job
+        // await updateJob(jobData?.id ?? '', updatedFields);
     };
+
+    const handleNewCustomer = (newCustomer: Customer) => {
+        if (newCustomer.id === customer?.id) return;
+        setCustomer(newCustomer);
+        setJobData(prev => prev ? { ...prev, customerId: newCustomer.id } : prev);
+        setVehicle(undefined);
+    }
+
+    const handleNewVehicle = (newVehicle: Vehicle) => {
+        if (newVehicle.id === vehicle?.id) return;
+        setVehicle(newVehicle);
+        setJobData(prev => prev ? { ...prev, vehicleId: newVehicle.id } : prev);
+    }
+
+    if (isLoading || !jobData || !jobSteps || !parts) {
+        return (
+            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+                <Loading />
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-gray-50">
-            {/* Header */}
-            <div className="bg-white border-b border-gray-200 pt-6 pb-4 px-4 sm:px-6">
-                <div className="flex items-center space-x-4">
-                    <Link
-                        href="/jobs"
-                        className="flex items-center text-gray-600 hover:text-gray-800"
-                    >
-                        <ArrowLeft className="size-5 hover:scale-110" />
-                    </Link>
-                    <div className="flex-1">
-                        <div className='flex items-center gap-3'>
-                            <h1 className="text-xl sm:text-2xl font-bold text-gray-900">{jobData.title}</h1>
-                            <span className={`${getStatusBadge(jobData.status)}`}>
-                                {jobData.status}
-                            </span>
-                        </div>
-                        <span className="text-sm text-gray-500">Job #{jobData.id}</span>
-                        <div>
-                            <span>{jobData.status === "Waiting" && "Estimated"} Start Data</span>
-                        </div>
-                    </div>
-                </div>
+            <div className="flex items-center pt-5 pl-6">
+                <Link
+                    href="/jobs"
+                    className="flex items-center gap-1 text-gray-600 hover:text-orange-400"
+                >
+                    <ArrowLeft className="size-5 hover:scale-110" />
+                    <span>Back</span>
+                </Link>
+            </div>
+
+            <div className='pt-4 px-4 sm:pl-6 sm:pr-2'>
+                <JobDetailsCard job={jobData} onJobUpdate={handleJobUpdate} />
             </div>
 
             {/* Mobile: Customer and Vehicle cards at top */}
             <div className="md:hidden p-4 space-y-4">
-                <CustomerInfo customer={jobData.customer} />
-                <VehicleDetails vehicle={jobData.vehicle} />
+                <CustomerInfo customer={customer} handleUpdate={handleNewCustomer} />
+                <VehicleInfo vehicle={vehicle} customerId={customer?.id} handleUpdate={handleNewVehicle} />
             </div>
 
             <div className="flex flex-col md:flex-row ">
                 {/* Main Content */}
                 <div className="flex-1 p-4 sm:p-6">
                     <JobSteps jobSteps={jobSteps} setJobSteps={setJobSteps} />
-                    <PartsAndMaterials partsAndMaterials={parts} />
+                    <PartsAndMaterials parts={parts} setParts={setParts} jobId={jobData.id} />
                     <PhotoDocumentation />
                 </div>
 
                 {/* Desktop Sidebar */}
                 <div className="hidden md:block w-80 pt-6 pr-2 space-y-6">
-                    <CustomerInfo customer={jobData.customer} />
-                    <VehicleDetails vehicle={jobData.vehicle} />
-                    {costSummary && <CostSummary costSummary={costSummary} />}
-                    <JobNotes Notes={notes} />
+                    <CustomerInfo customer={customer} handleUpdate={handleNewCustomer} />
+                    <VehicleInfo vehicle={vehicle} customerId={customer?.id} handleUpdate={handleNewVehicle} />
+                    <JobNotes Notes={notes} setNotes={setNotes} />
+                    <CostSummary costSummary={calculateCostSummary()} />
                 </div>
             </div>
 
             {/* Mobile: Cost Summary and Notes at bottom */}
             <div className="md:hidden p-4 space-y-4">
-                {costSummary && <CostSummary costSummary={costSummary} />}
-                <JobNotes Notes={notes} />
+                <JobNotes Notes={notes} setNotes={setNotes} />
+                <CostSummary costSummary={calculateCostSummary()} />
             </div>
         </div>
     );

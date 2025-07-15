@@ -57,11 +57,34 @@ const CustomerDetailsPage = () => {
         setCustomerData(customer);
     };
 
-    const getStatusBadge = (status: Status) => (
-        <span className={`px-2 py-1 rounded text-xs font-medium ${status.color}`}>
-            {status.type}
-        </span>
-    );
+    const getStatusBadge = (status: string) => {
+        const baseClasses = "px-2 py-1 rounded text-xs font-medium";
+        switch (status) {
+            case "In Progress":
+                return `${baseClasses} bg-blue-100 text-blue-800`;
+            case "Waiting":
+                return `${baseClasses} bg-yellow-100 text-yellow-800`;
+            case "On Hold":
+                return `${baseClasses} bg-orange-100 text-orange-800`;
+            case "Payment":
+                return `${baseClasses} bg-red-100 text-red-800`;
+            default:
+                return `${baseClasses} bg-gray-100 text-gray-600`;
+        }
+    };
+
+    const getInvoiceStatusBadge = (status: string) => {
+        const baseClasses = "px-2 py-1 rounded text-xs font-medium";
+        switch (status) {
+            case "Completed":
+                return `${baseClasses} bg-green-100 text-green-800`;
+            case "Awaiting Payment":
+                return `${baseClasses} bg-yellow-100 text-yellow-800`;
+            default:
+                return `${baseClasses} bg-gray-100 text-gray-600`;
+        }
+    };
+
 
     const handleAddVehicle = (vehicle: Vehicle) => {
         console.log("New vehicle Info");
@@ -312,7 +335,9 @@ const CustomerDetailsPage = () => {
                     <div className="space-y-4">
                         <div>
                             <label className="text-sm font-medium text-gray-700 mb-2 block">Status</label>
-                            {getStatusBadge(customerData.status)}
+                            <span className={`px-2 py-1 rounded text-xs font-medium ${getStatusBadge(customerData.status)}`}>
+                                {customerData.status === "In Progress" ? "Active Job" : customerData.status}
+                            </span>
                         </div>
 
                         <div className="grid grid-cols-2 gap-4">
@@ -429,7 +454,9 @@ const CustomerDetailsPage = () => {
                                                             {vehicle ? `${vehicle.year} ${vehicle.make} ${vehicle.model}` : 'Unknown Vehicle'}
                                                         </td>
                                                         <td className="px-6 py-4 whitespace-nowrap">
-                                                            {getStatusBadge(job.status)}
+                                                            <span className={`px-2 py-1 rounded text-xs font-medium ${getStatusBadge(job.status)}`}>
+                                                                {job.status}
+                                                            </span>
                                                         </td>
                                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                                             {job.startDate}
@@ -493,7 +520,9 @@ const CustomerDetailsPage = () => {
                                                         {invoice.date}
                                                     </td>
                                                     <td className="px-6 py-4 whitespace-nowrap">
-                                                        {getStatusBadge(invoice.status)}
+                                                        <span className={`px-2 py-1 rounded text-xs font-medium ${getInvoiceStatusBadge(invoice.status)}`}>
+                                                            {invoice.status}
+                                                        </span>
                                                     </td>
                                                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                                         <button className="text-orange-600 hover:text-orange-900 mr-3">View</button>
