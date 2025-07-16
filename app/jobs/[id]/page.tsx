@@ -20,7 +20,7 @@ const mockJobData: Job = {
     vehicleId: "1",
     title: "LS3 Engine Rebuild",
     description: "Complete engine rebuild including bore, hone, and performance upgrades. Customer wants forged internals for future power goals.",
-    status: "In Progress",
+    status: "in-progress",
     priority: "High",
     estimatedStartDate: "2025-06-20",
     startDate: "2025-06-20",
@@ -71,11 +71,11 @@ const mockJobSteps: JobStep[] = [
 ];
 
 const mockParts: Part[] = [
-    { id: "1", jobId: "2025-0156", name: "Forged Pistons (.030 over)", partNumber: "Summit Racing SUM-2618-030", quantity: 8, price: 459.99, status: "received" },
-    { id: "2", jobId: "2025-0156", name: "Connecting Rods", partNumber: "Eagle CRS6200A33D", quantity: 8, price: 389.99, status: "received" },
-    { id: "3", jobId: "2025-0156", name: "ARP Head Studs", partNumber: "ARP 234-4316", quantity: 1, price: 189.99, status: "ordered" },
-    { id: "4", jobId: "2025-0156", name: "Engine Gasket Set", partNumber: "Fel-Pro HS26332PT", quantity: 1, price: 129.99, status: "received" },
-    { id: "5", jobId: "2025-0156", name: "Performance Camshaft", partNumber: "Comp Cams 12-600-4", quantity: 1, price: 279.99, status: "needed" }
+    { id: "1", jobId: "2025-0156", name: "Forged Pistons (.030 over)", partNumber: "Summit Racing SUM-2618-030", quantity: 8, price: 459.99, status: "received", url: "https://test.com" },
+    { id: "2", jobId: "2025-0156", name: "Connecting Rods", partNumber: "Eagle CRS6200A33D", quantity: 8, price: 389.99, status: "received", url: "https://test.com" },
+    { id: "3", jobId: "2025-0156", name: "ARP Head Studs", partNumber: "ARP 234-4316", quantity: 1, price: 189.99, status: "ordered", url: "https://test.com" },
+    { id: "4", jobId: "2025-0156", name: "Engine Gasket Set", partNumber: "Fel-Pro HS26332PT", quantity: 1, price: 129.99, status: "received", url: "https://test.com" },
+    { id: "5", jobId: "2025-0156", name: "Performance Camshaft", partNumber: "Comp Cams 12-600-4", quantity: 1, price: 279.99, status: "needed", url: "https://test.com" }
 ];
 
 const mockNotes: Note[] = [

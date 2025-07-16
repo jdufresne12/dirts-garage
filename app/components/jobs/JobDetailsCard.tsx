@@ -66,15 +66,15 @@ export default function JobDetailsCard({ job, onJobUpdate }: JobDetailsCardProps
     const getStatusBadge = (status: string) => {
         const baseClasses = "px-3 py-1 rounded-full text-xs font-medium inline-flex items-center gap-1";
         switch (status) {
-            case "In Progress":
+            case "in-progress":
                 return { classes: `${baseClasses} bg-blue-100 text-blue-800`, icon: <Clock className="w-3 h-3" /> };
-            case "Waiting":
+            case "waiting":
                 return { classes: `${baseClasses} bg-yellow-100 text-yellow-800`, icon: <AlertCircle className="w-3 h-3" /> };
-            case "On Hold":
+            case "on-hold":
                 return { classes: `${baseClasses} bg-orange-100 text-orange-800`, icon: <AlertCircle className="w-3 h-3" /> };
-            case "Payment":
+            case "payment":
                 return { classes: `${baseClasses} bg-red-100 text-red-800`, icon: <DollarSign className="w-3 h-3" /> };
-            case "Completed":
+            case "completed":
                 return { classes: `${baseClasses} bg-green-100 text-green-800`, icon: <CheckCircle className="w-3 h-3" /> };
             default:
                 return { classes: `${baseClasses} bg-gray-100 text-gray-600`, icon: <Clock className="w-3 h-3" /> };
@@ -192,11 +192,11 @@ export default function JobDetailsCard({ job, onJobUpdate }: JobDetailsCardProps
                                     onChange={(e) => setEditForm(prev => ({ ...prev, status: e.target.value }))}
                                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                                 >
-                                    <option value="In Progress">In Progress</option>
-                                    <option value="Waiting">Waiting</option>
-                                    <option value="On Hold">On Hold</option>
-                                    <option value="Payment">Payment</option>
-                                    <option value="Completed">Completed</option>
+                                    <option value="in-progress">In Progress</option>
+                                    <option value="waiting">Waiting</option>
+                                    <option value="on-hold">On Hold</option>
+                                    <option value="payment">Payment</option>
+                                    <option value="completed">Completed</option>
                                 </select>
                             </div>
 
@@ -295,10 +295,10 @@ export default function JobDetailsCard({ job, onJobUpdate }: JobDetailsCardProps
                         </div>
                     </div>
 
-                    {(editForm.status === 'Waiting' || editForm.status === 'On Hold') && (
+                    {(editForm.status === 'waiting' || editForm.status === 'on-hold') && (
                         <div className="md:col-span-2 lg:col-span-3">
                             <label className="block text-sm font-medium text-gray-700 mb-1">
-                                {editForm.status === 'Waiting' ? 'Waiting Reason' : 'Hold Reason'}
+                                {editForm.status === 'waiting' ? 'Waiting Reason' : 'Hold Reason'}
                             </label>
                             <input
                                 type="text"
@@ -360,10 +360,10 @@ export default function JobDetailsCard({ job, onJobUpdate }: JobDetailsCardProps
                         </div>
                     </div>
 
-                    {(job.status === 'Waiting' || job.status === 'On Hold') && job.waitingReason && (
+                    {(job.status === 'waiting' || job.status === 'on-hold') && job.waitingReason && (
                         <div className="col-span-2 md:col-span-3 lg:col-span-6 pt-2">
                             <p className="text-xs text-gray-500 mb-1">
-                                {job.status === 'Waiting' ? 'Waiting Reason' : 'Hold Reason'}
+                                {job.status === 'waiting' ? 'Waiting Reason' : 'Hold Reason'}
                             </p>
                             <p className="text-sm text-gray-700 bg-yellow-50 p-2 rounded border-l-4 border-yellow-300">
                                 {job.waitingReason}

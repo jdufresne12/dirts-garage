@@ -12,7 +12,8 @@ const emptyFormData: JobStep = {
     estimatedHours: 0,
     actualHours: 0,
     startDate: '',
-    completedDate: ''
+    completedDate: '',
+    estimatedStartDate: '',
 };
 
 interface AddProgressModalProps {
@@ -46,6 +47,10 @@ export default function AddJobStepModal({ isOpen, onClose, onSave, stepData, onD
             onDelete(stepData.id);
             onClose();
         }
+    };
+
+    function isPending() {
+        return formData.status === 'pending' ? true : false;
     };
 
     if (!isOpen) return null;
@@ -169,12 +174,15 @@ export default function AddJobStepModal({ isOpen, onClose, onSave, stepData, onD
                             <div className='grid grid-cols-2 gap-10 mt-5'>
                                 <div>
                                     <label className="text-sm font-medium text-gray-700">
-                                        {formData.status === "pending" ? "Estimated" : null} Start Date
+                                        {isPending() ? "Estimated" : null} Start Date
                                     </label>
                                     <input
                                         type="datetime-local"
-                                        value={formData.startDate || ''}
-                                        onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
+                                        value={(isPending() ? formData.estimatedStartDate : formData.startDate) || ''}
+                                        onChange={(e) => isPending() ?
+                                            setFormData({ ...formData, estimatedStartDate: e.target.value }) :
+                                            setFormData({ ...formData, startDate: e.target.value })
+                                        }
                                         className={`w-full border border-gray-300 rounded px-3 py-2 ${formData.startDate === "" ? "text-neutral-500" : null}`}
                                     />
                                 </div>

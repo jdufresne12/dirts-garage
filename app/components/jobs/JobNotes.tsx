@@ -65,7 +65,7 @@ export default function JobNotes({ Notes, setNotes }: JobNotesProps) {
                 />
                 <button
                     onClick={handleNewNote}
-                    className="w-full mt-2 bg-orange-500 text-white py-2 rounded hover:bg-orange-600"
+                    className="w-full mt-2 bg-orange-400 text-white py-2 rounded-lg hover:bg-orange-500"
                 >
                     Add Note
                 </button>

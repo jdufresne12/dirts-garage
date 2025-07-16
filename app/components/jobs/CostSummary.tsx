@@ -31,7 +31,7 @@ export default function CostSummary({ costSummary }: CostSummaryProps) {
                 </div>
             </div>
 
-            <button className="w-full mt-4 bg-orange-500 text-white py-2 rounded-lg hover:bg-orange-600">
+            <button className="w-full mt-4 bg-orange-400 text-white py-2 rounded-lg hover:bg-orange-500">
                 Generate Invoice
             </button>
         </div>

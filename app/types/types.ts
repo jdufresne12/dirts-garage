@@ -93,6 +93,7 @@ interface JobStep {
     description: string;
     startDate?: string;
     completedDate?: string;
+    estimatedStartDate?: string;
     order?: number;
     status: string;
     estimatedHours?: number;
