@@ -1,10 +1,9 @@
-// JobsPage.tsx
 'use client';
 import React, { useState, useEffect } from 'react';
-import Link from 'next/link';
 import { Search, Plus } from 'lucide-react';
 import mockData from '../data/mock-data';
 import JobsTable from '../components/jobs/JobsTable';
+import Link from 'next/link';
 
 const JobsPage = () => {
     const [jobs, setJobs] = useState<Job[]>([]);
@@ -62,10 +61,10 @@ const JobsPage = () => {
                     <nav className="-mb-px flex">
                         {[
                             { label: 'All', value: 'all' },
-                            { label: 'In Progress', value: 'inprogress' },
-                            { label: 'Waiting', value: 'waiting' },
-                            { label: 'Completed', value: 'completed' },
-                            { label: 'On Hold', value: 'onHold' },
+                            { label: 'In Progress', value: 'In Progress' },
+                            { label: 'Waiting', value: 'Waiting' },
+                            { label: 'Completed', value: 'Completed' },
+                            { label: 'On Hold', value: 'On Hold' },
                         ].map((tab) => (
                             <button
                                 key={tab.value}
@@ -78,7 +77,7 @@ const JobsPage = () => {
                                 {tab.label} ({
                                     tab.value === 'all'
                                         ? jobs.length
-                                        : jobs.filter((j) => j.status.toLowerCase().replace(' ', '') === tab.value.toLowerCase()).length
+                                        : jobs.filter((j) => j.status.toLowerCase() === tab.value.toLowerCase()).length
                                 })
                             </button>
                         ))}

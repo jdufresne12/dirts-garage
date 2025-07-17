@@ -13,7 +13,7 @@ const emptyFormData: Part = {
     price: 0,
     partNumber: '',
     url: '',
-    status: 'needed'
+    status: 'Needed'
 };
 
 interface AddPartModalProps {
@@ -330,15 +330,15 @@ export default function AddPartModal({ isOpen, partData, onClose, onSave, onDele
                                 </label>
                                 <select
                                     name="status"
-                                    value={formData.status || 'needed'}
+                                    value={formData.status || 'Needed'}
                                     onChange={handleInputChange}
                                     className={`w-full border rounded px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-orange-500 ${errors.status ? 'border-red-500' : 'border-gray-300'
                                         }`}
                                     disabled={isSubmitting}
                                 >
-                                    <option value="needed">Needed</option>
-                                    <option value="ordered">Ordered</option>
-                                    <option value="received">Received</option>
+                                    <option value="Needed">Needed</option>
+                                    <option value="Ordered">Ordered</option>
+                                    <option value="Received">Received</option>
                                 </select>
                                 {errors.status && (
                                     <p className="mt-1 text-sm text-red-600">{errors.status}</p>

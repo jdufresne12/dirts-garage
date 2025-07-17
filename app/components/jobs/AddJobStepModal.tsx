@@ -8,7 +8,7 @@ const emptyFormData: JobStep = {
     id: helpers.generateUniqueID(),
     title: '',
     description: '',
-    status: '',
+    status: 'Pending',
     estimatedHours: 0,
     actualHours: 0,
     startDate: '',
@@ -50,7 +50,7 @@ export default function AddJobStepModal({ isOpen, onClose, onSave, stepData, onD
     };
 
     function isPending() {
-        return formData.status === 'pending' ? true : false;
+        return formData.status === 'Pending' ? true : false;
     };
 
     if (!isOpen) return null;
@@ -128,10 +128,9 @@ export default function AddJobStepModal({ isOpen, onClose, onSave, stepData, onD
                                     onChange={(e) => setFormData({ ...formData, status: e.target.value })}
                                     className={`w-full border border-gray-300 rounded px-3 py-2.5 ${formData.status === "" ? "text-neutral-500" : null}`}
                                 >
-                                    <option value="">- Select Status -</option>
-                                    <option value="pending">Pending</option>
-                                    <option value="in-progress">In Progress</option>
-                                    <option value="completed">Completed</option>
+                                    <option value="Pending">Pending</option>
+                                    <option value="In Progress">In Progress</option>
+                                    <option value="Completed">Completed</option>
                                 </select>
                             </div>
 
@@ -150,7 +149,7 @@ export default function AddJobStepModal({ isOpen, onClose, onSave, stepData, onD
                                         className="w-full border border-gray-300 rounded px-3 py-2"
                                     />
                                 </div>
-                                {formData.status !== "" && formData.status !== "pending" && (
+                                {formData.status !== "" && formData.status !== "Pending" && (
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-1">
                                             Hours

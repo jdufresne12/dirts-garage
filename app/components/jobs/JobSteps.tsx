@@ -19,9 +19,9 @@ export default function JobSteps({ jobSteps, setJobSteps }: JobStepsProps) {
 
     const getStatusColor = (status: string) => {
         switch (status) {
-            case 'completed':
+            case 'Completed':
                 return 'border-green-400';
-            case 'in-progress':
+            case 'In Progress':
                 return 'border-orange-400';
             default:
                 return 'border-gray-300';
@@ -30,9 +30,9 @@ export default function JobSteps({ jobSteps, setJobSteps }: JobStepsProps) {
 
     const getStatusBadge = (status: string) => {
         switch (status) {
-            case 'completed':
+            case 'Completed':
                 return 'px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full';
-            case 'in-progress':
+            case 'In Progress':
                 return 'px-2 py-1 text-xs font-medium bg-orange-100 text-orange-800 rounded-full';
             default:
                 return 'px-2 py-1 text-xs font-medium bg-gray-100 text-gray-800 rounded-full';

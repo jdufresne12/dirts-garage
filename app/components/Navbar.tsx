@@ -37,8 +37,8 @@ export default function Navbar({ isMobile }: NavbarProps) {
         { icon: LayoutDashboard, label: 'Dashboard', href: '/' },
         { icon: Users, label: 'Customers', href: '/customers' },
         { icon: Wrench, label: 'Jobs', href: '/jobs' },
-        { icon: Receipt, label: 'Invoicing', href: '/invoice' },
-        { icon: Calendar, label: 'Schedule', href: '/schedule' },
+        // { icon: Receipt, label: 'Invoicing', href: '/invoices' },
+        // { icon: Calendar, label: 'Schedule', href: '/schedule' },
         { icon: Settings, label: 'Settings', href: '/settings' },
     ];
 

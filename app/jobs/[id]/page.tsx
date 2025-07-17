@@ -20,7 +20,7 @@ const mockJobData: Job = {
     vehicleId: "1",
     title: "LS3 Engine Rebuild",
     description: "Complete engine rebuild including bore, hone, and performance upgrades. Customer wants forged internals for future power goals.",
-    status: "in-progress",
+    status: "In Progress",
     priority: "High",
     estimatedStartDate: "2025-06-20",
     startDate: "2025-06-20",
@@ -36,7 +36,7 @@ const mockJobSteps: JobStep[] = [
         title: "Initial Inspection & Teardown",
         description:
             "Engine removed from vehicle. Initial inspection completed. Block and heads sent for cleaning and inspection.",
-        status: "completed",
+        status: "Completed",
         completedDate: "2025-06-21T14:30",
         estimatedHours: 5,
         actualHours: 5
@@ -46,7 +46,7 @@ const mockJobSteps: JobStep[] = [
         title: "Machine Shop Work",
         description:
             "Block bored .030 over, decked, and honed. Heads reconditioned with new valves and guides.",
-        status: "completed",
+        status: "Completed",
         completedDate: "2025-06-23T16:00",
         estimatedHours: 5,
         actualHours: 5
@@ -56,7 +56,7 @@ const mockJobSteps: JobStep[] = [
         title: "Engine Assembly",
         description:
             "Currently installing pistons and connecting rods. Waiting for torque plates to arrive for final assembly.",
-        status: "in-progress",
+        status: "In Progress",
         startDate: "2025-06-24T08:00",
         estimatedHours: 5
     },
@@ -65,17 +65,17 @@ const mockJobSteps: JobStep[] = [
         title: "Installation & Final Inspection",
         description:
             "Install engine back into vehicle and perform final quality checks.",
-        status: "pending",
+        status: "Pending",
         estimatedHours: 5
     }
 ];
 
 const mockParts: Part[] = [
-    { id: "1", jobId: "2025-0156", name: "Forged Pistons (.030 over)", partNumber: "Summit Racing SUM-2618-030", quantity: 8, price: 459.99, status: "received", url: "https://test.com" },
-    { id: "2", jobId: "2025-0156", name: "Connecting Rods", partNumber: "Eagle CRS6200A33D", quantity: 8, price: 389.99, status: "received", url: "https://test.com" },
-    { id: "3", jobId: "2025-0156", name: "ARP Head Studs", partNumber: "ARP 234-4316", quantity: 1, price: 189.99, status: "ordered", url: "https://test.com" },
-    { id: "4", jobId: "2025-0156", name: "Engine Gasket Set", partNumber: "Fel-Pro HS26332PT", quantity: 1, price: 129.99, status: "received", url: "https://test.com" },
-    { id: "5", jobId: "2025-0156", name: "Performance Camshaft", partNumber: "Comp Cams 12-600-4", quantity: 1, price: 279.99, status: "needed", url: "https://test.com" }
+    { id: "1", jobId: "2025-0156", name: "Forged Pistons (.030 over)", partNumber: "Summit Racing SUM-2618-030", quantity: 8, price: 459.99, status: "Received", url: "https://test.com" },
+    { id: "2", jobId: "2025-0156", name: "Connecting Rods", partNumber: "Eagle CRS6200A33D", quantity: 8, price: 389.99, status: "Received", url: "https://test.com" },
+    { id: "3", jobId: "2025-0156", name: "ARP Head Studs", partNumber: "ARP 234-4316", quantity: 1, price: 189.99, status: "Ordered", url: "https://test.com" },
+    { id: "4", jobId: "2025-0156", name: "Engine Gasket Set", partNumber: "Fel-Pro HS26332PT", quantity: 1, price: 129.99, status: "Received", url: "https://test.com" },
+    { id: "5", jobId: "2025-0156", name: "Performance Camshaft", partNumber: "Comp Cams 12-600-4", quantity: 1, price: 279.99, status: "Needed", url: "https://test.com" }
 ];
 
 const mockNotes: Note[] = [
@@ -156,13 +156,12 @@ const JobDetailsPage = () => {
 
     return (
         <div className="min-h-screen bg-gray-50">
-            <div className="flex items-center pt-5 pl-6">
+            <div className="flex items-center pt-8 sm:pt-5 pl-5 pb-1">
                 <Link
                     href="/jobs"
-                    className="flex items-center gap-1 text-gray-600 hover:text-orange-400"
+                    className="flex justify-center items-center h-8 w-fit px-2 rounded-lg bg-orange-400 gap-1 text-white font-sans hover:text-orange-400"
                 >
-                    <ArrowLeft className="size-5 hover:scale-110" />
-                    <span>Back</span>
+                    <ArrowLeft className="size-5 hover:scale-110" /> back to all jobs
                 </Link>
             </div>
 
@@ -189,14 +188,28 @@ const JobDetailsPage = () => {
                     <CustomerInfo customer={customer} handleUpdate={handleNewCustomer} />
                     <VehicleInfo vehicle={vehicle} customerId={customer?.id} handleUpdate={handleNewVehicle} />
                     <JobNotes Notes={notes} setNotes={setNotes} />
-                    <CostSummary costSummary={calculateCostSummary()} />
+                    <CostSummary
+                        costSummary={calculateCostSummary()}
+                        jobData={jobData}
+                        customer={customer!}
+                        vehicle={vehicle!}
+                        jobSteps={jobSteps}
+                        parts={parts}
+                    />
                 </div>
             </div>
 
             {/* Mobile: Cost Summary and Notes at bottom */}
             <div className="md:hidden p-4 space-y-4">
                 <JobNotes Notes={notes} setNotes={setNotes} />
-                <CostSummary costSummary={calculateCostSummary()} />
+                <CostSummary
+                    costSummary={calculateCostSummary()}
+                    jobData={jobData}
+                    customer={customer!}
+                    vehicle={vehicle!}
+                    jobSteps={jobSteps}
+                    parts={parts}
+                />
             </div>
         </div>
     );

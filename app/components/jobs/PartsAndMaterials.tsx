@@ -17,11 +17,11 @@ export default function parts({ parts, setParts, jobId }: PartsProps) {
     const getPartStatusBadge = (status: string) => {
         const baseClasses = "px-2 py-1 h-8 rounded text-xs font-medium";
         switch (status) {
-            case 'received':
+            case 'Received':
                 return `${baseClasses} bg-green-100 text-green-800`;
-            case 'ordered':
+            case 'Ordered':
                 return `${baseClasses} bg-yellow-100 text-yellow-800`;
-            case 'needed':
+            case 'Needed':
                 return `${baseClasses} bg-red-100 text-red-800`;
             default:
                 return `${baseClasses} bg-gray-100 text-gray-800`;
