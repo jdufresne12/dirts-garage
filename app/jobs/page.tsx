@@ -33,12 +33,10 @@ const JobsPage = () => {
 
     return (
         <div className="min-h-screen bg-gray-50 w-full overflow-x-hidden">
-            <div className="w-full mx-auto p-4 sm:p-6 lg:p-8">
-                <h1 className="pb-4 text-2xl font-bold text-gray-900 lg:text-3xl">Jobs</h1>
-
+            <div className="w-full mx-auto p-4 sm:p-6">
                 {/* Action Buttons */}
                 <div className="flex flex-row w-full items-center my-4 gap-5">
-                    <div className="flex items-center relative border border-gray-300 rounded-lg hover:border-orange-400 focus-within:border-orange-400">
+                    <div className="flex w-7/12 items-center relative border border-gray-300 rounded-lg hover:border-orange-400 focus-within:border-orange-400">
                         <Search className="size-4 mx-2 text-gray-500" />
                         <input
                             type="text"

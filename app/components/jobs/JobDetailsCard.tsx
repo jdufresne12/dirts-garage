@@ -123,20 +123,11 @@ export default function JobDetailsCard({ job, onJobUpdate }: JobDetailsCardProps
             )}
 
             {/* Save/Cancel buttons when editing */}
-            {isEditing && (
-                // <div className="flex items-center gap-2 mb-4">
-                //     <button
-                //         onClick={() => setIsEditing(false)}
-                //         className='flex justify-center items-center text-gray-400 hover:text-gray-500'
-                //     >
-                //         <X className="size-3" />
-                //         <span className='ml-1 text-xs'>cancel</span>
-                //     </button>
-                // </div>
+            {/* {isEditing && (
                 <div className="flex justify-center items-center gap-2 mb-2">
                     <span className='text-2xl font font-medium sm:font-bold'>Edit Job Details</span>
                 </div>
-            )}
+            )} */}
 
             {/* Main content section */}
             <div className="mb-6">
@@ -163,8 +154,8 @@ export default function JobDetailsCard({ job, onJobUpdate }: JobDetailsCardProps
                             />
                         </div>
 
-                        <span className="flex border-b-1 border-gray-300 text-lg font-semibold mb-4">Tracking Info</span>
-                        <div className="grid grid-cols-4 gap-4">
+                        <span className="flex border-b-1 border-gray-300 text-lg font-semibold pt-6 mb-4">Tracking Info</span>
+                        <div className="grid grid-cols-4 gap-4 mb-6">
                             <div className='grid col-span-2 md:col-span-1'>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
                                 <select
@@ -205,7 +196,7 @@ export default function JobDetailsCard({ job, onJobUpdate }: JobDetailsCardProps
 
             {isEditing ? (
                 <>
-                    <div className="flex flex-col lg:flex-row gap-6 pt-4 border-t border-gray-200">
+                    <div className="flex flex-col lg:flex-row gap-6 pt-6 border-gray-200">
                         <div className="flex-1 lg:w-3/4">
                             <span className="flex border-b border-gray-300 text-lg font-semibold mb-4 pb-2">Dates & Deadlines</span>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

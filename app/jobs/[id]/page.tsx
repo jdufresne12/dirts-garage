@@ -165,26 +165,26 @@ const JobDetailsPage = () => {
                 </Link>
             </div>
 
-            <div className='pt-4 px-4 sm:pl-6 sm:pr-2'>
+            <div className='pt-4 px-6'>
                 <JobDetailsCard job={jobData} onJobUpdate={handleJobUpdate} />
             </div>
 
             {/* Mobile: Customer and Vehicle cards at top */}
-            <div className="md:hidden p-4 space-y-4">
+            <div className="md:hidden px-6 space-y-4">
                 <CustomerInfo customer={customer} handleUpdate={handleNewCustomer} />
                 <VehicleInfo vehicle={vehicle} customerId={customer?.id} handleUpdate={handleNewVehicle} />
             </div>
 
             <div className="flex flex-col md:flex-row ">
                 {/* Main Content */}
-                <div className="flex-1 p-4 sm:p-6">
+                <div className="flex-1 p-6 sm:p-6">
                     <JobSteps jobSteps={jobSteps} setJobSteps={setJobSteps} />
                     <PartsAndMaterials parts={parts} setParts={setParts} jobId={jobData.id} />
                     <PhotoDocumentation />
                 </div>
 
                 {/* Desktop Sidebar */}
-                <div className="hidden md:block w-80 pt-6 pr-2 space-y-6">
+                <div className="hidden md:block w-80 pt-6 pr-6 space-y-6">
                     <CustomerInfo customer={customer} handleUpdate={handleNewCustomer} />
                     <VehicleInfo vehicle={vehicle} customerId={customer?.id} handleUpdate={handleNewVehicle} />
                     <JobNotes Notes={notes} setNotes={setNotes} />
@@ -200,8 +200,9 @@ const JobDetailsPage = () => {
             </div>
 
             {/* Mobile: Cost Summary and Notes at bottom */}
-            <div className="md:hidden p-4 space-y-4">
+            <div className="md:hidden px-6 pb-6 space-y-4">
                 <JobNotes Notes={notes} setNotes={setNotes} />
+                <div className='h-5' />
                 <CostSummary
                     costSummary={calculateCostSummary()}
                     jobData={jobData}

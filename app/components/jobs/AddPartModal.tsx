@@ -175,7 +175,7 @@ export default function AddPartModal({ isOpen, partData, onClose, onSave, onDele
     return (
         <Modal isOpen={isOpen} onClose={onClose}>
             {/* Header */}
-            <div className="flex items-center justify-between p-6 border-b border-gray-200">
+            <div className="flex w-screen max-w-full items-center justify-between p-6 border-b border-gray-200">
                 <h3 className="text-lg font-semibold">{partData ? "Edit" : "Add"} Part</h3>
                 {partData && !showDeleteConfirm ? (
                     <button

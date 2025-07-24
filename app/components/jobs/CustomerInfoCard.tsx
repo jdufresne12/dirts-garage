@@ -69,7 +69,7 @@ export default function CustomerInfo({ customer, handleUpdate }: CustomerInfoPro
                         onClick={() => setShowAddCustomerModal(true)}
                         className='flex items-center justify-center '
                     >
-                        <span className='text-sm font-bold text-orange-400 hover:text-color-800 hover:scale[120]'>Add Customer</span>
+                        <span className='text-sm font-bold text-orange-400 hover:text-color-800 hover:scale[120]'>Add New Customer</span>
                     </button>
                 </div>
 

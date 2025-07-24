@@ -67,12 +67,12 @@ export default function VehicleInfo({ vehicle, handleUpdate, customerId }: vehic
                     </select>
                 }
                 <div className='flex flex-row justify-center items-center mt-4 gap-4'>
-                    <p className='text-stone-300 font-bold text-sm '>or</p>
+                    <p className='text-stone-300 text-sm '>or</p>
                     <button
                         onClick={() => setShowAddVehicleModal(true)}
-                        className='flex items-center justify-center text-orange-400 hover:text-color-800 hover:scale[110]'
+                        className='flex items-center justify-center '
                     >
-                        Create Customer
+                        <span className='text-sm font-bold text-orange-400 hover:text-color-800 hover:scale[120]'>Add New vehicle</span>
                     </button>
                 </div>
 

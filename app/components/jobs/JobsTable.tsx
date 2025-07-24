@@ -104,6 +104,8 @@ const JobsTable: React.FC<JobsTableProps> = ({
                         <tr>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Customer & Vehicle</th>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Work Order</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Priority</th>
                             {activeTab === 'Waiting' && (
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Est. Start</th>
                             )}
@@ -114,26 +116,34 @@ const JobsTable: React.FC<JobsTableProps> = ({
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Est. Completion</th>
                             )}
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Cost</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Priority</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
                         </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
                         {currentJobs.map((job) => (
                             <tr key={job.id} className="hover:bg-gray-50" onClick={() => router.push(`/jobs/${job.id}`)}>
                                 <td className="px-6 py-4">
-                                    {job.customerId
-                                        ?
+                                    {job.customerId ? (
                                         <div>
                                             <div className="text-sm font-medium text-gray-900">{getCustomerName(job.customerId)}</div>
-                                            {job.vehicleId && <div className="text-sm text-gray-500">{getVehicleInfo(job.vehicleId)}</div>}
+                                            {job.vehicleId && (
+                                                <div className="hidden md:block text-xs text-gray-500">{getVehicleInfo(job.vehicleId)}</div>
+                                            )}
                                         </div>
-                                        : <span className="text-sm font-medium text-gray-900">N/A</span>
-                                    }
+                                    ) : (
+                                        <span className="text-sm font-medium text-gray-900">N/A</span>
+                                    )}
                                 </td>
                                 <td className="px-6 py-4">
                                     <div className="text-sm text-gray-900">{job.title}</div>
-                                    {job.latestUpdate && <div className="text-xs text-gray-500 mt-1">{job.latestUpdate}</div>}
+                                    {job.latestUpdate && (
+                                        <div className="hidden md:block text-xs text-gray-500 mt-1">{job.latestUpdate}</div>
+                                    )}
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap">
+                                    <span className={getStatusBadge(job.status)}>{job.status}</span>
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap">
+                                    <span className={getPriorityBadge(job.priority)}>{job.priority}</span>
                                 </td>
                                 {activeTab === 'Waiting' && (
                                     <td className="px-6 py-4">
@@ -159,12 +169,6 @@ const JobsTable: React.FC<JobsTableProps> = ({
                                             : `${formatCurrency(job.actualCost)} / ${formatCurrency(job.estimatedCost)}`
                                         }
                                     </div>
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap">
-                                    <span className={getPriorityBadge(job.priority)}>{job.priority}</span>
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap">
-                                    <span className={getStatusBadge(job.status)}>{job.status}</span>
                                 </td>
                             </tr>
                         ))}
@@ -203,9 +207,7 @@ const JobsTable: React.FC<JobsTableProps> = ({
                                 Showing{' '}
                                 <span className="font-medium">{startIndex + 1}</span>
                                 {' '}to{' '}
-                                <span className="font-medium">
-                                    {Math.min(endIndex, filteredJobs.length)}
-                                </span>
+                                <span className="font-medium">{Math.min(endIndex, filteredJobs.length)}</span>
                                 {' '}of{' '}
                                 <span className="font-medium">{filteredJobs.length}</span>
                                 {' '}results
@@ -276,6 +278,7 @@ const JobsTable: React.FC<JobsTableProps> = ({
             )}
         </div>
     );
+
 };
 
 export default JobsTable;

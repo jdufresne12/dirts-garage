@@ -141,7 +141,7 @@ export default function AddCustomerModal({ isOpen, onClose, onSubmit }: AddCusto
     return (
         <Modal isOpen={isOpen} onClose={onClose}>
             {/* Header */}
-            <div className="flex items-center justify-between p-6 border-b border-gray-200">
+            <div className="flex w-screen max-w-full items-center justify-between p-6 border-b border-gray-200">
                 <div className="flex items-center">
                     <User className="h-6 w-6 text-orange-500 mr-3" />
                     <h3 className="text-xl font-semibold text-gray-900">

@@ -135,7 +135,7 @@ export default function NewJob() {
 
     return (
         <div className="min-h-screen bg-gray-50 py-8">
-            <div className="max-w-4xl mx-auto sm:mt-20">
+            <div className="max-w-4xl mx-auto sm:mt-5">
                 <div className='flex flex-col justify-center items-center'>
                     <h1 className="text-3xl font-bold text-orange-500 mb-8">Create New Job</h1>
 
@@ -145,23 +145,26 @@ export default function NewJob() {
                             <div className={`size-8 rounded-full flex items-center justify-center text-white font-medium ${currentCard === 'job' ? 'bg-orange-500' : 'bg-green-500'}`}>
                                 1
                             </div>
-                            <span className="ml-2 font-medium truncate pt-3 sm:pt-0">Job Details</span>
+                            <span className="ml-2 text-xs font-medium truncate pt-3 sm:text-sm sm:pt-0">Job Details</span>
                         </div>
-                        <div className="w-16 h-0.5 bg-gray-300 mx-4"></div>
-                        <div className={`flex flex-col items-center sm:flex-row ${currentCard === 'customer-vehicle' ? 'text-orange-500' : 'text-gray-400'}`}>
+                        <div className="w-20 h-0.5 bg-gray-300 mx-4 -mt-6 sm:mt-0"></div>
+                        <div className={`flex flex-col items-center -mb-3.5 sm:flex-row sm:mb-0 ${currentCard === 'customer-vehicle' ? 'text-orange-500' : 'text-gray-400'}`}>
                             <div className={`size-8 rounded-full flex items-center justify-center text-white font-medium ${currentCard === 'customer-vehicle' ? 'bg-orange-500' : 'bg-gray-400'}`}>
                                 2
                             </div>
-                            <span className="ml-2 font-medium truncate pt-3 sm:pt-0">Customer & Vehicle</span>
+                            <span className="ml-2 text-xs font-medium pt-3 text-center leading-tight sm:text-sm sm:pt-0 sm:text-left">
+                                Customer &<br />Vehicle
+                            </span>
                         </div>
+
                     </div>
                 </div>
 
                 {/* Card container with sliding animation */}
                 <div className="flex justify-center relative overflow-hidden">
-                    <div className={`flex transition-transform duration-500 ease-in-out ${currentCard === 'customer-vehicle' ? '-translate-x-full' : 'translate-x-0'}`}>
+                    <div className={`mx-5 flex transition-transform duration-500 ease-in-out ${currentCard === 'customer-vehicle' ? '-translate-x-full' : 'translate-x-0'}`}>
                         {/* Job Details form */}
-                        <div className="w-full flex-shrink-0 px-4">
+                        <div className="w-full flex-shrink-0 px-4 mx-4">
                             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
                                 <div className="space-y-6">
                                     {/* Basic Details  */}

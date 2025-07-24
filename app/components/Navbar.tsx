@@ -14,9 +14,11 @@ import {
     ChevronLeft,
     ChevronRight,
     X,
+    LogOut,
     Menu
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import SignOutModal from './SignOutModal';
 
 interface NavbarProps {
     isMobile: boolean;
@@ -28,10 +30,12 @@ interface MenuItem {
 }
 
 export default function Navbar({ isMobile }: NavbarProps) {
-    const { user } = useAuth();
+    const { user, logout } = useAuth();
+    const pathname = `/${usePathname().split('/')[1]}`;
+
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [isCollapsed, setIsCollapsed] = useState(false);
-    const pathname = `/${usePathname().split('/')[1]}`;
+    const [showSignOutModal, setShowSignoutModal] = useState(false);
 
     const menuItems: MenuItem[] = [
         { icon: LayoutDashboard, label: 'Dashboard', href: '/' },
@@ -39,15 +43,9 @@ export default function Navbar({ isMobile }: NavbarProps) {
         { icon: Wrench, label: 'Jobs', href: '/jobs' },
         // { icon: Receipt, label: 'Invoicing', href: '/invoices' },
         // { icon: Calendar, label: 'Schedule', href: '/schedule' },
-        { icon: Settings, label: 'Settings', href: '/settings' },
+        // { icon: Settings, label: 'Settings', href: '/settings' },
     ];
 
-    // Close mobile menu when clicking a link
-    const handleLinkClick = () => {
-        if (isMobile) {
-            setMobileMenuOpen(false);
-        }
-    };
 
     if (isMobile) {
         return (
@@ -94,7 +92,7 @@ export default function Navbar({ isMobile }: NavbarProps) {
                                     <li key={item.label}>
                                         <Link
                                             href={item.href}
-                                            onClick={handleLinkClick}
+                                            onClick={() => setMobileMenuOpen(false)}
                                             className={`w-full flex items-center space-x-3 px-3 py-3 rounded-lg transition-all duration-200 ${isActive
                                                 ? 'bg-orange-500 text-white shadow-lg'
                                                 : 'text-slate-300 hover:bg-slate-700 hover:text-white'
@@ -118,11 +116,13 @@ export default function Navbar({ isMobile }: NavbarProps) {
                         </div>
                     </div>
                 </div>
+
+                <SignOutModal isOpen={showSignOutModal} onClose={() => setShowSignoutModal(false)} />
             </>
         );
     }
 
-    // Desktop Sidebar - Fixed height, no scrolling, but not position fixed
+    // Desktop Sidebar
     return (
         <div className={`
             flex-shrink-0 h-screen flex flex-col bg-slate-800 text-white 
@@ -191,6 +191,24 @@ export default function Navbar({ isMobile }: NavbarProps) {
                             </li>
                         );
                     })}
+                    <li key={'Sign Out'} className="relative group">
+                        <button
+                            onClick={() => setShowSignoutModal(true)}
+                            className='w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg transition-all duration-200 text-slate-300 hover:bg-slate-700 hover:text-white'
+                        >
+                            <LogOut className='size-5 flex-shrink-0 text-slate-400 group-hover:text-white' />
+                            {!isCollapsed && (
+                                <span className="text-sm lg:text-lg font-medium truncate">Sign Out</span>
+                            )}
+                        </button>
+
+                        {/* Tooltip for collapsed state */}
+                        {isCollapsed && (
+                            <div className="absolute left-full ml-2 top-1/2 transform -translate-y-1/2 bg-slate-900 text-white px-2 py-1 rounded shadow-lg opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity z-50 whitespace-nowrap">
+                                Sign Out
+                            </div>
+                        )}
+                    </li>
                 </ul>
             </nav>
 
@@ -205,6 +223,8 @@ export default function Navbar({ isMobile }: NavbarProps) {
                     </div>
                 )}
             </div>
+
+            <SignOutModal isOpen={showSignOutModal} onClose={() => setShowSignoutModal(false)} />
         </div>
     );
 }
