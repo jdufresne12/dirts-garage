@@ -58,7 +58,7 @@ export default function CustomerInfo({ customer, handleUpdate }: CustomerInfoPro
                     <option value="">Choose a customer...</option>
                     {mockCustomers.map((customer) => (
                         <option key={customer.id} value={customer.id}>
-                            {customer.firstName} {customer.lastName}
+                            {customer.first_name} {customer.last_name}
                         </option>
                     ))}
                 </select>
@@ -85,7 +85,7 @@ export default function CustomerInfo({ customer, handleUpdate }: CustomerInfoPro
     return (
         <div className="bg-white rounded-lg border border-gray-200 p-4">
             <div className="flex items-center justify-between mb-4">
-                <h3 className="font-semibold">{customer.firstName} {customer.lastName}</h3>
+                <h3 className="font-semibold">{customer.first_name} {customer.last_name}</h3>
                 <button
                     onClick={() => setIsEditing(true)}
                     className="text-gray-400 hover:text-gray-600"

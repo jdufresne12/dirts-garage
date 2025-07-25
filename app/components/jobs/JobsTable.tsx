@@ -31,7 +31,7 @@ const JobsTable: React.FC<JobsTableProps> = ({
     const getCustomerName = (customerId: string | null): string => {
         if (!customerId) return 'Unknown Customer';
         const customer = customers.find(c => c.id === customerId);
-        return customer ? `${customer.firstName} ${customer.lastName}` : 'Unknown Customer';
+        return customer ? `${customer.first_name} ${customer.last_name}` : 'Unknown Customer';
     };
 
     const getVehicleInfo = (vehicleId: string | null): string => {

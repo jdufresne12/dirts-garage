@@ -13,11 +13,14 @@ interface AddCustomerModalProps {
 export default function AddCustomerModal({ isOpen, onClose, onSubmit }: AddCustomerModalProps) {
     const [formData, setFormData] = useState<Customer>({
         id: helpers.generateUniqueID(),
-        firstName: "",
-        lastName: "",
+        first_name: "",
+        last_name: "",
         email: "",
         phone: "",
         address: "",
+        city: "",
+        state: "",
+        zipcode: "",
         notes: "",
         status: 'None'
     });
@@ -30,11 +33,14 @@ export default function AddCustomerModal({ isOpen, onClose, onSubmit }: AddCusto
         if (!isOpen) {
             setFormData({
                 id: helpers.generateUniqueID(),
-                firstName: "",
-                lastName: "",
+                first_name: "",
+                last_name: "",
                 email: "",
                 phone: "",
                 address: "",
+                city: "",
+                state: "",
+                zipcode: "",
                 notes: "",
                 status: 'None'
             });
@@ -66,12 +72,12 @@ export default function AddCustomerModal({ isOpen, onClose, onSubmit }: AddCusto
     const validateForm = (): boolean => {
         const newErrors: Partial<Customer> = {};
 
-        if (!formData.firstName.trim()) {
-            newErrors.firstName = "First name is required";
+        if (!formData.first_name.trim()) {
+            newErrors.first_name = "First name is required";
         }
 
-        if (!formData.lastName.trim()) {
-            newErrors.lastName = "Last name is required";
+        if (!formData.last_name.trim()) {
+            newErrors.last_name = "Last name is required";
         }
 
         if (!formData.email.trim()) {
@@ -98,8 +104,21 @@ export default function AddCustomerModal({ isOpen, onClose, onSubmit }: AddCusto
         setIsSubmitting(true);
 
         try {
-            // Simulate API call - remove once apis created
-            await new Promise(resolve => setTimeout(resolve, 1000));
+            const response = await fetch('/api/customers', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData),
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to create customer');
+            }
+
+            const result = await response.text();
+
+            console.log("Result: ", result);
 
             if (onSubmit) {
                 onSubmit(formData);
@@ -113,7 +132,7 @@ export default function AddCustomerModal({ isOpen, onClose, onSubmit }: AddCusto
         }
     };
 
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
 
         let formattedValue = value;
@@ -168,17 +187,17 @@ export default function AddCustomerModal({ isOpen, onClose, onSubmit }: AddCusto
                             </label>
                             <input
                                 type="text"
-                                id="firstName"
-                                name="firstName"
-                                value={formData.firstName}
+                                id="first_name"
+                                name="first_name"
+                                value={formData.first_name}
                                 onChange={handleInputChange}
-                                className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 ${errors.firstName ? 'border-red-500' : 'border-gray-300'
+                                className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 ${errors.first_name ? 'border-red-500' : 'border-gray-300'
                                     }`}
                                 placeholder="First Name"
                                 disabled={isSubmitting}
                             />
-                            {errors.firstName && (
-                                <p className="mt-1 text-sm text-red-600">{errors.firstName}</p>
+                            {errors.first_name && (
+                                <p className="mt-1 text-sm text-red-600">{errors.first_name}</p>
                             )}
                         </div>
 
@@ -189,17 +208,17 @@ export default function AddCustomerModal({ isOpen, onClose, onSubmit }: AddCusto
                             </label>
                             <input
                                 type="text"
-                                id="lastName"
-                                name="lastName"
-                                value={formData.lastName}
+                                id="last_name"
+                                name="last_name"
+                                value={formData.last_name}
                                 onChange={handleInputChange}
-                                className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 ${errors.lastName ? 'border-red-500' : 'border-gray-300'
+                                className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 ${errors.last_name ? 'border-red-500' : 'border-gray-300'
                                     }`}
                                 placeholder="Last Name"
                                 disabled={isSubmitting}
                             />
-                            {errors.lastName && (
-                                <p className="mt-1 text-sm text-red-600">{errors.lastName}</p>
+                            {errors.last_name && (
+                                <p className="mt-1 text-sm text-red-600">{errors.last_name}</p>
                             )}
                         </div>
                     </div>
@@ -248,22 +267,61 @@ export default function AddCustomerModal({ isOpen, onClose, onSubmit }: AddCusto
                         )}
                     </div>
 
-                    {/* Address Field */}
+                    {/* Address Fields */}
                     <div>
                         <label htmlFor="address" className="block text-sm font-medium text-gray-700 mb-2">
                             <MapPin className="inline h-4 w-4 mr-1" />
                             Address
                         </label>
-                        <input
-                            type="text"
-                            id="address"
-                            name="address"
-                            value={formData.address}
-                            onChange={handleInputChange}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
-                            placeholder="123 Main St, City, State 12345"
-                            disabled={isSubmitting}
-                        />
+                        <div className="space-y-2">
+                            <textarea
+                                id="address"
+                                name="address"
+                                value={formData.address}
+                                onChange={handleInputChange}
+                                placeholder="Street Address"
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                                rows={2}
+                                disabled={isSubmitting}
+                            />
+                            <div className="grid grid-cols-3 gap-2">
+                                <input
+                                    type="text"
+                                    id="city"
+                                    name="city"
+                                    value={formData.city}
+                                    onChange={handleInputChange}
+                                    placeholder="City"
+                                    className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                                    disabled={isSubmitting}
+                                />
+                                <select
+                                    id="state"
+                                    name="state"
+                                    value={formData.state}
+                                    onChange={handleInputChange}
+                                    className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                                    disabled={isSubmitting}
+                                >
+                                    <option value="">Select State</option>
+                                    {helpers.US_STATES.map((state) => (
+                                        <option key={state.abbreviation} value={state.abbreviation}>
+                                            {state.name}
+                                        </option>
+                                    ))}
+                                </select>
+                                <input
+                                    type="text"
+                                    id="zipcode"
+                                    name="zipcode"
+                                    value={formData.zipcode}
+                                    onChange={handleInputChange}
+                                    placeholder="ZIP Code"
+                                    className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                                    disabled={isSubmitting}
+                                />
+                            </div>
+                        </div>
                     </div>
 
                     {/* Notes Field */}
@@ -306,4 +364,3 @@ export default function AddCustomerModal({ isOpen, onClose, onSubmit }: AddCusto
         </Modal>
     );
 }
-

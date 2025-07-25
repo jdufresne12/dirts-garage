@@ -368,8 +368,8 @@ export const mockInvoices: Invoice[] = [
 export const mockCustomers: Customer[] = [
     {
         id: "CUST001",
-        firstName: "Mike",
-        lastName: "Johnson",
+        first_name: "Mike",
+        last_name: "Johnson",
         phone: "(555) 123-4567",
         email: "mike.johnson@email.com",
         address: "123 Main St",
@@ -388,8 +388,8 @@ export const mockCustomers: Customer[] = [
     },
     {
         id: "CUST002",
-        firstName: "Sarah",
-        lastName: "Davis",
+        first_name: "Sarah",
+        last_name: "Davis",
         phone: "(555) 987-6543",
         email: "sarah.davis@email.com",
         address: "456 Oak Avenue",
@@ -408,8 +408,8 @@ export const mockCustomers: Customer[] = [
     },
     {
         id: "CUST003",
-        firstName: "Tom",
-        lastName: "Wilson",
+        first_name: "Tom",
+        last_name: "Wilson",
         phone: "(555) 456-7890",
         email: "tom.wilson@email.com",
         address: "789 Pine Street",
@@ -428,8 +428,8 @@ export const mockCustomers: Customer[] = [
     },
     {
         id: "CUST004",
-        firstName: "Alex",
-        lastName: "Martinez",
+        first_name: "Alex",
+        last_name: "Martinez",
         phone: "(555) 321-6547",
         email: "alex.martinez@email.com",
         address: "321 Elm Drive",
@@ -448,8 +448,8 @@ export const mockCustomers: Customer[] = [
     },
     {
         id: "CUST005",
-        firstName: "Jennifer",
-        lastName: "Lee",
+        first_name: "Jennifer",
+        last_name: "Lee",
         phone: "(555) 654-3210",
         email: "jennifer.lee@email.com",
         address: "654 Maple Lane",
@@ -468,8 +468,8 @@ export const mockCustomers: Customer[] = [
     },
     {
         id: "CUST006",
-        firstName: "Robert",
-        lastName: "Garcia",
+        first_name: "Robert",
+        last_name: "Garcia",
         phone: "(555) 789-0123",
         email: "robert.garcia@email.com",
         address: "987 Cedar Court",
@@ -488,8 +488,8 @@ export const mockCustomers: Customer[] = [
     },
     {
         id: "CUST007",
-        firstName: "Lisa",
-        lastName: "Brown",
+        first_name: "Lisa",
+        last_name: "Brown",
         phone: "(555) 147-2580",
         email: "lisa.brown@email.com",
         address: "147 Birch Boulevard",

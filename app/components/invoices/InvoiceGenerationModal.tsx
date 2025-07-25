@@ -417,7 +417,7 @@ export default function InvoiceGenerationModal({
                 <div>
                     <h3 className="font-semibold text-gray-900 mb-2">Bill To:</h3>
                     <div className="text-gray-700 text-sm md:text-base">
-                        <p className="font-medium">{customer.firstName} {customer.lastName}</p>
+                        <p className="font-medium">{customer.first_name} {customer.last_name}</p>
                         <p>{customer.address}</p>
                         <p>{customer.city}, {customer.state} {customer.zipcode}</p>
                         <p>{customer.phone}</p>
@@ -496,7 +496,7 @@ export default function InvoiceGenerationModal({
                         <div>
                             <h2 className="text-lg md:text-2xl font-bold text-gray-900">Generate Invoice</h2>
                             <p className="text-sm md:text-base text-gray-600">
-                                {jobData.title} - {customer.firstName} {customer.lastName}
+                                {jobData.title} - {customer.first_name} {customer.last_name}
                             </p>
                         </div>
                         <button

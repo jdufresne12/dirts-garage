@@ -11,11 +11,7 @@ import {
     X,
     Plus,
     Wrench,
-    DollarSign,
-    Calendar,
     FileText,
-    TrendingUp,
-    CheckCircle,
     ChevronLeft,
     Mail
 } from 'lucide-react';
@@ -31,30 +27,59 @@ const CustomerDetailsPage = () => {
     const [isEditing, setIsEditing] = useState(false);
     const [showAddVehicle, setShowAddVehicle] = useState(false);
 
-    // Get customer data using the new mock data structure
-    const customer = mockData.getCustomerById(id as string);
-    const [customerData, setCustomerData] = useState<Customer | undefined>(mockData.getCustomerById(id as string));
+    const [initCustomerData, setInitCustomerData] = useState<Customer | undefined>();
+    const [customerData, setCustomerData] = useState<Customer | undefined>();
 
     useEffect(() => {
-        const fetchCustomerData = async () => {
-            const customer = await mockData.getCustomerById(id as string);
-            console.log(`${id}`)
-            setCustomerData(customer);
-        };
+        async function fetchCustomerData(id: string) {
+            const res = await fetch(`/api/customers/${id}`);
+            if (!res.ok) throw new Error('Customer not found');
+            return await res.json();
+        }
 
-        if (id) fetchCustomerData();
+        if (id) {
+            fetchCustomerData(id as string)
+                .then(data => {
+                    setCustomerData(data)
+                    setInitCustomerData(data);
+                    console.log(data)
+                })
+                .catch((err) => console.error(err));
+        }
     }, [id]);
 
-    const handleSave = () => {
+    const handleSave = async () => {
         setIsEditing(false);
-        // Here you would save the data to your backend
-        console.log('Saving customer data:', customerData);
+
+        try {
+            const res = await fetch(`/api/customers/${id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(customerData), // Send only the fields to update
+            });
+
+            if (!res.ok) {
+                throw new Error(`Failed to update customer: ${res.status}`);
+            }
+
+            const updatedCustomer = await res.json();
+            console.log('Customer updated:', updatedCustomer);
+
+            // Optional: Update local state with latest data
+            setCustomerData(updatedCustomer);
+            setInitCustomerData(updatedCustomer)
+
+        } catch (err) {
+            console.error('Error saving customer:', err);
+        }
     };
+
 
     const handleCancel = () => {
         setIsEditing(false);
-        // Reset to original customer data
-        setCustomerData(customer);
+        setCustomerData(initCustomerData);
     };
 
     const getStatusBadge = (status: string) => {
@@ -89,7 +114,7 @@ const CustomerDetailsPage = () => {
     const handleAddVehicle = (vehicle: Vehicle) => {
         console.log("New vehicle Info");
         console.log(vehicle);
-        if (customer?.vehicles?.find(v => v.id === vehicle.id)) {
+        if (customerData?.vehicles?.find(v => v.id === vehicle.id)) {
             setCustomerData(prev => {
                 if (!prev || !prev.vehicles) return prev;
 
@@ -187,10 +212,10 @@ const CustomerDetailsPage = () => {
                                             First Name
                                         </label>
                                         <input
-                                            value={customerData.firstName}
+                                            value={customerData.first_name}
                                             onChange={(e) => setCustomerData({
                                                 ...customerData,
-                                                firstName: e.target.value
+                                                first_name: e.target.value
                                             })}
                                             className="w-full border border-gray-300 rounded-lg px-3 py-2"
                                         />
@@ -200,10 +225,10 @@ const CustomerDetailsPage = () => {
                                             Last Name
                                         </label>
                                         <input
-                                            value={customerData.lastName}
+                                            value={customerData.last_name}
                                             onChange={(e) => setCustomerData({
                                                 ...customerData,
-                                                lastName: e.target.value
+                                                last_name: e.target.value
                                             })}
                                             className="w-full border border-gray-300 rounded-lg px-3 py-2"
                                         />
@@ -215,7 +240,7 @@ const CustomerDetailsPage = () => {
                                         <User className="size-3 mr-2" />
                                         Name
                                     </label>
-                                    <p className="text-gray-900">{customerData.firstName} {customerData.lastName}</p>
+                                    <p className="text-gray-900">{customerData.first_name} {customerData.last_name}</p>
                                 </>
                             )}
                         </div>
@@ -385,7 +410,7 @@ const CustomerDetailsPage = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {customerData.vehicles && customerData.vehicles.length > 0 ? (
                         customerData.vehicles.map(vehicle => (
-                            <VehicleCard key={vehicle.id} vehicle={vehicle} customerId={customer!.id} onUpdate={handleAddVehicle} />
+                            <VehicleCard key={vehicle.id} vehicle={vehicle} customerId={customerData.id} onUpdate={handleAddVehicle} />
                         ))
                     ) : (
                         <div className="col-span-full text-center py-8 text-gray-500">
@@ -548,7 +573,7 @@ const CustomerDetailsPage = () => {
                 isOpen={showAddVehicle}
                 onClose={() => setShowAddVehicle(false)}
                 onSubmit={handleAddVehicle}
-                customerId={customer!.id}
+                customerId={customerData.id}
             />
         </div>
     );

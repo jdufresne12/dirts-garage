@@ -1,5 +1,7 @@
+import { uuidv7 } from "uuidv7";
+
 export const generateUniqueID = (): string => {
-    return "Cust00001"
+    return uuidv7().toLowerCase();
 }
 
 export const checkNoActiveJobs = (customer: Customer) => {

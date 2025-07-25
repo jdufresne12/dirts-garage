@@ -1,5 +1,5 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import {
   Wrench,
@@ -27,9 +27,9 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-gray-50 w-full overflow-x-hidden">
-      <div className="w-full mx-auto mt-5 p-6 lg:p-8">
+      <div className="w-full mx-auto p-6 lg:p-8">
         {/* Analytics Cards */}
-        <div className="grid grid-cols-1 w-full gap-4 mb-6 sm:gap-6 sm:mb-10 sm:grid-cols-2 lg:grid-cols-2">
+        <div className="grid grid-cols-2 w-full gap-4 mb-6 sm:gap-6 sm:mb-10 ">
           <AnalyticsCard
             title="Active Jobs"
             value="12"

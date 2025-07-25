@@ -356,7 +356,7 @@ export default function NewJob() {
                                             <option value="">Select Customer</option>
                                             {customersList.map(customer => (
                                                 <option key={customer.id} value={customer.id}>
-                                                    {customer.firstName} {customer.lastName} - {customer.email}
+                                                    {customer.first_name} {customer.last_name} - {customer.email}
                                                 </option>
                                             ))}
                                         </select>
@@ -365,7 +365,7 @@ export default function NewJob() {
                                     {selectedCustomer && (
                                         <div className="flex justify-between items-start mt-2 p-3 bg-blue-50 rounded-md group">
                                             <p className="text-sm text-gray-700">
-                                                <strong>{selectedCustomer.firstName} {selectedCustomer.lastName}</strong><br />
+                                                <strong>{selectedCustomer.first_name} {selectedCustomer.last_name}</strong><br />
                                                 {selectedCustomer.email}<br />
                                                 {selectedCustomer.phone}
                                             </p>

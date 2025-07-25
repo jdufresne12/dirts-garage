@@ -3,8 +3,8 @@ import helpers from "./helpers"
 export function newCustomer(customer: Customer): Customer {
     return {
         id: customer.id || helpers.generateUniqueID(),
-        firstName: customer.firstName,
-        lastName: customer.lastName,
+        first_name: customer.first_name,
+        last_name: customer.last_name,
         phone: customer.phone,
         email: customer.email,
         address: customer.address || undefined,

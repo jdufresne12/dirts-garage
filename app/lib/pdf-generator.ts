@@ -28,8 +28,8 @@ interface InvoiceLineItem {
 }
 
 interface Customer {
-    firstName: string;
-    lastName: string;
+    first_name: string;
+    last_name: string;
     email: string;
     phone: string;
     address: string;
@@ -166,7 +166,7 @@ export class InvoicePDFGenerator {
         yPosition += 8;
         this.doc.setFontSize(10);
         this.doc.setFont('helvetica', 'normal');
-        this.doc.text(`${customer.firstName} ${customer.lastName}`, leftColumn, yPosition);
+        this.doc.text(`${customer.first_name} ${customer.last_name}`, leftColumn, yPosition);
         yPosition += 5;
         this.doc.text(customer.address, leftColumn, yPosition);
         yPosition += 5;
