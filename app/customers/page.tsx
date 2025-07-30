@@ -111,7 +111,7 @@ export default function CustomersPage() {
         <div className="min-h-screen bg-gray-50 w-full overflow-x-hidden">
             <div className="w-full mx-auto p-4 sm:p-6">
                 {/* Action Buttons */}
-                <div className="flex flex-row w-full items-center my-4 gap-5 hover">
+                <div className="flex flex-row w-full items-center my-4 gap-5 ">
                     <div className="flex w-full sm:w-7/12 items-center relative border border-gray-300 rounded-lg hover:border-orange-400 focus-within:border-orange-400">
                         <div>
                             <Search className="size-4 mx-2 text-gray-500" />
@@ -119,7 +119,7 @@ export default function CustomersPage() {
                         <input
                             type="text"
                             placeholder="Search customers..."
-                            className="w-50 py-1.5 md:w-75 focus:ring-0 focus:outline-none"
+                            className="w-full py-1.5 focus:ring-0 focus:outline-none"
                             onChange={(e: any) => setSearchTerm(e.target.value)}
                         />
                     </div>
@@ -159,7 +159,7 @@ export default function CustomersPage() {
                         </div>
                     </div>
                 ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+                    <div className="grid grid-cols-1 gap-4 sm:mt-10 md:grid-cols-2 lg:grid-cols-3 sm:gap-6">
                         {customers.length > 0
                             ? customers.map((customer) => (
                                 <Link

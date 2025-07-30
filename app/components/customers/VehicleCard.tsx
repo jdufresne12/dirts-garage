@@ -1,16 +1,17 @@
 'use client';
 
-import { Car, Edit3 } from 'lucide-react';
+
 import React, { useState } from 'react';
 import AddVehicleModal from './AddVehicleModal';
+import { Car, Edit3, Trash } from 'lucide-react';
 
 interface VehicleCardProps {
     vehicle: Vehicle;
-    customerId: string;
+    customer_id: string;
     onUpdate: (updatedVehicle: Vehicle) => void;
 }
 
-export default function VehicleCard({ vehicle, customerId, onUpdate }: VehicleCardProps) {
+export default function VehicleCard({ vehicle, customer_id, onUpdate }: VehicleCardProps) {
     const [showEditModal, setShowEditModal] = useState(false);
 
     const handleEditSubmit = (updatedVehicle: Vehicle) => {
@@ -28,18 +29,27 @@ export default function VehicleCard({ vehicle, customerId, onUpdate }: VehicleCa
                             {vehicle.year} {vehicle.make} {vehicle.model}
                         </h4>
                     </div>
-                    <button
-                        onClick={() => setShowEditModal(true)}
-                        className="text-gray-400 hover:text-gray-600"
-                    >
-                        <Edit3 className="w-4 h-4" />
-                    </button>
+                    <div className='space-x-4'>
+                        <button
+                            onClick={() => setShowEditModal(true)}
+                            className="text-gray-400 hover:text-gray-600"
+                        >
+                            <Edit3 className="w-4 h-4" />
+                        </button>
+                        {/* <button
+                            onClick={() => setShowEditModal(true)}
+                            className="text-gray-400 hover:text-red-600"
+                        >
+                            <Trash className="w-4 h-4" />
+                        </button> */}
+                    </div>
                 </div>
                 <div className="grid grid-cols-1 gap-2 text-sm text-gray-600">
-                    <div><span className="font-medium">VIN:</span> {vehicle.vin || 'N/A'}</div>
-                    <div><span className="font-medium">Mileage:</span> {vehicle.mileage?.toLocaleString() || 'N/A'}</div>
+                    <div><span className="font-medium">Engine:</span> {vehicle.engine || 'N/A'}</div>
+                    <div><span className="font-medium">Transmission:</span> {vehicle.transmission || 'N/A'}</div>
+                    <div><span className="font-medium">Mileage:</span> {vehicle.mileage !== 0 ? vehicle.mileage : 'N/A'}</div>
                     <div><span className="font-medium">Color:</span> {vehicle.color || 'N/A'}</div>
-                    <div><span className="font-medium">License:</span> {vehicle.licensePlate || 'N/A'}</div>
+                    <div><span className="font-medium">VIN:</span> {vehicle.vin || 'N/A'}</div>
                 </div>
             </div>
 
@@ -48,8 +58,8 @@ export default function VehicleCard({ vehicle, customerId, onUpdate }: VehicleCa
                 isOpen={showEditModal}
                 onClose={() => setShowEditModal(false)}
                 onSubmit={handleEditSubmit}
-                customerId={customerId}
-                vehicle={{ ...vehicle, customerId }}
+                customer_id={customer_id}
+                vehicle={{ ...vehicle, customer_id }}
             />
         </>
     );

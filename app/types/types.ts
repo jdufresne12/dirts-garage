@@ -11,12 +11,22 @@ interface Customer {
     notes?: string;
     status: string;
     jobs?: Job[] | null;
-    jobCount?: number;
     vehicles?: Vehicle[] | null;
-    vehicleCount?: number;
     invoices?: Invoice[] | null;
-    totalSpent?: number;
-    amountOwed?: number
+};
+
+interface Vehicle {
+    id: string;
+    year: number;
+    make: string;
+    model: string;
+    engine?: string;
+    transmission?: string;
+    vin?: string;
+    license_plate?: string;
+    color?: string;
+    mileage?: number;
+    customer_id: string;
 };
 
 interface Job {
@@ -52,21 +62,6 @@ interface Invoice {
     jobId: string;
     customer: Customer | null;
     job: Job | null;
-};
-
-interface Vehicle {
-    id: string;
-    year: number;
-    make: string;
-    model: string;
-    engine?: string;
-    transmission?: string;
-    vin?: string;
-    licensePlate?: string;
-    color?: string;
-    mileage?: number;
-    customerId: string;
-    jobs?: Job[];
 };
 
 interface Part {

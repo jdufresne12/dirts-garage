@@ -11,16 +11,27 @@ export async function GET() {
     }
 }
 
-// ADD ADDRESSES
 export async function POST(req: Request) {
     try {
         const body = await req.json();
-        const { id, first_name, last_name, phone, email, status } = body;
+        const {
+            id,
+            first_name,
+            last_name,
+            phone,
+            email,
+            address,
+            city,
+            state,
+            zipcode,
+            notes,
+            status
+        } = body;
 
         await pgPool.query(
-            `INSERT INTO customers (id, first_name, last_name, phone, email, status, created_at, updated_at)
-       VALUES ($1, $2, $3, $4, $5, $6, NOW(), NOW())`,
-            [id, first_name, last_name, phone, email, status]
+            `INSERT INTO customers (id, first_name, last_name, phone, email, address, city, state, zipcode, notes, status, created_at, updated_at)
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, NOW(), NOW())`,
+            [id, first_name, last_name, phone, email, address, city, state, zipcode, notes, status]
         );
 
         return new NextResponse('Customer created', { status: 201 });

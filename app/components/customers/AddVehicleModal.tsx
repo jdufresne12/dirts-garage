@@ -8,32 +8,32 @@ interface AddVehicleModalProps {
     isOpen: boolean;
     onClose: () => void;
     onSubmit?: (vehicleData: Vehicle) => void;
-    customerId: string;
-    vehicle?: Vehicle; // <-- For editing
+    customer_id: string;
+    vehicle?: Vehicle;
 }
 
 export default function AddVehicleModal({
     isOpen,
     onClose,
     onSubmit,
-    customerId,
+    customer_id,
     vehicle,
 }: AddVehicleModalProps) {
     const isEditMode = !!vehicle;
 
     const [formData, setFormData] = useState<Vehicle>({
         id: vehicle?.id ?? helpers.generateUniqueID(),
-        customerId: vehicle?.customerId ?? customerId,
+        customer_id: vehicle?.customer_id ?? customer_id,
         year: vehicle?.year ?? new Date().getFullYear(),
         make: vehicle?.make ?? "",
         model: vehicle?.model ?? "",
+        engine: vehicle?.engine ?? "",
+        transmission: vehicle?.transmission ?? "",
         vin: vehicle?.vin ?? "",
-        licensePlate: vehicle?.licensePlate ?? "",
+        license_plate: vehicle?.license_plate ?? "",
         color: vehicle?.color ?? "",
         mileage: vehicle?.mileage ?? 0,
-        jobs: vehicle?.jobs ?? [],
     });
-
     const [errors, setErrors] = useState<Partial<Record<keyof Vehicle, string>>>({});
     const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -41,15 +41,16 @@ export default function AddVehicleModal({
         if (!isOpen) {
             setFormData({
                 id: vehicle?.id ?? helpers.generateUniqueID(),
-                customerId: vehicle?.customerId ?? customerId,
+                customer_id: vehicle?.customer_id ?? customer_id,
                 year: vehicle?.year ?? new Date().getFullYear(),
                 make: vehicle?.make ?? "",
                 model: vehicle?.model ?? "",
+                engine: vehicle?.engine ?? "",
+                transmission: vehicle?.transmission ?? "",
                 vin: vehicle?.vin ?? "",
-                licensePlate: vehicle?.licensePlate ?? "",
+                license_plate: vehicle?.license_plate ?? "",
                 color: vehicle?.color ?? "",
                 mileage: vehicle?.mileage ?? 0,
-                jobs: vehicle?.jobs ?? [],
             });
             setErrors({});
             setIsSubmitting(false);
@@ -79,7 +80,7 @@ export default function AddVehicleModal({
         if (!formData.year) newErrors.year = "Year is required";
         if (!formData.make.trim()) newErrors.make = "Make is required";
         if (!formData.model.trim()) newErrors.model = "Model is required";
-        if (!formData.vin?.trim()) newErrors.vin = "VIN is required";
+        // if (!formData.vin?.trim()) newErrors.vin = "VIN is required";
 
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
@@ -116,8 +117,35 @@ export default function AddVehicleModal({
         setIsSubmitting(true);
 
         try {
-            await new Promise((res) => setTimeout(res, 800));
-            onSubmit?.(formData);
+            let response;
+            console.log(formData)
+
+            if (isEditMode) {
+                response = await fetch(`/api/vehicles/${formData.id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData),
+                });
+            } else {
+                response = await fetch('/api/vehicles', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData),
+                });
+            }
+
+            if (!response.ok) {
+                throw new Error(`Failed to ${isEditMode ? "update" : "create"} vehicle`);
+            }
+
+            if (onSubmit) {
+                onSubmit(formData);
+            }
+
             onClose();
         } catch (err) {
             console.error("Vehicle submission failed", err);
@@ -195,18 +223,40 @@ export default function AddVehicleModal({
                             {errors.model && <p className="text-sm text-red-600">{errors.model}</p>}
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                                VIN *
-                            </label>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">License Plate</label>
                             <input
                                 type="text"
-                                name="vin"
-                                value={formData.vin}
+                                name="license_plate"
+                                value={formData.license_plate}
                                 onChange={handleInputChange}
-                                className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 ${errors.vin ? "border-red-500" : "border-gray-300"}`}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
                                 disabled={isSubmitting}
                             />
-                            {errors.vin && <p className="text-sm text-red-600">{errors.vin}</p>}
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">Engine</label>
+                            <input
+                                type="text"
+                                name="engine"
+                                value={formData.engine}
+                                onChange={handleInputChange}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                                disabled={isSubmitting}
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">Transmission</label>
+                            <input
+                                type="text"
+                                name="transmission"
+                                value={formData.transmission}
+                                onChange={handleInputChange}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                                disabled={isSubmitting}
+                            />
                         </div>
                     </div>
 
@@ -236,15 +286,18 @@ export default function AddVehicleModal({
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">License Plate</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                            VIN
+                        </label>
                         <input
                             type="text"
-                            name="licensePlate"
-                            value={formData.licensePlate}
+                            name="vin"
+                            value={formData.vin}
                             onChange={handleInputChange}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                            className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 ${errors.vin ? "border-red-500" : "border-gray-300"}`}
                             disabled={isSubmitting}
                         />
+                        {errors.vin && <p className="text-sm text-red-600">{errors.vin}</p>}
                     </div>
                 </div>
 
