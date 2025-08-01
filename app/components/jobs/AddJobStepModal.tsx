@@ -9,22 +9,26 @@ const emptyFormData: JobStep = {
     title: '',
     description: '',
     status: 'Pending',
-    estimatedHours: 0,
-    actualHours: 0,
-    startDate: '',
-    completedDate: '',
-    estimatedStartDate: '',
+    estimated_hours: 0,
+    actual_hours: 0,
+    start_date: '',
+    completed_date: '',
+    estimated_start_date: '',
+    job_id: '',
+    order: 0,
 };
 
 interface AddProgressModalProps {
     isOpen: boolean;
+    stepData?: JobStep;
+    job_id: string;
+    numSteps: number;
     onClose: () => void;
     onSave: (jobData: JobStep) => void;
-    stepData?: JobStep;
-    onDelete?: (stepId: string) => void; // NEW: optional delete handler
+    onDelete?: (stepId: string) => void;
 }
 
-export default function AddJobStepModal({ isOpen, onClose, onSave, stepData, onDelete }: AddProgressModalProps) {
+export default function AddJobStepModal({ isOpen, stepData, job_id, numSteps, onClose, onSave, onDelete }: AddProgressModalProps) {
     const [formData, setFormData] = useState<JobStep>(stepData ?? emptyFormData);
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false); // NEW
 
@@ -32,9 +36,14 @@ export default function AddJobStepModal({ isOpen, onClose, onSave, stepData, onD
         if (stepData) {
             setFormData(stepData);
         } else {
-            setFormData({ ...emptyFormData, id: helpers.generateUniqueID() });
+            setFormData({
+                ...emptyFormData,
+                id: helpers.generateUniqueID(),
+                job_id: job_id,
+                order: numSteps
+            });
         }
-        setShowDeleteConfirm(false); // reset when modal opens
+        setShowDeleteConfirm(false);
     }, [stepData, isOpen]);
 
     const handleSave = () => {
@@ -51,6 +60,28 @@ export default function AddJobStepModal({ isOpen, onClose, onSave, stepData, onD
 
     function isPending() {
         return formData.status === 'Pending' ? true : false;
+    };
+
+    const formatDateTimeLocal = (dateString: string | null | undefined): string => {
+        if (!dateString) return '';
+
+        try {
+            const date = new Date(dateString);
+            // Check if the date is valid
+            if (isNaN(date.getTime())) return '';
+
+            // Format to YYYY-MM-DDTHH:MM (without seconds and timezone)
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+
+            return `${year}-${month}-${day}T${hours}:${minutes}`;
+        } catch (error) {
+            console.warn('Error formatting date:', dateString, error);
+            return '';
+        }
     };
 
     if (!isOpen) return null;
@@ -144,8 +175,8 @@ export default function AddJobStepModal({ isOpen, onClose, onSave, stepData, onD
                                         step="0.25"
                                         min="0"
                                         placeholder="0"
-                                        value={formData.estimatedHours || ''}
-                                        onChange={(e) => setFormData({ ...formData, estimatedHours: parseFloat(e.target.value) })}
+                                        value={formData.estimated_hours || ''}
+                                        onChange={(e) => setFormData({ ...formData, estimated_hours: parseFloat(e.target.value) })}
                                         className="w-full border border-gray-300 rounded px-3 py-2"
                                     />
                                 </div>
@@ -159,8 +190,8 @@ export default function AddJobStepModal({ isOpen, onClose, onSave, stepData, onD
                                             step="0.25"
                                             min="0"
                                             placeholder="0"
-                                            value={formData.actualHours || ''}
-                                            onChange={(e) => setFormData({ ...formData, actualHours: parseFloat(e.target.value) })}
+                                            value={formData.actual_hours || ''}
+                                            onChange={(e) => setFormData({ ...formData, actual_hours: parseFloat(e.target.value) })}
                                             className="w-full border border-gray-300 rounded px-3 py-2"
                                         />
                                     </div>
@@ -177,25 +208,25 @@ export default function AddJobStepModal({ isOpen, onClose, onSave, stepData, onD
                                     </label>
                                     <input
                                         type="datetime-local"
-                                        value={(isPending() ? formData.estimatedStartDate : formData.startDate) || ''}
+                                        value={formatDateTimeLocal(isPending() ? formData.estimated_start_date : formData.start_date)}
                                         onChange={(e) => isPending() ?
-                                            setFormData({ ...formData, estimatedStartDate: e.target.value }) :
-                                            setFormData({ ...formData, startDate: e.target.value })
+                                            setFormData({ ...formData, estimated_start_date: e.target.value }) :
+                                            setFormData({ ...formData, start_date: e.target.value })
                                         }
-                                        className={`w-full border border-gray-300 rounded px-3 py-2 ${formData.startDate === "" ? "text-neutral-500" : null}`}
+                                        className={`w-full border border-gray-300 rounded px-3 py-2`}
                                     />
                                 </div>
 
-                                {formData.status === 'completed' && (
+                                {formData.status === 'Completed' && (
                                     <div>
                                         <label className="text-sm font-medium text-gray-700">
                                             Completed Date
                                         </label>
                                         <input
                                             type='datetime-local'
-                                            value={formData.completedDate || ''}
-                                            onChange={((e) => setFormData({ ...formData, completedDate: e.target.value }))}
-                                            className={`w-full border border-gray-300 rounded px-3 py-2 ${formData.completedDate === "" ? "text-neutral-500" : null}`}
+                                            value={formatDateTimeLocal(formData.completed_date)}
+                                            onChange={((e) => setFormData({ ...formData, completed_date: e.target.value }))}
+                                            className={`w-full border border-gray-300 rounded px-3 py-2`}
                                         />
                                     </div>
                                 )}

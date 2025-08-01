@@ -30,7 +30,6 @@ const JobDetailsPage = () => {
     const [vehicle, setVehicle] = useState<Vehicle | undefined>();
 
     useEffect(() => {
-        // Fetch job data, steps, parts, notes from API
         try {
             fetch(`/api/jobs/${id}`)
                 .then(res => res.json())
@@ -38,7 +37,6 @@ const JobDetailsPage = () => {
                     setJobData(data)
                     setCustomer(data.customer)
                     setVehicle(data.vehicle || undefined)
-                    console.log(data)
                 })
                 .catch(error => console.error("Failed gather job data:", error))
         } catch (error) {
@@ -74,7 +72,6 @@ const JobDetailsPage = () => {
                 }
 
                 const updatedJob = await response.json();
-                console.log('Job updated successfully:', updatedJob);
             } catch (error) {
                 console.error("Job detail update failed: ", error);
             }
@@ -83,29 +80,21 @@ const JobDetailsPage = () => {
 
     const handleNewCustomer = async (newCustomer: Customer) => {
         if (newCustomer.id === customer?.id) return;
-
-        console.log('Updating customer to:', newCustomer);
-
-        // Update customer state
         setCustomer(newCustomer);
-
-        // Reset vehicle when customer changes
         setVehicle(undefined);
 
         // Update job data locally
         setJobData(prev => prev ? {
             ...prev,
-            customer_id: newCustomer.id, // Include both for compatibility
-            vehicle_id: null             // Clear vehicle when customer changes
+            customer_id: newCustomer.id,
+            vehicle_id: null
         } : prev);
 
-        // Update job in database
         try {
             await handleJobUpdate({
                 customer_id: newCustomer.id,
                 vehicle_id: null // Clear vehicle_id in database
             });
-            console.log('Customer updated successfully');
         } catch (error) {
             console.error('Failed to update customer:', error);
         }
@@ -114,22 +103,16 @@ const JobDetailsPage = () => {
     const handleNewVehicle = async (newVehicle: Vehicle) => {
         if (newVehicle.id === vehicle?.id) return;
 
-        console.log('Updating vehicle to:', newVehicle);
-
-        // Update vehicle state
         setVehicle(newVehicle);
-
-        // Update job data locally
         setJobData(prev => prev ? {
             ...prev,
             vehicleId: newVehicle.id,
-            vehicle_id: newVehicle.id // Include both for compatibility
+            vehicle_id: newVehicle.id
         } : prev);
 
         // Update job in database
         try {
             await handleJobUpdate({ vehicle_id: newVehicle.id });
-            console.log('Vehicle updated successfully');
         } catch (error) {
             console.error('Failed to update vehicle:', error);
         }
@@ -158,7 +141,7 @@ const JobDetailsPage = () => {
                 <JobDetailsCard job={jobData} onJobUpdate={handleJobUpdate} />
             </div>
 
-            {/* Mobile: Customer and Vehicle cards at top */}
+            {/* Mobile */}
             <div className="md:hidden px-6 space-y-4">
                 <CustomerInfo customer={customer} handleUpdate={handleNewCustomer} />
                 <VehicleInfo vehicle={vehicle} customer_id={customer?.id} handleUpdate={handleNewVehicle} />
@@ -167,8 +150,8 @@ const JobDetailsPage = () => {
             <div className="flex flex-col md:flex-row ">
                 {/* Main Content */}
                 <div className="flex-1 p-6 sm:p-6">
-                    <JobSteps jobSteps={jobSteps || []} setJobSteps={setJobSteps} />
-                    <PartsAndMaterials parts={parts || []} setParts={setParts} jobId={jobData.id} />
+                    <JobSteps job_id={jobData.id} jobSteps={jobSteps || []} setJobSteps={setJobSteps} />
+                    <PartsAndMaterials job_id={jobData.id} parts={parts || []} setParts={setParts} />
                     <PhotoDocumentation />
                 </div>
 
@@ -176,7 +159,7 @@ const JobDetailsPage = () => {
                 <div className="hidden md:block w-80 pt-6 pr-6 space-y-6">
                     <CustomerInfo customer={customer} handleUpdate={handleNewCustomer} />
                     <VehicleInfo vehicle={vehicle} customer_id={customer?.id} handleUpdate={handleNewVehicle} />
-                    <JobNotes Notes={notes} setNotes={setNotes} />
+                    <JobNotes job_id={jobData.id} Notes={notes} setNotes={setNotes} />
                     <CostSummary
                         costSummary={calculateCostSummary()}
                         jobData={jobData}
@@ -188,9 +171,9 @@ const JobDetailsPage = () => {
                 </div>
             </div>
 
-            {/* Mobile: Cost Summary and Notes at bottom */}
+            {/* Mobile */}
             <div className="md:hidden px-6 pb-6 space-y-4">
-                <JobNotes Notes={notes} setNotes={setNotes} />
+                <JobNotes job_id={jobData.id} Notes={notes} setNotes={setNotes} />
                 <div className='h-5' />
                 <CostSummary
                     costSummary={calculateCostSummary()}

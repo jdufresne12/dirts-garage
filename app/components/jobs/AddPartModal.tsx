@@ -6,12 +6,12 @@ import helpers from '@/app/utils/helpers';
 
 const emptyFormData: Part = {
     id: helpers.generateUniqueID(),
-    jobId: '',
+    job_id: '',
     name: '',
     description: '',
     quantity: 1,
     price: 0,
-    partNumber: '',
+    part_number: '',
     url: '',
     status: 'Needed'
 };
@@ -19,12 +19,13 @@ const emptyFormData: Part = {
 interface AddPartModalProps {
     isOpen: boolean;
     partData: Part | null;
+    job_id: string;
     onClose: () => void;
     onSave: (partData: Part) => void;
     onDelete?: (partId: string) => void;
 }
 
-export default function AddPartModal({ isOpen, partData, onClose, onSave, onDelete }: AddPartModalProps) {
+export default function AddPartModal({ isOpen, partData, job_id, onClose, onSave, onDelete }: AddPartModalProps) {
     const [formData, setFormData] = useState<Part>(partData ?? emptyFormData);
     const [errors, setErrors] = useState<Partial<Record<keyof Part, string>>>({});
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -34,7 +35,11 @@ export default function AddPartModal({ isOpen, partData, onClose, onSave, onDele
         if (partData) {
             setFormData(partData);
         } else {
-            setFormData({ ...emptyFormData, id: helpers.generateUniqueID() });
+            setFormData({
+                ...emptyFormData,
+                id: helpers.generateUniqueID(),
+                job_id: job_id
+            });
         }
         setErrors({});
         setShowDeleteConfirm(false);
@@ -70,10 +75,10 @@ export default function AddPartModal({ isOpen, partData, onClose, onSave, onDele
             newErrors.name = "Part name must be at least 2 characters";
         }
 
-        if (!formData.partNumber.trim()) {
-            newErrors.partNumber = "Part number is required";
-        } else if (formData.partNumber.trim().length < 2) {
-            newErrors.partNumber = "Part number must be at least 2 characters";
+        if (!formData.part_number.trim()) {
+            newErrors.part_number = "Part number is required";
+        } else if (formData.part_number.trim().length < 2) {
+            newErrors.part_number = "Part number must be at least 2 characters";
         }
 
         // Quantity validation
@@ -251,16 +256,16 @@ export default function AddPartModal({ isOpen, partData, onClose, onSave, onDele
                             </label>
                             <input
                                 type="text"
-                                name="partNumber"
+                                name="part_number"
                                 placeholder="e.g. JE-123456"
-                                value={formData.partNumber || ''}
+                                value={formData.part_number || ''}
                                 onChange={handleInputChange}
-                                className={`w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500 ${errors.partNumber ? 'border-red-500' : 'border-gray-300'
+                                className={`w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500 ${errors.part_number ? 'border-red-500' : 'border-gray-300'
                                     }`}
                                 disabled={isSubmitting}
                             />
-                            {errors.partNumber && (
-                                <p className="mt-1 text-sm text-red-600">{errors.partNumber}</p>
+                            {errors.part_number && (
+                                <p className="mt-1 text-sm text-red-600">{errors.part_number}</p>
                             )}
                         </div>
 

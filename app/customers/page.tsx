@@ -38,10 +38,6 @@ export default function CustomersPage() {
     }, [useMockData]);
 
     useEffect(() => {
-        console.log(customers)
-    }, [customers])
-
-    useEffect(() => {
         if (searchTerm === "") {
             setCustomers(initCustomers)
         } else {
@@ -101,8 +97,6 @@ export default function CustomersPage() {
 
     const handleAddCustomer = (customer: Customer) => {
         const newCustomer = customerHelpers.newCustomer(customer);
-        console.log("New Customer Info");
-        console.log(newCustomer);
         setSearchTerm("");
         setCustomers([...customers, newCustomer])
     }

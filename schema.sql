@@ -112,6 +112,7 @@ CREATE INDEX idx_invoices_status ON invoices(status);
 -- Notes table
 CREATE TABLE notes (
     id TEXT PRIMARY KEY,
+    job_id TEXT NOT NULL,
     note TEXT NOT NULL,
     timestamp TIMESTAMP NOT NULL DEFAULT NOW(),
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
@@ -121,11 +122,12 @@ CREATE TABLE notes (
 -- Job Steps table
 CREATE TABLE job_steps (
     id TEXT PRIMARY KEY,
+    job_id TEXT NOT NULL
     title TEXT NOT NULL,
     description TEXT NOT NULL,
-    start_date DATE,
-    completed_date DATE,
-    estimated_start_date DATE,
+    start_date TIMESTAMP,
+    completed_date TIMESTAMP,
+    estimated_start_date TIMESTAMP,
     "order" INT,
     status TEXT NOT NULL,
     estimated_hours NUMERIC(5,2),

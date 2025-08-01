@@ -13,8 +13,6 @@ export async function GET(
             [id]
         );
 
-        console.log('Query result rows:', result.rows.length);
-
         return NextResponse.json(result.rows);
     } catch (error) {
         console.error('GET /api/vehicles/customer/[id] error:', error);

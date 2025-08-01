@@ -1,6 +1,4 @@
-'use client';
-import React, { useEffect, useState } from 'react';
-import Link from 'next/link';
+import React from 'react';
 import {
   Wrench,
   FileText,
@@ -8,23 +6,13 @@ import {
   DollarSign,
   Plus
 } from 'lucide-react';
-import mockData from './data/mock-data';
 
 import AnalyticsCard from './components/dashboard/AnalyticsCard';
 import RevenueTrendGraph from './components/dashboard/RevenueTrendGraph';
 import RecentActivity from './components/dashboard/RecentActivity';
 import JobsRequiringAttention from './components/dashboard/JobsRequiringAttention';
-import StartJobModal from './components/jobs/StartJobModal';
 
 export default function Home() {
-  const [startJobModalOpen, setStartJobModalOpen] = useState(false);
-
-  const handleStartJob = (data: any) => {
-    console.log('New customer data:', data);
-    // Here you would typically save to your database or state management
-    // For now, we'll just log it
-  };
-
   return (
     <div className="min-h-screen bg-gray-50 w-full overflow-x-hidden">
       <div className="w-full mx-auto p-6 lg:p-8">
@@ -60,8 +48,12 @@ export default function Home() {
           />
         </div>
 
+        <div className="w-full min-w-0 mb-6 ">
+          <RevenueTrendGraph />
+        </div>
+
         {/* Main Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-1 gap-4 sm:gap-6 mb-6 sm:mb-8 w-full">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mb-6 sm:mb-8 w-full">
           <div className="w-full min-w-0">
             <RecentActivity />
           </div>
@@ -70,17 +62,7 @@ export default function Home() {
           </div>
         </div>
 
-        {/* <div className="w-full min-w-0">
-          <RevenueTrendGraph />
-        </div> */}
       </div>
-
-      {/* Add Customer Modal */}
-      <StartJobModal
-        isOpen={startJobModalOpen}
-        onClose={() => setStartJobModalOpen(false)}
-        onSubmit={handleStartJob}
-      />
     </div>
   );
 }

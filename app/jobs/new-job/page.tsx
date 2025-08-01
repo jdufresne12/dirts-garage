@@ -57,7 +57,6 @@ export default function NewJob() {
                 .then(res => res.json())
                 .then(data => {
                     setVehiclesList(data)
-                    console.log(data)
                 })
                 .catch(error => console.error("Error fetching vehicles:", error))
         } else {
@@ -186,9 +185,6 @@ export default function NewJob() {
     };
 
     const handleCreateJob = async () => {
-        console.log('Creating job:', jobForm);
-
-        // Call APIS
         try {
             const response = await fetch('/api/jobs', {
                 method: 'POST',
@@ -203,8 +199,6 @@ export default function NewJob() {
             }
 
             const result = await response.text();
-
-            console.log("Result: ", result);
         } catch (error) {
             console.error('Error creating job:', error);
         }

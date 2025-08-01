@@ -44,10 +44,6 @@ export default function VehicleInfo({ vehicle, handleUpdate, customer_id }: vehi
         }
     }, [customer_id]);
 
-    useEffect(() => {
-        console.log(vehicle)
-    }, [])
-
     const handleAddVehicle = async (vehicle_id: string) => {
         if (vehicle_id && customer_id) {
             // Use possibleVehicles from API instead of mockVehicles

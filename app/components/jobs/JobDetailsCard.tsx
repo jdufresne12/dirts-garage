@@ -79,15 +79,11 @@ export default function JobDetailsCard({ job, onJobUpdate }: JobDetailsCardProps
 
     const formatDate = (dateString: string) => {
         if (!dateString) return 'Not set';
-        return new Date(dateString).toLocaleDateString('en-US', {
-            month: 'numeric',
-            day: 'numeric',
-            year: 'numeric'
-        });
+        const [year, month, day] = formatDateEdit(dateString).split('-');
+        return `${month}/${day}/${year}`
     };
 
     const formatDateEdit = (dateString: string) => {
-        console.log(dateString)
         if (dateString === '')
             return dateString
         else {
@@ -132,11 +128,11 @@ export default function JobDetailsCard({ job, onJobUpdate }: JobDetailsCardProps
             )}
 
             {/* Save/Cancel buttons when editing */}
-            {/* {isEditing && (
+            {isEditing && (
                 <div className="flex justify-center items-center gap-2 mb-2">
-                    <span className='text-2xl font font-medium sm:font-bold'>Edit Job Details</span>
+                    <span className='text-xl font font-medium sm:font-bold'>Edit Job Details</span>
                 </div>
-            )} */}
+            )}
 
             {/* Main content section */}
             <div className="mb-6">

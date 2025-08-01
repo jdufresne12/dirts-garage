@@ -44,7 +44,6 @@ const CustomerDetailsPage = () => {
                 .then(data => {
                     setCustomerData(data)
                     setInitCustomerData(data);
-                    console.log(data)
                 })
                 .catch((err) => console.error(err))
                 .finally(() => setIsInitialLoading(false));
@@ -489,7 +488,7 @@ const CustomerDetailsPage = () => {
                                             </thead>
                                             <tbody className="bg-white divide-y divide-gray-200">
                                                 {customerData.jobs.map(job => {
-                                                    const vehicle = customerData.vehicles?.find(v => v.id === job.vehicleId);
+                                                    const vehicle = customerData.vehicles?.find(v => v.id === job.vehicle_id);
                                                     return (
                                                         <tr key={job.id} className="hover:bg-gray-50">
                                                             <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
@@ -504,10 +503,10 @@ const CustomerDetailsPage = () => {
                                                                 </span>
                                                             </td>
                                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                                                {job.startDate}
+                                                                {job.start_date}
                                                             </td>
                                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                                                ${job.estimatedCost.toLocaleString()}
+                                                                ${job.estimated_cost.toLocaleString()}
                                                             </td>
                                                             <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                                                 <button className="text-orange-600 hover:text-orange-900 mr-3">View</button>
@@ -559,7 +558,7 @@ const CustomerDetailsPage = () => {
                                                             ${invoice.amount.toLocaleString()}
                                                         </td>
                                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                                            ${invoice.amountPaid.toLocaleString()}
+                                                            ${invoice.amount_paid.toLocaleString()}
                                                         </td>
                                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                                             {invoice.date}

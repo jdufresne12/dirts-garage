@@ -26,33 +26,97 @@ export const formatPhoneNumber = (value: string) => {
     return `(${area}) ${middle}-${last}`;
 };
 
+export const displayDateAndTimeShort = (dateString: string): string => {
+    if (!dateString) return '';
+
+    try {
+        let date: Date;
+
+        // Check if the dateString has timezone info (ends with Z or has timezone offset)
+        if (dateString.includes('Z') || dateString.match(/[+-]\d{2}:\d{2}$/)) {
+            // It's a full ISO string with timezone - convert to local time
+            date = new Date(dateString);
+        } else {
+            // It's a local datetime string (like "2025-08-01T15:20") - treat as local time
+            // Don't let JavaScript interpret it as UTC
+            const [datePart, timePart] = dateString.split("T");
+            const [year, month, day] = datePart.split("-");
+            const [hours, minutes] = (timePart || "00:00").split(":");
+
+            // Create date in local timezone
+            date = new Date(
+                parseInt(year),
+                parseInt(month) - 1, // months are 0-indexed
+                parseInt(day),
+                parseInt(hours),
+                parseInt(minutes || "0")
+            );
+        }
+
+        // Format the date
+        const month = (date.getMonth() + 1).toString();
+        const day = date.getDate().toString();
+        const year = date.getFullYear().toString();
+        let hours = date.getHours();
+        const minutes = date.getMinutes();
+
+        const ampm = hours >= 12 ? 'PM' : 'AM';
+        hours = hours % 12;
+        hours = hours ? hours : 12; // the hour '0' should be '12'
+
+        return `${month}/${day}/${year}, ${hours}:${minutes.toString().padStart(2, '0')} ${ampm}`;
+
+    } catch (error) {
+        console.warn('Error formatting date:', dateString, error);
+        return dateString; // fallback to original string
+    }
+};
+
 export const displayDateAndTimeLong = (dateString: string): string => {
+    if (!dateString) return '';
+
     const months = [
         "January", "February", "March", "April", "May", "June",
         "July", "August", "September", "October", "November", "December"
     ];
-    const [date, time] = dateString.split("T")
-    const [year, month, day] = date.split("-");
-    const [hours, minutes] = time.split(":");
 
-    let formattedDate: string = `
-        ${months[parseInt(month) - 1]} ${day}, ${year} at ${parseInt(hours) > 12 ? parseInt(hours) - 12 : hours}:${minutes.padStart(2, '0')} ${parseInt(hours) >= 12 ? 'PM' : 'AM'}
-    `;
+    try {
+        let date: Date;
 
-    return formattedDate;
-}
+        // Handle timezone the same way as the short format
+        if (dateString.includes('Z') || dateString.match(/[+-]\d{2}:\d{2}$/)) {
+            date = new Date(dateString);
+        } else {
+            const [datePart, timePart] = dateString.split("T");
+            const [year, month, day] = datePart.split("-");
+            const [hours, minutes] = (timePart || "00:00").split(":");
 
-export const displayDateAndTimeShort = (dateString: string): string => {
-    const [date, time] = dateString.split("T")
-    const [year, month, day] = date.split("-");
-    const [hours, minutes] = time.split(":");
+            date = new Date(
+                parseInt(year),
+                parseInt(month) - 1,
+                parseInt(day),
+                parseInt(hours),
+                parseInt(minutes || "0")
+            );
+        }
 
-    let formattedDate: string = `
-        ${month}/${day}/${year}, ${parseInt(hours) > 12 ? parseInt(hours) - 12 : hours}:${minutes.padStart(2, '0')} ${parseInt(hours) >= 12 ? 'PM' : 'AM'}
-    `;
+        const month = months[date.getMonth()];
+        const day = date.getDate();
+        const year = date.getFullYear();
+        let hours = date.getHours();
+        const minutes = date.getMinutes();
 
-    return formattedDate;
-}
+        const ampm = hours >= 12 ? 'PM' : 'AM';
+        hours = hours % 12;
+        hours = hours ? hours : 12;
+
+        return `${month} ${day}, ${year} at ${hours}:${minutes.toString().padStart(2, '0')} ${ampm}`;
+
+    } catch (error) {
+        console.warn('Error formatting date:', dateString, error);
+        return dateString;
+    }
+};
 
 export const getLocalDateTimeString = () => {
     const now = new Date();

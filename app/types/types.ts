@@ -86,11 +86,12 @@ interface Note {
 
 interface JobStep {
     id: string;
+    job_id: string;
     title: string;
     description: string;
     start_date?: string;
     completed_date?: string;
-    estimated_start?: string;
+    estimated_start_date?: string;
     order?: number;
     status: string;
     estimated_hours?: number;

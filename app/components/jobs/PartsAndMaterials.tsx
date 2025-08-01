@@ -1,18 +1,28 @@
 'use client';
 import React, { useState, useEffect } from 'react';
 import AddPartModal from './AddPartModal';
-import { Edit } from 'lucide-react';
+import { Edit, Cog } from 'lucide-react';
 
 interface PartsProps {
+    job_id: string;
     parts: Part[] | [];
     setParts: React.Dispatch<React.SetStateAction<Part[] | undefined>>;
-    jobId: string;
 }
 
-export default function parts({ parts, setParts, jobId }: PartsProps) {
+export default function parts({ parts, setParts, job_id }: PartsProps) {
     const [showAddPartModal, setShowAddPartModal] = useState(false);
     const [selectedPart, setSelectedPart] = useState<Part | null>(null);
     const [showPartInfo, setShowPartInfo] = useState<boolean[]>(new Array(parts.length).fill(false));
+
+    useEffect(() => {
+        try {
+            fetch(`/api/jobs/parts/${job_id}`)
+                .then(res => res.json())
+                .then(data => setParts(data))
+        } catch (error) {
+            console.error('Error fetching parts:', error);
+        }
+    }, [job_id]);
 
     const getPartStatusBadge = (status: string) => {
         const baseClasses = "px-2 py-1 h-8 rounded text-xs font-medium";
@@ -33,26 +43,78 @@ export default function parts({ parts, setParts, jobId }: PartsProps) {
         setSelectedPart(null);
     }
 
-    const handleModalSave = (part: Part) => {
+    const handleModalSave = async (part: Part) => {
         console.log(part);
-        part.job_id = jobId;
+        part.job_id = job_id;
 
-        // Call APi to add to DB
-        if (selectedPart?.id === part.id) {
-            setParts((prevParts) =>
-                (prevParts ?? []).map(p => p.id === part.id ? part : p));
-            setSelectedPart(part)
-        } else {
-            setParts(prevParts => [...prevParts!, part]);
-            setSelectedPart(null)
+        try {
+            if (selectedPart?.id === part.id) {
+                // Update existing part
+                const response = await fetch(`/api/jobs/parts/${part.id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(part),
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to update part');
+                }
+
+                const updatedPart = await response.json();
+
+                setParts((prevParts) =>
+                    (prevParts ?? []).map(p => p.id === part.id ? updatedPart : p)
+                );
+                setSelectedPart(updatedPart);
+            } else {
+                // Create new part
+                const response = await fetch('/api/jobs/parts', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(part),
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to create part');
+                }
+
+                setParts(prevParts => [...(prevParts ?? []), part]);
+                setSelectedPart(null);
+            }
+
+            setShowAddPartModal(false);
+        } catch (error) {
+            console.error('Error saving part:', error);
         }
+    };
 
-        setShowAddPartModal(false);
-    }
-
-    const handlePartRemoval = (partId: string) => {
+    const handlePartRemoval = async (partId: string) => {
         console.log(partId);
-    }
+
+        try {
+            const response = await fetch(`/api/jobs/parts/${partId}`, {
+                method: 'DELETE',
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to delete part');
+            }
+
+            // Remove part from state only if API call was successful
+            setParts(prevParts => (prevParts ?? []).filter(p => p.id !== partId));
+
+            if (selectedPart?.id === partId) {
+                setSelectedPart(null);
+                setShowAddPartModal(false);
+            }
+        } catch (error) {
+            console.error('Error deleting part:', error);
+        }
+    };
 
     const handlePartClick = (index: number) => {
         const updatedShowPartInfo = [...showPartInfo];
@@ -78,7 +140,7 @@ export default function parts({ parts, setParts, jobId }: PartsProps) {
             </div>
 
             <div className="space-y-4">
-                {parts.map((part, index) => (
+                {parts.length > 0 ? parts.map((part, index) => (
                     <div key={index} className="border border-gray-200 rounded-lg hover:scale-101">
                         <div
                             onClick={() => handlePartClick(index)}
@@ -134,14 +196,15 @@ export default function parts({ parts, setParts, jobId }: PartsProps) {
                                             </div>
                                             {part.url && (
                                                 <div>
-                                                    <label className="block text-xs font-medium text-gray-500 uppercase tracking-wide ">
+                                                    <label className="block text-xs font-medium text-gray-500 uppercase tracking-wide">
                                                         Link
                                                     </label>
                                                     <a
                                                         href={part.url.startsWith('http') ? part.url : `https://${part.url}`}
                                                         target="_blank"
                                                         rel="noopener noreferrer"
-                                                        className="text-blue-500 text-sm"
+                                                        className="text-blue-500 text-sm block truncate hover:text-blue-700 transition-colors"
+                                                        title={part.url} // Shows full URL on hover
                                                     >
                                                         {part.url}
                                                     </a>
@@ -178,12 +241,54 @@ export default function parts({ parts, setParts, jobId }: PartsProps) {
                             </div>
                         )}
                     </div>
-                ))}
+                )) : (
+                    <div className="flex flex-col items-center justify-center py-12 px-6 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
+                        <div className="text-center">
+                            {/* Icon */}
+                            <div className="mx-auto mb-4 w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center">
+                                <Cog className='size-8 text-gray-400' />
+                            </div>
+
+                            {/* Main message */}
+                            <h3 className="text-lg font-medium text-gray-900 mb-2">
+                                No parts added yet
+                            </h3>
+
+                            {/* Subtitle */}
+                            <p className="text-sm text-gray-500 mb-6 max-w-md">
+                                Add parts and materials needed for this job to track inventory, costs, and ordering status.
+                                Click "Add Part" to get started.
+                            </p>
+
+                            {/* CTA Button */}
+                            <button
+                                onClick={() => setShowAddPartModal(true)}
+                                className="inline-flex items-center px-4 py-2 bg-orange-400 text-white text-sm font-medium rounded-lg hover:bg-orange-500 transition-colors duration-200"
+                            >
+                                <svg
+                                    className="w-4 h-4 mr-2"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                                    />
+                                </svg>
+                                Add Part
+                            </button>
+                        </div>
+                    </div>
+                )}
             </div>
 
             <AddPartModal
                 isOpen={showAddPartModal}
                 partData={selectedPart}
+                job_id={job_id}
                 onClose={handleModalClose}
                 onSave={handleModalSave}
                 onDelete={handlePartRemoval}
