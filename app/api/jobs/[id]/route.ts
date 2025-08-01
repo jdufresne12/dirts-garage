@@ -13,17 +13,23 @@ export async function GET(_req: Request, context: { params: { id: string } }) {
         const jobs = jobsResult.rows[0];
 
         // Get Customer Data
-        const customerResult = await pgPool.query('SELECT * FROM customers WHERE id = $1', [jobs.customer_id]);
-        if (customerResult.rows.length === 0) {
-            return new NextResponse('Customer not found', { status: 404 });
+        let customer: Customer | undefined = undefined;
+        if (jobs.customer_id) {
+            const customerResult = await pgPool.query('SELECT * FROM customers WHERE id = $1', [jobs.customer_id]);
+            if (customerResult.rows.length === 0) {
+                return new NextResponse('Customer not found', { status: 404 });
+            }
+            customer = customerResult.rows[0];
         }
-        const customer = customerResult.rows[0];
 
-        const vehicleResult = await pgPool.query('SELECT * FROM vehicles WHERE id = $1', [jobs.vehicle_id]);
-        if (vehicleResult.rows.length === 0) {
-            return new NextResponse('Vehicle not found', { status: 404 });
+        let vehicle: Vehicle | undefined = undefined;
+        if (jobs.vehicle_id) {
+            const vehicleResult = await pgPool.query('SELECT * FROM vehicles WHERE id = $1', [jobs.vehicle_id]);
+            if (vehicleResult.rows.length === 0) {
+                return new NextResponse('Vehicle not found', { status: 404 });
+            }
+            vehicle = vehicleResult.rows[0];
         }
-        const vehicle = vehicleResult.rows[0];
 
         const completeCustomerData = {
             ...jobs,

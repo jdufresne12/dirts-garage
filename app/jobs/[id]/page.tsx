@@ -37,7 +37,7 @@ const JobDetailsPage = () => {
                 .then(data => {
                     setJobData(data)
                     setCustomer(data.customer)
-                    setVehicle(data.vehicle)
+                    setVehicle(data.vehicle || undefined)
                     console.log(data)
                 })
                 .catch(error => console.error("Failed gather job data:", error))
@@ -83,17 +83,57 @@ const JobDetailsPage = () => {
 
     const handleNewCustomer = async (newCustomer: Customer) => {
         if (newCustomer.id === customer?.id) return;
-        setCustomer(newCustomer);
-        await handleJobUpdate({ customer_id: newCustomer.id });
-        setJobData(prev => prev ? { ...prev, customerId: newCustomer.id } : prev);
-        setVehicle(undefined);
-    }
 
-    const handleNewVehicle = (newVehicle: Vehicle) => {
+        console.log('Updating customer to:', newCustomer);
+
+        // Update customer state
+        setCustomer(newCustomer);
+
+        // Reset vehicle when customer changes
+        setVehicle(undefined);
+
+        // Update job data locally
+        setJobData(prev => prev ? {
+            ...prev,
+            customer_id: newCustomer.id, // Include both for compatibility
+            vehicle_id: null             // Clear vehicle when customer changes
+        } : prev);
+
+        // Update job in database
+        try {
+            await handleJobUpdate({
+                customer_id: newCustomer.id,
+                vehicle_id: null // Clear vehicle_id in database
+            });
+            console.log('Customer updated successfully');
+        } catch (error) {
+            console.error('Failed to update customer:', error);
+        }
+    };
+
+    const handleNewVehicle = async (newVehicle: Vehicle) => {
         if (newVehicle.id === vehicle?.id) return;
+
+        console.log('Updating vehicle to:', newVehicle);
+
+        // Update vehicle state
         setVehicle(newVehicle);
-        setJobData(prev => prev ? { ...prev, vehicleId: newVehicle.id } : prev);
-    }
+
+        // Update job data locally
+        setJobData(prev => prev ? {
+            ...prev,
+            vehicleId: newVehicle.id,
+            vehicle_id: newVehicle.id // Include both for compatibility
+        } : prev);
+
+        // Update job in database
+        try {
+            await handleJobUpdate({ vehicle_id: newVehicle.id });
+            console.log('Vehicle updated successfully');
+        } catch (error) {
+            console.error('Failed to update vehicle:', error);
+        }
+    };
 
     if (isLoading || !jobData) {
         return (

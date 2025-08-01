@@ -16,7 +16,7 @@ const emptyJobForm: Job = {
     priority: "Low",
     waiting_reason: '',
     latest_update: '',
-    estimated_start: '',
+    estimated_start_date: '',
     estimated_completion: '',
     start_date: '',
     completion_date: '',
@@ -373,7 +373,7 @@ export default function NewJob() {
                                             <label className="block text-sm font-medium text-gray-700 mb-1">Estimated Start</label>
                                             <input
                                                 type="date"
-                                                value={jobForm.estimated_start}
+                                                value={jobForm.estimated_start_date}
                                                 onChange={(e) => setJobForm(prev => ({ ...prev, estimated_start: e.target.value }))}
                                                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                                             />

@@ -193,7 +193,7 @@ export default function CustomersPage() {
                                     {!helpers.checkNoActiveJobs(customer) ? (
                                         <div>
                                             <div className="text-xs text-gray-500 mb-1">Current Project</div>
-                                            <div className="text-sm font-medium text-gray-900">{getCurrentJob(customer)}</div>
+                                            <div className="text-sm font-medium text-gray-900">{getCurrentJob(customer) || "No Active Jobs"}</div>
                                         </div>
                                     ) : (
                                         <div>

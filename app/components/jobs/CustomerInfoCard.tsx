@@ -1,7 +1,6 @@
 'use client';
 import React, { useEffect, useState } from 'react';
 import { Contact2, Edit, Phone, Mail, MapPin } from 'lucide-react';
-import { mockCustomers } from '@/app/data/mock-data';
 import AddCustomerModal from '../customers/AddCustomerModal';
 
 interface CustomerInfoProps {
@@ -14,21 +13,31 @@ export default function CustomerInfo({ customer, handleUpdate }: CustomerInfoPro
     const [selectedCustomerId, setSelectedCustomerId] = useState<string>('');
     const [showAddCustomerModal, setShowAddCustomerModal] = useState<boolean>(false);
     const [customers, setCustomers] = useState<Customer[]>([]);
+    const [loading, setLoading] = useState<boolean>(false);
 
     useEffect(() => {
-        try {
-            fetch(`/api/customers`)
-                .then(res => res.json())
-                .then(data => setCustomers(data))
-        } catch (error) {
-            console.log("Error fetching vehicles:", error);
-        }
-    }, [])
+        const fetchCustomers = async () => {
+            try {
+                setLoading(true);
+                const res = await fetch(`/api/customers`);
+                if (res.ok) {
+                    const data = await res.json();
+                    setCustomers(data);
+                }
+            } catch (error) {
+                console.error("Error fetching customers:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
 
+        fetchCustomers();
+    }, []);
 
     const handleCustomerSelect = async (customerId: string) => {
         if (customerId) {
-            const selectedCustomer = mockCustomers.find(c => c.id === customerId);
+            // Use the fetched customers from API, not mockCustomers
+            const selectedCustomer = customers.find(c => c.id === customerId);
             if (selectedCustomer) {
                 await handleUpdate?.(selectedCustomer);
                 setIsEditing(false);
@@ -37,12 +46,23 @@ export default function CustomerInfo({ customer, handleUpdate }: CustomerInfoPro
         }
     };
 
-    const handleAddNewCustomer = (customerData: Customer) => {
-        console.log(customerData);
-        handleUpdate?.(customerData)
+    const handleAddNewCustomer = async (customerData: Customer) => {
+        console.log('New customer:', customerData);
+        await handleUpdate?.(customerData);
         setSelectedCustomerId(customerData.id);
         setIsEditing(false);
-    }
+
+        // Refresh the customers list to include the new customer
+        try {
+            const res = await fetch(`/api/customers`);
+            if (res.ok) {
+                const data = await res.json();
+                setCustomers(data);
+            }
+        } catch (error) {
+            console.error("Error refreshing customers:", error);
+        }
+    };
 
     if (!customer || isEditing) {
         return (
@@ -59,29 +79,33 @@ export default function CustomerInfo({ customer, handleUpdate }: CustomerInfoPro
                     )}
                 </div>
 
-                <select
-                    value={selectedCustomerId}
-                    onChange={(e) => {
-                        setSelectedCustomerId(e.target.value);
-                        handleCustomerSelect(e.target.value);
-                    }}
-                    className="w-7/8 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
-                >
-                    <option value="">Choose a customer...</option>
-                    {customers.map((customer) => (
-                        <option key={customer.id} value={customer.id}>
-                            {customer.first_name} {customer.last_name}
-                        </option>
-                    ))}
-                </select>
+                {loading ? (
+                    <p className="text-gray-500">Loading customers...</p>
+                ) : (
+                    <select
+                        value={selectedCustomerId}
+                        onChange={(e) => {
+                            setSelectedCustomerId(e.target.value);
+                            handleCustomerSelect(e.target.value);
+                        }}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                    >
+                        <option value="">Choose a customer...</option>
+                        {customers.map((customer) => (
+                            <option key={customer.id} value={customer.id}>
+                                {customer.first_name || customer.first_name} {customer.last_name || customer.last_name}
+                            </option>
+                        ))}
+                    </select>
+                )}
 
                 <div className='flex flex-row justify-center items-center mt-4 gap-4'>
-                    <p className='text-stone-300 text-sm '>or</p>
+                    <p className='text-stone-300 text-sm'>or</p>
                     <button
                         onClick={() => setShowAddCustomerModal(true)}
-                        className='flex items-center justify-center '
+                        className='flex items-center justify-center'
                     >
-                        <span className='text-sm font-bold text-orange-400 hover:text-color-800 hover:scale[120]'>Add New Customer</span>
+                        <span className='text-sm font-bold text-orange-400 hover:text-orange-800 hover:scale-110'>Add New Customer</span>
                     </button>
                 </div>
 
@@ -97,7 +121,9 @@ export default function CustomerInfo({ customer, handleUpdate }: CustomerInfoPro
     return (
         <div className="bg-white rounded-lg border border-gray-200 p-4">
             <div className="flex items-center justify-between mb-4">
-                <h3 className="font-semibold">{customer.first_name} {customer.last_name}</h3>
+                <h3 className="font-semibold">
+                    {customer.first_name || customer.first_name} {customer.last_name || customer.last_name}
+                </h3>
                 <button
                     onClick={() => setIsEditing(true)}
                     className="text-gray-400 hover:text-gray-600"
@@ -122,4 +148,4 @@ export default function CustomerInfo({ customer, handleUpdate }: CustomerInfoPro
             </div>
         </div>
     );
-};
+}
