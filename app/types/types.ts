@@ -31,47 +31,49 @@ interface Vehicle {
 
 interface Job {
     id: string;
-    customerId: string | null;
-    vehicleId: string | null;
+    customer_id: string | null;
+    customer?: Customer;
+    vehicle_id: string | null;
+    vehicle?: Vehicle;
     title: string;
     description: string;
     status: string;
-    waitingReason?: string;
-    latestUpdate?: string;
-    estimatedStartDate?: string;
-    estimatedCompletion?: string;
-    startDate?: string;
-    completionDate?: string;
-    estimatedCost: number;
-    actualCost: number;
+    waiting_reason?: string;
+    latest_update?: string;
+    estimated_start_date?: string;
+    estimated_completion?: string;
+    start_date?: string;
+    completion_date?: string;
+    estimated_cost: number;
+    actual_cost: number;
     priority: "Low" | "Medium" | "High";
     parts?: Part[] | null;
     invoiced?: boolean;
-    invoiceAmount?: number;
+    invoice_amount?: number;
 };
 
 interface Invoice {
     id: string;
     date: string;
     amount: number;
-    amountPaid: number;
+    amount_paid: number;
     status: string;
-    dueDate: string;
-    paidDate?: string;
-    customerId: string;
-    jobId: string;
+    due_date: string;
+    paid_date?: string;
+    customer_id: string;
+    job_id: string;
     customer: Customer | null;
     job: Job | null;
 };
 
 interface Part {
     id: string;
-    jobId: string | null;
+    job_id: string | null;
     name: string;
     description?: string;
     quantity: number;
     price: number;
-    partNumber: string;
+    part_number: string;
     url?: string;
     status: string
 };
@@ -86,13 +88,13 @@ interface JobStep {
     id: string;
     title: string;
     description: string;
-    startDate?: string;
-    completedDate?: string;
-    estimatedStartDate?: string;
+    start_date?: string;
+    completed_date?: string;
+    estimated_start?: string;
     order?: number;
     status: string;
-    estimatedHours?: number;
-    actualHours?: number;
+    estimated_hours?: number;
+    actual_hours?: number;
     technician?: string;
 }
 

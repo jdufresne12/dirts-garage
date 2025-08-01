@@ -400,7 +400,7 @@ const CustomerDetailsPage = () => {
                                 <div>
                                     <label className="text-sm font-medium text-gray-700 mb-2 block">Total Spent</label>
                                     <p className="text-xl font-bold text-green-600">
-                                        ${customerData.totalSpent ? customerData.totalSpent.toLocaleString() : 0}
+                                        ${customerData.invoices?.totalSpent ? customerData.totalSpent.toLocaleString() : 0}
                                     </p>
                                 </div>
                                 <div>

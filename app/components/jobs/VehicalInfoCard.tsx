@@ -1,5 +1,5 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Edit } from 'lucide-react';
 import { mockVehicles } from '@/app/data/mock-data';
 import AddVehicleModal from '../customers/AddVehicleModal';
@@ -7,19 +7,32 @@ import AddVehicleModal from '../customers/AddVehicleModal';
 interface vehicleInfoProps {
     vehicle?: Vehicle;
     handleUpdate?: (vehicle: Vehicle) => void;
-    customerId?: string;
+    customer_id?: string;
 }
 
-export default function VehicleInfo({ vehicle, handleUpdate, customerId }: vehicleInfoProps) {
+export default function VehicleInfo({ vehicle, handleUpdate, customer_id }: vehicleInfoProps) {
     const [isEditing, setIsEditing] = useState<boolean>(vehicle ? false : true);
     const [selectedVehicleId, setSelectedVehicleId] = useState<string>('');
     const [showAddVehicleModal, setShowAddVehicleModal] = useState<boolean>(false);
+    const [possibleVehicles, setPossibleVehicles] = useState<Vehicle[] | []>([])
 
-    const possibleVehicles = mockVehicles.filter(v => v.customerId === customerId);
+    useEffect(() => {
+        if (customer_id) {
+            try {
+                fetch(`/api/vehicles/customer/${customer_id}`)
+                    .then(res => res.json())
+                    .then(data => setPossibleVehicles(data))
+            } catch (error) {
+                console.log("Error fetching vehicles:", error);
+            }
+        } else {
+            setPossibleVehicles([])
+        }
+    }, [customer_id])
 
-    const handleAddVehicle = (vehicleId: string) => {
-        if (vehicleId && customerId) {
-            const selectedVehicle = mockVehicles.find(v => v.id === vehicleId);
+    const handleAddVehicle = (vehicle_id: string) => {
+        if (vehicle_id && customer_id) {
+            const selectedVehicle = mockVehicles.find(v => v.id === vehicle_id);
             if (selectedVehicle) {
                 handleUpdate?.(selectedVehicle);
                 setIsEditing(false);
@@ -29,13 +42,12 @@ export default function VehicleInfo({ vehicle, handleUpdate, customerId }: vehic
     };
 
     const handleAddNewVehicle = (vehicleData: Vehicle) => {
-        console.log(vehicleData);
         handleUpdate?.(vehicleData);
         setSelectedVehicleId(vehicleData.id);
         setIsEditing(false);
     }
 
-    if ((!vehicle || isEditing) && customerId) {
+    if ((!vehicle || isEditing) && customer_id) {
         return (
             <div className="bg-white rounded-lg border border-gray-200 p-4">
                 <div className="flex items-center justify-between mb-4">
@@ -78,7 +90,7 @@ export default function VehicleInfo({ vehicle, handleUpdate, customerId }: vehic
 
                 <AddVehicleModal
                     isOpen={showAddVehicleModal}
-                    customerId={customerId}
+                    customer_id={customer_id}
                     onClose={() => setShowAddVehicleModal(false)}
                     onSubmit={handleAddNewVehicle}
                 />
@@ -100,11 +112,10 @@ export default function VehicleInfo({ vehicle, handleUpdate, customerId }: vehic
 
                 <div className="space-y-3">
                     <div className="text-sm text-gray-600 space-y-1">
-                        <p><strong>VIN:</strong> {vehicle.vin}</p>
-                        <p><strong>Mileage:</strong> {vehicle.mileage}</p>
-                        <p><strong>Color:</strong> {vehicle.color}</p>
                         <p><strong>Engine:</strong> {vehicle.engine}</p>
                         <p><strong>Transmission:</strong> {vehicle.transmission}</p>
+                        <p><strong>Mileage:</strong> {vehicle.mileage}</p>
+                        <p><strong>VIN:</strong> {vehicle.vin || 'N/A'}</p>
                     </div>
                 </div>
             </div>

@@ -4,7 +4,7 @@ import AddPartModal from './AddPartModal';
 import { Edit } from 'lucide-react';
 
 interface PartsProps {
-    parts: Part[]
+    parts: Part[] | [];
     setParts: React.Dispatch<React.SetStateAction<Part[] | undefined>>;
     jobId: string;
 }
@@ -35,7 +35,7 @@ export default function parts({ parts, setParts, jobId }: PartsProps) {
 
     const handleModalSave = (part: Part) => {
         console.log(part);
-        part.jobId = jobId;
+        part.job_id = jobId;
 
         // Call APi to add to DB
         if (selectedPart?.id === part.id) {
@@ -86,7 +86,7 @@ export default function parts({ parts, setParts, jobId }: PartsProps) {
                         >
                             <div className="flex-1">
                                 <h4 className="font-medium text-gray-900">{part.name}</h4>
-                                <p className="text-sm text-gray-600">{part.partNumber} • Qty: {part.quantity} • ${part.price}</p>
+                                <p className="text-sm text-gray-600">{part.part_number} • Qty: {part.quantity} • ${part.price}</p>
                             </div>
                             <span className={`flex ${getPartStatusBadge(part.status)} whitespace-nowrap justify-center items-center`}>
                                 {part.status.charAt(0).toUpperCase() + part.status.slice(1)}
@@ -130,7 +130,7 @@ export default function parts({ parts, setParts, jobId }: PartsProps) {
                                                 <label className="block text-xs font-medium text-gray-500 uppercase tracking-wide ">
                                                     Part Number
                                                 </label>
-                                                <p className="text-sm text-gray-900 font-mono">{part.partNumber}</p>
+                                                <p className="text-sm text-gray-900 font-mono">{part.part_number}</p>
                                             </div>
                                             {part.url && (
                                                 <div>

@@ -1,5 +1,5 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Contact2, Edit, Phone, Mail, MapPin } from 'lucide-react';
 import { mockCustomers } from '@/app/data/mock-data';
 import AddCustomerModal from '../customers/AddCustomerModal';
@@ -13,12 +13,24 @@ export default function CustomerInfo({ customer, handleUpdate }: CustomerInfoPro
     const [isEditing, setIsEditing] = useState<boolean>(customer ? false : true);
     const [selectedCustomerId, setSelectedCustomerId] = useState<string>('');
     const [showAddCustomerModal, setShowAddCustomerModal] = useState<boolean>(false);
+    const [customers, setCustomers] = useState<Customer[]>([]);
 
-    const handleCustomerSelect = (customerId: string) => {
+    useEffect(() => {
+        try {
+            fetch(`/api/customers`)
+                .then(res => res.json())
+                .then(data => setCustomers(data))
+        } catch (error) {
+            console.log("Error fetching vehicles:", error);
+        }
+    }, [])
+
+
+    const handleCustomerSelect = async (customerId: string) => {
         if (customerId) {
             const selectedCustomer = mockCustomers.find(c => c.id === customerId);
             if (selectedCustomer) {
-                handleUpdate?.(selectedCustomer);
+                await handleUpdate?.(selectedCustomer);
                 setIsEditing(false);
                 setSelectedCustomerId('');
             }
@@ -56,7 +68,7 @@ export default function CustomerInfo({ customer, handleUpdate }: CustomerInfoPro
                     className="w-7/8 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                 >
                     <option value="">Choose a customer...</option>
-                    {mockCustomers.map((customer) => (
+                    {customers.map((customer) => (
                         <option key={customer.id} value={customer.id}>
                             {customer.first_name} {customer.last_name}
                         </option>

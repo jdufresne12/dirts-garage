@@ -176,7 +176,7 @@ export default function AddVehicleModal({
 
             <form onSubmit={handleSubmit} className="p-6">
                 <div className="space-y-6">
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="grid grid-cols-3 gap-3">
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">
                                 Year *
@@ -205,9 +205,6 @@ export default function AddVehicleModal({
                             />
                             {errors.make && <p className="text-sm text-red-600">{errors.make}</p>}
                         </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-3">
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">
                                 Model *
@@ -221,17 +218,6 @@ export default function AddVehicleModal({
                                 disabled={isSubmitting}
                             />
                             {errors.model && <p className="text-sm text-red-600">{errors.model}</p>}
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">License Plate</label>
-                            <input
-                                type="text"
-                                name="license_plate"
-                                value={formData.license_plate}
-                                onChange={handleInputChange}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
-                                disabled={isSubmitting}
-                            />
                         </div>
                     </div>
 
@@ -273,31 +259,18 @@ export default function AddVehicleModal({
                             />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">Color</label>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                VIN
+                            </label>
                             <input
                                 type="text"
-                                name="color"
-                                value={formData.color}
+                                name="vin"
+                                value={formData.vin}
                                 onChange={handleInputChange}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                                className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 ${errors.vin ? "border-red-500" : "border-gray-300"}`}
                                 disabled={isSubmitting}
                             />
                         </div>
-                    </div>
-
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                            VIN
-                        </label>
-                        <input
-                            type="text"
-                            name="vin"
-                            value={formData.vin}
-                            onChange={handleInputChange}
-                            className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 ${errors.vin ? "border-red-500" : "border-gray-300"}`}
-                            disabled={isSubmitting}
-                        />
-                        {errors.vin && <p className="text-sm text-red-600">{errors.vin}</p>}
                     </div>
                 </div>
 

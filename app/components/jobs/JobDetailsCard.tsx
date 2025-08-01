@@ -14,13 +14,13 @@ export default function JobDetailsCard({ job, onJobUpdate }: JobDetailsCardProps
         description: job.description,
         status: job.status,
         priority: job.priority,
-        estimatedStartDate: job.estimatedStartDate || '',
-        startDate: job.startDate || '',
-        estimatedCompletion: job.estimatedCompletion || '',
-        completionDate: job.completionDate || '',
-        estimatedCost: job.estimatedCost,
-        actualCost: job.actualCost || 0,
-        waitingReason: job.waitingReason || '',
+        estimated_start_date: job.estimated_start_date || '',
+        start_date: job.start_date || '',
+        estimated_completion: job.estimated_completion || '',
+        completion_date: job.completion_date || '',
+        estimated_cost: job.estimated_cost,
+        actual_cost: job.actual_cost || 0,
+        waiting_reason: job.waiting_reason || '',
     });
 
     const handleSave = () => {
@@ -34,13 +34,13 @@ export default function JobDetailsCard({ job, onJobUpdate }: JobDetailsCardProps
             description: job.description,
             status: job.status,
             priority: job.priority,
-            estimatedStartDate: job.estimatedStartDate || '',
-            startDate: job.startDate || '',
-            estimatedCompletion: job.estimatedCompletion || '',
-            completionDate: job.completionDate || '',
-            estimatedCost: job.estimatedCost,
-            actualCost: job.actualCost || 0,
-            waitingReason: job.waitingReason || '',
+            estimated_start_date: job.estimated_start_date || '',
+            start_date: job.start_date || '',
+            estimated_completion: job.estimated_completion || '',
+            completion_date: job.completion_date || '',
+            estimated_cost: job.estimated_cost,
+            actual_cost: job.actual_cost || 0,
+            waiting_reason: job.waiting_reason || '',
         });
         setIsEditing(false);
     };
@@ -86,6 +86,15 @@ export default function JobDetailsCard({ job, onJobUpdate }: JobDetailsCardProps
         });
     };
 
+    const formatDateEdit = (dateString: string) => {
+        console.log(dateString)
+        if (dateString === '')
+            return dateString
+        else {
+            return dateString.split('T')[0];
+        }
+    };
+
     const formatCurrency = (amount: number) => {
         return new Intl.NumberFormat('en-US', {
             style: 'currency',
@@ -97,7 +106,7 @@ export default function JobDetailsCard({ job, onJobUpdate }: JobDetailsCardProps
     const priorityBadge = getPriorityBadge(job.priority);
 
     return (
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+        <div className={`bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6`}>
             {!isEditing && (
                 <div className='flex items-center justify-between mb-2 '>
                     <div className='space-x-3'>
@@ -204,8 +213,8 @@ export default function JobDetailsCard({ job, onJobUpdate }: JobDetailsCardProps
                                     <label className="block text-sm font-medium text-gray-700 mb-1">Estimated Start</label>
                                     <input
                                         type="date"
-                                        value={editForm.estimatedStartDate}
-                                        onChange={(e) => setEditForm(prev => ({ ...prev, estimatedStartDate: e.target.value }))}
+                                        value={formatDateEdit(editForm.estimated_start_date)}
+                                        onChange={(e) => setEditForm(prev => ({ ...prev, estimated_start_date: e.target.value }))}
                                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                                     />
                                 </div>
@@ -214,8 +223,8 @@ export default function JobDetailsCard({ job, onJobUpdate }: JobDetailsCardProps
                                     <label className="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
                                     <input
                                         type="date"
-                                        value={editForm.startDate}
-                                        onChange={(e) => setEditForm(prev => ({ ...prev, startDate: e.target.value }))}
+                                        value={formatDateEdit(editForm.start_date)}
+                                        onChange={(e) => setEditForm(prev => ({ ...prev, start_date: e.target.value }))}
                                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                                     />
                                 </div>
@@ -224,8 +233,8 @@ export default function JobDetailsCard({ job, onJobUpdate }: JobDetailsCardProps
                                     <label className="block text-sm font-medium text-gray-700 mb-1">Estimated Completion</label>
                                     <input
                                         type="date"
-                                        value={editForm.estimatedCompletion}
-                                        onChange={(e) => setEditForm(prev => ({ ...prev, estimatedCompletion: e.target.value }))}
+                                        value={formatDateEdit(editForm.estimated_completion)}
+                                        onChange={(e) => setEditForm(prev => ({ ...prev, estimated_completion: e.target.value }))}
                                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                                     />
                                 </div>
@@ -234,8 +243,8 @@ export default function JobDetailsCard({ job, onJobUpdate }: JobDetailsCardProps
                                     <label className="block text-sm font-medium text-gray-700 mb-1">Completion Date</label>
                                     <input
                                         type="date"
-                                        value={editForm.completionDate}
-                                        onChange={(e) => setEditForm(prev => ({ ...prev, completionDate: e.target.value }))}
+                                        value={formatDateEdit(editForm.completion_date)}
+                                        onChange={(e) => setEditForm(prev => ({ ...prev, completion_date: e.target.value }))}
                                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                                     />
                                 </div>
@@ -251,8 +260,14 @@ export default function JobDetailsCard({ job, onJobUpdate }: JobDetailsCardProps
                                         <DollarSign className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
                                         <input
                                             type="number"
-                                            value={editForm.estimatedCost}
-                                            onChange={(e) => setEditForm(prev => ({ ...prev, estimatedCost: parseFloat(e.target.value) || 0 }))}
+                                            value={editForm.estimated_cost}
+                                            onChange={(e) => {
+                                                const value = parseFloat(e.target.value);
+                                                setEditForm(prev => ({
+                                                    ...prev,
+                                                    estimated_cost: isNaN(value) ? 0 : parseFloat(value.toFixed(2))
+                                                }));
+                                            }}
                                             className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                                             step="0.01"
                                             min="0"
@@ -266,8 +281,14 @@ export default function JobDetailsCard({ job, onJobUpdate }: JobDetailsCardProps
                                         <DollarSign className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
                                         <input
                                             type="number"
-                                            value={editForm.actualCost}
-                                            onChange={(e) => setEditForm(prev => ({ ...prev, actualCost: parseFloat(e.target.value) || 0 }))}
+                                            value={editForm.actual_cost}
+                                            onChange={(e) => {
+                                                const value = parseFloat(e.target.value);
+                                                setEditForm(prev => ({
+                                                    ...prev,
+                                                    actual_cost: isNaN(value) ? 0 : parseFloat(value.toFixed(2))
+                                                }));
+                                            }}
                                             className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-500"
                                             step="0.01"
                                             min="0"
@@ -286,8 +307,8 @@ export default function JobDetailsCard({ job, onJobUpdate }: JobDetailsCardProps
                             </label>
                             <input
                                 type="text"
-                                value={editForm.waitingReason}
-                                onChange={(e) => setEditForm(prev => ({ ...prev, waitingReason: e.target.value }))}
+                                value={editForm.waiting_reason}
+                                onChange={(e) => setEditForm(prev => ({ ...prev, waiting_reason: e.target.value }))}
                                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                                 placeholder="Enter reason..."
                             />
@@ -300,7 +321,7 @@ export default function JobDetailsCard({ job, onJobUpdate }: JobDetailsCardProps
                         <Calendar className="size-4 text-gray-400" />
                         <div>
                             <p className="text-xs text-gray-500">Estimated Start</p>
-                            <p className="font-medium">{formatDate(job.estimatedStartDate || '')}</p>
+                            <p className="font-medium">{formatDate(job.estimated_start_date || '')}</p>
                         </div>
                     </div>
 
@@ -308,7 +329,7 @@ export default function JobDetailsCard({ job, onJobUpdate }: JobDetailsCardProps
                         <Calendar className="size-4 text-gray-400" />
                         <div>
                             <p className="text-xs text-gray-500">Actual Start</p>
-                            <p className="font-medium">{formatDate(job.startDate || '')}</p>
+                            <p className="font-medium">{formatDate(job.start_date || '')}</p>
                         </div>
                     </div>
 
@@ -316,7 +337,7 @@ export default function JobDetailsCard({ job, onJobUpdate }: JobDetailsCardProps
                         <Calendar className="size-4 text-gray-400" />
                         <div>
                             <p className="text-xs text-gray-500">Estimated Completion</p>
-                            <p className="font-medium">{formatDate(job.estimatedCompletion || '')}</p>
+                            <p className="font-medium">{formatDate(job.estimated_completion || '')}</p>
                         </div>
                     </div>
 
@@ -324,7 +345,7 @@ export default function JobDetailsCard({ job, onJobUpdate }: JobDetailsCardProps
                         <Calendar className="size-4 text-gray-400" />
                         <div>
                             <p className="text-xs text-gray-500">Completion Date</p>
-                            <p className="font-medium">{formatDate(job.completionDate || '')}</p>
+                            <p className="font-medium">{formatDate(job.completion_date || '')}</p>
                         </div>
                     </div>
 
@@ -332,7 +353,7 @@ export default function JobDetailsCard({ job, onJobUpdate }: JobDetailsCardProps
                         <DollarSign className="size-4 text-gray-400" />
                         <div>
                             <p className="text-xs text-gray-500">Estimated Cost</p>
-                            <p className="font-medium">{formatCurrency(job.estimatedCost)}</p>
+                            <p className="font-medium">{formatCurrency(job.estimated_cost)}</p>
                         </div>
                     </div>
 
@@ -340,26 +361,26 @@ export default function JobDetailsCard({ job, onJobUpdate }: JobDetailsCardProps
                         <DollarSign className="size-4 text-gray-400" />
                         <div>
                             <p className="text-xs text-gray-500">Actual Cost</p>
-                            <p className="font-medium">{formatCurrency(job.actualCost)}</p>
+                            <p className="font-medium">{formatCurrency(job.actual_cost)}</p>
                         </div>
                     </div>
 
-                    {(job.status === 'Waiting' || job.status === 'On Hold') && job.waitingReason && (
+                    {(job.status === 'Waiting' || job.status === 'On Hold') && job.waiting_reason && (
                         <div className="col-span-2 md:col-span-3 lg:col-span-6 pt-2">
                             <p className="text-xs text-gray-500 mb-1">
                                 {job.status === 'Waiting' ? 'Waiting Reason' : 'Hold Reason'}
                             </p>
                             <p className="text-sm text-gray-700 bg-yellow-50 p-2 rounded border-l-4 border-yellow-300">
-                                {job.waitingReason}
+                                {job.waiting_reason}
                             </p>
                         </div>
                     )}
 
-                    {job.latestUpdate && (
+                    {job.latest_update && (
                         <div className="col-span-2 md:col-span-3 lg:col-span-6 pt-2">
                             <p className="text-xs text-gray-500 mb-1">Latest Update</p>
                             <p className="text-sm text-gray-700 bg-blue-50 p-2 rounded border-l-4 border-blue-300">
-                                {job.latestUpdate}
+                                {job.latest_update}
                             </p>
                         </div>
                     )}

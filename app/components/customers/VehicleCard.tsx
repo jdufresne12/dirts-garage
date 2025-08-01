@@ -48,7 +48,6 @@ export default function VehicleCard({ vehicle, customer_id, onUpdate }: VehicleC
                     <div><span className="font-medium">Engine:</span> {vehicle.engine || 'N/A'}</div>
                     <div><span className="font-medium">Transmission:</span> {vehicle.transmission || 'N/A'}</div>
                     <div><span className="font-medium">Mileage:</span> {vehicle.mileage !== 0 ? vehicle.mileage : 'N/A'}</div>
-                    <div><span className="font-medium">Color:</span> {vehicle.color || 'N/A'}</div>
                     <div><span className="font-medium">VIN:</span> {vehicle.vin || 'N/A'}</div>
                 </div>
             </div>

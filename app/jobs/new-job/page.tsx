@@ -8,20 +8,20 @@ import { mockCustomers, mockVehicles } from '@/app/data/mock-data';
 
 const emptyJobForm: Job = {
     id: helpers.generateUniqueID(),
-    customerId: '',
-    vehicleId: '',
+    customer_id: '',
+    vehicle_id: '',
     title: '',
     description: '',
     status: 'Waiting',
     priority: "Low",
-    waitingReason: '',
-    latestUpdate: '',
-    estimatedStartDate: '',
-    estimatedCompletion: '',
-    startDate: '',
-    completionDate: '',
-    estimatedCost: 0,
-    actualCost: 0,
+    waiting_reason: '',
+    latest_update: '',
+    estimated_start: '',
+    estimated_completion: '',
+    start_date: '',
+    completion_date: '',
+    estimated_cost: 0,
+    actual_cost: 0,
 };
 
 export default function NewJob() {
@@ -34,103 +34,182 @@ export default function NewJob() {
     const [showCustomerForm, setShowCustomerForm] = useState(false);
     const [showVehicleForm, setShowVehicleForm] = useState(false);
 
+    // Error states
+    const [errors, setErrors] = useState({
+        title: '',
+        description: ''
+    });
+    const [touched, setTouched] = useState({
+        title: false,
+        description: false
+    });
+
     useEffect(() => {
-        fetchCustomers();
+        fetch('/api/customers')
+            .then(res => res.json())
+            .then(data => setCustomersList(data))
+            .catch(error => console.error("Error fetching customers:", error))
     }, [])
 
-    // Fetch vehicles when customer changes
     useEffect(() => {
-        if (jobForm.customerId) {
-            fetchVehicles();
+        if (jobForm.customer_id) {
+            fetch(`/api/vehicles/customer/${jobForm.customer_id}`)
+                .then(res => res.json())
+                .then(data => {
+                    setVehiclesList(data)
+                    console.log(data)
+                })
+                .catch(error => console.error("Error fetching vehicles:", error))
         } else {
             setVehiclesList([]);
             setSelectedVehicle(null);
-            setJobForm(prev => ({ ...prev, vehicleId: '' }));
+            setJobForm(prev => ({ ...prev, vehicle_id: '' }));
         }
-    }, [jobForm.customerId])
+    }, [jobForm.customer_id])
 
-    function fetchCustomers() {
-        // Fetch all customers from API
-        setCustomersList(mockCustomers);
-    }
-
-    function fetchVehicles() {
-        // Fetch vehicles for selected customer from API
-        const filteredVehicles = mockVehicles.filter(v => v.customerId === jobForm.customerId);
-        setVehiclesList(filteredVehicles);
-    }
-
-    const handleJobNext = () => {
-        if (!jobForm.title || !jobForm.description) {
-            alert('Please fill in required fields');
-            return;
+    const validateTitle = (title: string): string => {
+        if (!title.trim()) {
+            return 'Title is required';
         }
-        setCurrentCard('customer-vehicle');
+        if (title.trim().length > 100) {
+            return 'Title must be less than 100 characters';
+        }
+        return '';
     };
 
-    const handleCustomerSelection = (customerId: string) => {
-        setJobForm(prev => ({ ...prev, customerId, vehicleId: '' }));
+    const validateDescription = (description: string): string => {
+        if (!description.trim()) {
+            return 'Description is required';
+        }
+        if (description.trim().length > 500) {
+            return 'Description must be less than 500 characters';
+        }
+        return '';
+    };
 
-        // Find and set the selected customer
-        const customer = customersList.find(c => c.id === customerId) || null;
+    // Handle input changes with validation
+    const handleTitleChange = (value: string) => {
+        setJobForm(prev => ({ ...prev, title: value }));
+
+        if (touched.title) {
+            setErrors(prev => ({
+                ...prev,
+                title: validateTitle(value)
+            }));
+        }
+    };
+
+    const handleDescriptionChange = (value: string) => {
+        setJobForm(prev => ({ ...prev, description: value }));
+
+        if (touched.description) {
+            setErrors(prev => ({
+                ...prev,
+                description: validateDescription(value)
+            }));
+        }
+    };
+
+    // Handle field blur (when user leaves the field)
+    const handleFieldBlur = (field: 'title' | 'description') => {
+        setTouched(prev => ({ ...prev, [field]: true }));
+
+        if (field === 'title') {
+            setErrors(prev => ({
+                ...prev,
+                title: validateTitle(jobForm.title)
+            }));
+        } else if (field === 'description') {
+            setErrors(prev => ({
+                ...prev,
+                description: validateDescription(jobForm.description)
+            }));
+        }
+    };
+
+    const handleCustomerSelection = (customer_id: string) => {
+        const customer = customersList.find(c => c.id === customer_id) || null;
         setSelectedCustomer(customer);
-
-        // Clear vehicle selection when customer changes
+        setJobForm(prev => ({ ...prev, customer_id, vehicle_id: '' }));
         setSelectedVehicle(null);
     };
 
-    const handleVehicleSelection = (vehicleId: string) => {
-        setJobForm(prev => ({ ...prev, vehicleId }));
-
-        // Find and set the selected vehicle
-        const vehicle = vehiclesList.find(v => v.id === vehicleId) || null;
+    const handleVehicleSelection = (vehicle_id: string) => {
+        const vehicle = vehiclesList.find(v => v.id === vehicle_id) || null;
         setSelectedVehicle(vehicle);
+        setJobForm(prev => ({ ...prev, vehicle_id }));
     };
 
     const handleAddCustomer = (customerData: Customer) => {
-        console.log('Adding customer:', customerData);
-        // Update customers list
         setCustomersList(prev => [...prev, customerData]);
-        // Select the new customer
         setSelectedCustomer(customerData);
-        setJobForm(prev => ({ ...prev, customerId: customerData.id }));
+        setJobForm(prev => ({ ...prev, customer_id: customerData.id }));
         setShowCustomerForm(false);
     };
 
     const handleAddVehicle = (vehicleData: Vehicle) => {
-        console.log('Adding vehicle:', vehicleData);
-        // Update vehicles list
         setVehiclesList(prev => [...prev, vehicleData]);
-        // Select the new vehicle
         setSelectedVehicle(vehicleData);
-        setJobForm(prev => ({ ...prev, vehicleId: vehicleData.id }));
+        setJobForm(prev => ({ ...prev, vehicle_id: vehicleData.id }));
         setShowVehicleForm(false);
     };
 
-    const handleCreateJob = () => {
-        if (!jobForm.customerId || !jobForm.vehicleId) {
-            alert('Please select both customer and vehicle');
-            return;
-        }
-
-        console.log('Creating job:', { ...jobForm, id: helpers.generateUniqueID() });
-
-        // Call APIS
-
-        // Redirect to job details page
-        window.location.href = `/jobs/1`;
-    };
-
     const handleClearCustomer = () => {
-        setJobForm(prev => ({ ...prev, customerId: '', vehicleId: '' }));
+        setJobForm(prev => ({ ...prev, customer_id: '', vehicle_id: '' }));
         setSelectedCustomer(null);
         setSelectedVehicle(null);
         setVehiclesList([]);
     };
 
     const handleClearVehicle = () => {
-        setJobForm(prev => ({ ...prev, vehicleId: '' }));
+        setJobForm(prev => ({ ...prev, vehicle_id: '' }));
         setSelectedVehicle(null);
+    };
+
+    const handleJobNext = () => {
+        // Mark all fields as touched to show errors
+        setTouched({ title: true, description: true });
+
+        // Validate all fields
+        const titleError = validateTitle(jobForm.title);
+        const descriptionError = validateDescription(jobForm.description);
+
+        setErrors({
+            title: titleError,
+            description: descriptionError
+        });
+
+        // Only proceed if no errors
+        if (!titleError && !descriptionError) {
+            setCurrentCard('customer-vehicle');
+        }
+    };
+
+    const handleCreateJob = async () => {
+        console.log('Creating job:', jobForm);
+
+        // Call APIS
+        try {
+            const response = await fetch('/api/jobs', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(jobForm),
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to create job');
+            }
+
+            const result = await response.text();
+
+            console.log("Result: ", result);
+        } catch (error) {
+            console.error('Error creating job:', error);
+        }
+        // Redirect to job details page
+        window.location.href = `/jobs/${jobForm.id}`;
     };
 
     return (
@@ -169,26 +248,50 @@ export default function NewJob() {
                                 <div className="space-y-6">
                                     {/* Basic Details  */}
                                     <span className="flex border-b-1 border-gray-300 text-lg font-semibold mb-4">Basic Details</span>
+
+                                    {/* Title field with error handling */}
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-1">Title *</label>
                                         <input
                                             type="text"
                                             value={jobForm.title}
-                                            onChange={(e) => setJobForm(prev => ({ ...prev, title: e.target.value }))}
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                                            onChange={(e) => handleTitleChange(e.target.value)}
+                                            onBlur={() => handleFieldBlur('title')}
+                                            className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${errors.title && touched.title
+                                                ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
+                                                : 'border-gray-300 focus:ring-orange-500 focus:border-orange-500'
+                                                }`}
                                             placeholder="Enter job title..."
                                         />
+                                        {errors.title && touched.title && (
+                                            <p className="mt-1 text-sm text-red-600">{errors.title}</p>
+                                        )}
                                     </div>
 
+                                    {/* Description field with error handling */}
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-1">Description *</label>
                                         <textarea
                                             value={jobForm.description}
-                                            onChange={(e) => setJobForm(prev => ({ ...prev, description: e.target.value }))}
+                                            onChange={(e) => handleDescriptionChange(e.target.value)}
+                                            onBlur={() => handleFieldBlur('description')}
                                             rows={3}
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                                            className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${errors.description && touched.description
+                                                ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
+                                                : 'border-gray-300 focus:ring-orange-500 focus:border-orange-500'
+                                                }`}
                                             placeholder="Describe the work to be done..."
                                         />
+                                        <div className="flex justify-between items-center mt-1">
+                                            {errors.description && touched.description ? (
+                                                <p className="text-sm text-red-600">{errors.description}</p>
+                                            ) : (
+                                                <div />
+                                            )}
+                                            <p className="text-xs text-gray-500">
+                                                {jobForm.description.length}/500
+                                            </p>
+                                        </div>
                                     </div>
 
                                     {/* Tracking */}
@@ -201,8 +304,8 @@ export default function NewJob() {
                                                 onChange={(e) => setJobForm(prev => ({
                                                     ...prev,
                                                     status: e.target.value,
-                                                    startDate: e.target.value === 'Waiting' ? '' : prev.startDate,
-                                                    completionDate: e.target.value !== 'Completed' && e.target.value !== 'Payment' ? '' : prev.completionDate,
+                                                    startDate: e.target.value === 'Waiting' ? '' : prev.start_date,
+                                                    completionDate: e.target.value !== 'Completed' && e.target.value !== 'Payment' ? '' : prev.completion_date,
                                                 }))}
                                                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                                             >
@@ -237,8 +340,8 @@ export default function NewJob() {
                                                 <span className="absolute left-3 top-2.5 text-gray-400">$</span>
                                                 <input
                                                     type="number"
-                                                    value={jobForm.estimatedCost}
-                                                    onChange={(e) => setJobForm(prev => ({ ...prev, estimatedCost: parseFloat(e.target.value) || 0 }))}
+                                                    value={jobForm.estimated_cost}
+                                                    onChange={(e) => setJobForm(prev => ({ ...prev, estimated_cost: parseFloat(e.target.value) || 0 }))}
                                                     className="w-full pl-8 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                                                     step="0.01"
                                                     min="0"
@@ -252,7 +355,7 @@ export default function NewJob() {
                                                 <span className="absolute left-3 top-2.5 text-gray-400">$</span>
                                                 <input
                                                     type="number"
-                                                    value={jobForm.actualCost}
+                                                    value={jobForm.actual_cost}
                                                     className="w-full pl-8 pr-3 py-2 border bg-gray-100 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                                                     step="0.01"
                                                     min="0"
@@ -270,8 +373,8 @@ export default function NewJob() {
                                             <label className="block text-sm font-medium text-gray-700 mb-1">Estimated Start</label>
                                             <input
                                                 type="date"
-                                                value={jobForm.estimatedStartDate}
-                                                onChange={(e) => setJobForm(prev => ({ ...prev, estimatedStartDate: e.target.value }))}
+                                                value={jobForm.estimated_start}
+                                                onChange={(e) => setJobForm(prev => ({ ...prev, estimated_start: e.target.value }))}
                                                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                                             />
                                         </div>
@@ -281,8 +384,8 @@ export default function NewJob() {
                                                 <label className="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
                                                 <input
                                                     type="date"
-                                                    value={jobForm.startDate}
-                                                    onChange={(e) => setJobForm(prev => ({ ...prev, startDate: e.target.value }))}
+                                                    value={jobForm.start_date}
+                                                    onChange={(e) => setJobForm(prev => ({ ...prev, start_date: e.target.value }))}
                                                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                                                 />
                                             </div>
@@ -292,8 +395,8 @@ export default function NewJob() {
                                             <label className="block text-sm font-medium text-gray-700 mb-1">Estimated Completion</label>
                                             <input
                                                 type="date"
-                                                value={jobForm.estimatedCompletion}
-                                                onChange={(e) => setJobForm(prev => ({ ...prev, estimatedCompletion: e.target.value }))}
+                                                value={jobForm.estimated_completion}
+                                                onChange={(e) => setJobForm(prev => ({ ...prev, estimated_completion: e.target.value }))}
                                                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                                             />
                                         </div>
@@ -303,8 +406,8 @@ export default function NewJob() {
                                                 <label className="block text-sm font-medium text-gray-700 mb-1">Completion Date</label>
                                                 <input
                                                     type="date"
-                                                    value={jobForm.completionDate}
-                                                    onChange={(e) => setJobForm(prev => ({ ...prev, completionDate: e.target.value }))}
+                                                    value={jobForm.completion_date}
+                                                    onChange={(e) => setJobForm(prev => ({ ...prev, completion_date: e.target.value }))}
                                                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                                                 />
                                             </div>
@@ -349,7 +452,7 @@ export default function NewJob() {
 
                                     {!selectedCustomer && (
                                         <select
-                                            value={jobForm.customerId || ''}
+                                            value={jobForm.customer_id || ''}
                                             onChange={(e) => handleCustomerSelection(e.target.value)}
                                             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                                         >
@@ -396,17 +499,17 @@ export default function NewJob() {
 
                                     {!selectedVehicle && (
                                         <select
-                                            value={jobForm.vehicleId || ''}
+                                            value={jobForm.vehicle_id || ''}
                                             onChange={(e) => handleVehicleSelection(e.target.value)}
                                             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
-                                            disabled={!jobForm.customerId}
+                                            disabled={!jobForm.customer_id}
                                         >
                                             <option value="">
-                                                {!jobForm.customerId ? 'Select customer first' : 'Select Vehicle'}
+                                                {!jobForm.customer_id ? 'Select customer first' : 'Select Vehicle'}
                                             </option>
                                             {vehiclesList.map(vehicle => (
                                                 <option key={vehicle.id} value={vehicle.id}>
-                                                    {vehicle.year} {vehicle.make} {vehicle.model} - {vehicle.licensePlate}
+                                                    {vehicle.year} {vehicle.make} {vehicle.model}
                                                 </option>
                                             ))}
                                         </select>
@@ -416,7 +519,6 @@ export default function NewJob() {
                                         <div className="flex justify-between items-start mt-2 p-3 bg-blue-50 rounded-md group">
                                             <p className="text-sm text-gray-700">
                                                 <strong>{selectedVehicle.year} {selectedVehicle.make} {selectedVehicle.model}</strong><br />
-                                                License Plate: {selectedVehicle.licensePlate}
                                             </p>
                                             <button onClick={handleClearVehicle}>
                                                 <Trash className="size-5 text-red-500 hover:text-red-600 opacity-0 transition-colors hover:scale-110 group-hover:opacity-100" />
@@ -425,7 +527,7 @@ export default function NewJob() {
                                     )}
 
                                     {/* Show message when no vehicles available */}
-                                    {jobForm.customerId && vehiclesList.length === 0 && !selectedVehicle && (
+                                    {jobForm.customer_id && vehiclesList.length === 0 && !selectedVehicle && (
                                         <div className="text-center py-4 text-gray-500 bg-gray-50 rounded-md">
                                             No vehicles found for this customer.
                                             <button
@@ -449,7 +551,7 @@ export default function NewJob() {
                                     <button
                                         onClick={handleCreateJob}
                                         className="flex items-center gap-2 px-4 py-2 bg-orange-400 text-white rounded-md hover:bg-orange-500 transition-colors"
-                                        disabled={!jobForm.customerId || !jobForm.vehicleId}
+                                        disabled={!jobForm.customer_id || !jobForm.vehicle_id}
                                     >
                                         <Save className="size-4" />
                                         Create Job
@@ -470,7 +572,7 @@ export default function NewJob() {
             {selectedCustomer && (
                 <AddVehicleModal
                     isOpen={showVehicleForm}
-                    customerId={selectedCustomer.id}
+                    customer_id={selectedCustomer.id}
                     onClose={() => setShowVehicleForm(false)}
                     onSubmit={handleAddVehicle}
                 />
