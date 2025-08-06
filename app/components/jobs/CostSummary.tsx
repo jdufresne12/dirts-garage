@@ -37,7 +37,7 @@ export default function CostSummary({
 
     return (
         <>
-            <div className="bg-white rounded-lg border border-gray-200 p-4">
+            <div className="bg-white rounded-lg border border-gray-200 p-4 mb-6">
                 <div className="flex items-center justify-between mb-4">
                     <h3 className="font-semibold">Cost Summary</h3>
                 </div>
@@ -48,7 +48,7 @@ export default function CostSummary({
                         <span>${costSummary.partsAndMaterials.toLocaleString()}</span>
                     </div>
                     <div className="flex justify-between">
-                        <span>Labor ({costSummary.hours} hours):</span>
+                        <span>Labor ({Number(costSummary.hours)} hours):</span>
                         <span>${costSummary.labor.toLocaleString()}</span>
                     </div>
                     <hr className="my-2" />

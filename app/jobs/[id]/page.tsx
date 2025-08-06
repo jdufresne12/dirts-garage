@@ -152,7 +152,7 @@ const JobDetailsPage = () => {
                 <div className="flex-1 p-6 sm:p-6">
                     <JobSteps job_id={jobData.id} jobSteps={jobSteps || []} setJobSteps={setJobSteps} />
                     <PartsAndMaterials job_id={jobData.id} parts={parts || []} setParts={setParts} />
-                    <PhotoDocumentation />
+                    <PhotoDocumentation job_id={jobData.id} />
                 </div>
 
                 {/* Desktop Sidebar */}

@@ -2,8 +2,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { X, Send, Save, Eye, Calculator, DollarSign, Calendar, FileText, Download, Plus, Trash2, Edit3 } from 'lucide-react';
 import { InvoicePDFGenerator } from '@/app/lib/pdf-generator';
+import helpers from '@/app/utils/helpers';
 
-// Types for the invoice
 interface InvoiceLineItem {
     id: string;
     type: 'labor' | 'part' | 'fee' | 'discount' | 'custom';
@@ -43,7 +43,7 @@ interface InvoiceGenerationModalProps {
     parts: Part[];
 }
 
-// Business info - you can move this to a config file later
+// Business info
 const businessInfo = {
     name: "Dirt's Garage",
     address: "154 South Parliman rd",
@@ -64,7 +64,7 @@ export default function InvoiceGenerationModal({
     parts
 }: InvoiceGenerationModalProps) {
     const [invoiceData, setInvoiceData] = useState<InvoiceData>({
-        invoiceNumber: '',
+        invoiceNumber: helpers.generateUniqueID(),
         date: new Date().toISOString().split('T')[0],
         dueDate: '',
         subtotal: 0,
@@ -126,35 +126,45 @@ export default function InvoiceGenerationModal({
         }));
     };
 
+    // Helper function to safely convert values to numbers
+    const safeNumber = (value: any): number => {
+        if (value === null || value === undefined || value === '') return 0;
+        const num = typeof value === 'string' ? parseFloat(value) : Number(value);
+        return isNaN(num) ? 0 : num;
+    };
+
     const generateLineItems = () => {
         const items: InvoiceLineItem[] = [];
 
         // Add labor items from job steps
         if (jobSteps && jobSteps.length > 0) {
-            const totalLaborHours = jobSteps.reduce((sum, step) => sum + (step.actualHours || 0), 0);
+            const totalLaborHours = jobSteps.reduce((sum, step) => sum + (safeNumber(step.actual_hours)), 0);
             if (totalLaborHours > 0) {
                 items.push({
                     id: 'labor-1',
                     type: 'labor',
                     description: invoiceData.laborDescription,
                     quantity: totalLaborHours,
-                    rate: invoiceData.laborRate,
-                    amount: totalLaborHours * invoiceData.laborRate,
+                    rate: safeNumber(invoiceData.laborRate),
+                    amount: totalLaborHours * safeNumber(invoiceData.laborRate),
                     taxable: true
                 });
             }
         }
 
-        // Add parts items
+        // Add parts items - Fix the rate conversion here
         if (parts && parts.length > 0) {
             parts.forEach((part, index) => {
+                const quantity = safeNumber(part.quantity);
+                const rate = safeNumber(part.price); // Convert price to number
+
                 items.push({
                     id: `part-${index + 1}`,
                     type: 'part',
-                    description: `${part.name} - ${part.partNumber}`,
-                    quantity: part.quantity,
-                    rate: part.price,
-                    amount: part.quantity * part.price,
+                    description: `${part.name} - ${part.part_number}`,
+                    quantity: quantity,
+                    rate: rate,
+                    amount: quantity * rate,
                     taxable: true
                 });
             });
@@ -164,10 +174,13 @@ export default function InvoiceGenerationModal({
     };
 
     const calculateTotals = () => {
-        const subtotal = invoiceData.lineItems.reduce((sum, item) => sum + item.amount, 0);
-        const discountAmount = invoiceData.discountAmount || 0;
+        const subtotal = invoiceData.lineItems.reduce((sum, item) => {
+            return sum + safeNumber(item.amount);
+        }, 0);
+
+        const discountAmount = safeNumber(invoiceData.discountAmount);
         const taxableAmount = subtotal - discountAmount;
-        const taxAmount = (taxableAmount * invoiceData.taxRate) / 100;
+        const taxAmount = (taxableAmount * safeNumber(invoiceData.taxRate)) / 100;
         const totalAmount = taxableAmount + taxAmount;
 
         setInvoiceData(prev => ({
@@ -196,7 +209,7 @@ export default function InvoiceGenerationModal({
                         };
                     } else {
                         // Back to hourly
-                        const totalHours = jobSteps ? jobSteps.reduce((sum, step) => sum + (step.actualHours || 0), 0) : 0;
+                        const totalHours = jobSteps ? jobSteps.reduce((sum, step) => sum + (step.actual_hours || 0), 0) : 0;
                         return {
                             ...item,
                             quantity: totalHours,
@@ -214,7 +227,7 @@ export default function InvoiceGenerationModal({
     }, [jobSteps]);
 
     const handleLaborRateChange = useCallback((value: string) => {
-        const rate = parseFloat(value) || 0;
+        const rate = safeNumber(value);
         setInvoiceData(prev => {
             const newData = { ...prev, laborRate: rate };
 
@@ -225,7 +238,7 @@ export default function InvoiceGenerationModal({
                         return {
                             ...item,
                             rate: rate,
-                            amount: item.quantity * rate
+                            amount: safeNumber(item.quantity) * rate
                         };
                     }
                     return item;
@@ -238,7 +251,7 @@ export default function InvoiceGenerationModal({
     }, []);
 
     const handleLaborAmountChange = useCallback((value: string) => {
-        const amount = parseFloat(value) || 0;
+        const amount = safeNumber(value);
         setInvoiceData(prev => {
             const newData = { ...prev, laborAmount: amount };
 
@@ -283,13 +296,16 @@ export default function InvoiceGenerationModal({
     const handleAddItem = useCallback(() => {
         if (!newItem.description.trim()) return;
 
+        const quantity = safeNumber(newItem.quantity);
+        const rate = safeNumber(newItem.rate);
+
         const item: InvoiceLineItem = {
             id: `custom-${Date.now()}`,
             type: 'custom',
             description: newItem.description,
-            quantity: newItem.quantity,
-            rate: newItem.rate,
-            amount: newItem.quantity * newItem.rate,
+            quantity: quantity,
+            rate: rate,
+            amount: quantity * rate,
             taxable: true
         };
 
@@ -315,12 +331,12 @@ export default function InvoiceGenerationModal({
     }, []);
 
     const handleDiscountChange = useCallback((value: string) => {
-        const discountAmount = parseFloat(value) || 0;
+        const discountAmount = safeNumber(value);
         setInvoiceData(prev => ({ ...prev, discountAmount }));
     }, []);
 
     const handleTaxRateChange = useCallback((value: string) => {
-        const taxRate = parseFloat(value) || 0;
+        const taxRate = safeNumber(value);
         setInvoiceData(prev => ({ ...prev, taxRate }));
     }, []);
 
@@ -407,7 +423,6 @@ export default function InvoiceGenerationModal({
                     <p className="text-base md:text-lg font-semibold text-gray-700">{invoiceData.invoiceNumber}</p>
                     <div className="mt-2 md:mt-4 text-sm text-gray-600">
                         <p><span className="font-medium">Date:</span> {invoiceData.date}</p>
-                        <p><span className="font-medium">Due:</span> {invoiceData.dueDate}</p>
                     </div>
                 </div>
             </div>
@@ -445,8 +460,12 @@ export default function InvoiceGenerationModal({
                                         <div className="break-words">{item.description}</div>
                                     </td>
                                     <td className="py-2 md:py-3 text-center text-gray-700 text-sm md:text-base">{item.quantity}</td>
-                                    <td className="py-2 md:py-3 text-right text-gray-700 text-sm md:text-base">${item.rate.toFixed(2)}</td>
-                                    <td className="py-2 md:py-3 text-right text-gray-700 text-sm md:text-base font-medium">${item.amount.toFixed(2)}</td>
+                                    <td className="py-2 md:py-3 text-right text-gray-700 text-sm md:text-base">
+                                        ${safeNumber(item.rate).toFixed(2)}
+                                    </td>
+                                    <td className="py-2 md:py-3 text-right text-gray-700 text-sm md:text-base font-medium">
+                                        ${safeNumber(item.amount).toFixed(2)}
+                                    </td>
                                 </tr>
                             ))}
                         </tbody>
@@ -459,21 +478,21 @@ export default function InvoiceGenerationModal({
                 <div className="w-full max-w-xs md:w-64">
                     <div className="flex justify-between py-1 md:py-2 text-sm md:text-base">
                         <span className="text-gray-700">Subtotal:</span>
-                        <span className="text-gray-700">${invoiceData.subtotal.toFixed(2)}</span>
+                        <span className="text-gray-700">${safeNumber(invoiceData.subtotal).toFixed(2)}</span>
                     </div>
                     {invoiceData.discountAmount > 0 && (
                         <div className="flex justify-between py-1 md:py-2 text-sm md:text-base">
                             <span className="text-gray-700">Discount:</span>
-                            <span className="text-gray-700">-${invoiceData.discountAmount.toFixed(2)}</span>
+                            <span className="text-gray-700">-${safeNumber(invoiceData.discountAmount).toFixed(2)}</span>
                         </div>
                     )}
                     <div className="flex justify-between py-1 md:py-2 text-sm md:text-base">
                         <span className="text-gray-700">Tax ({invoiceData.taxRate}%):</span>
-                        <span className="text-gray-700">${invoiceData.taxAmount.toFixed(2)}</span>
+                        <span className="text-gray-700">${safeNumber(invoiceData.taxAmount).toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between py-1 md:py-2 border-t-2 border-gray-300 font-bold text-base md:text-lg">
                         <span>Total:</span>
-                        <span>${invoiceData.totalAmount.toFixed(2)}</span>
+                        <span>${safeNumber(invoiceData.totalAmount).toFixed(2)}</span>
                     </div>
                 </div>
             </div>
@@ -1177,7 +1196,7 @@ export default function InvoiceGenerationModal({
                                     <span className="hidden sm:inline">Download PDF</span>
                                     <span className="sm:hidden">PDF</span>
                                 </button>
-                                <button
+                                {/* <button
                                     onClick={() => handleGenerate('send')}
                                     disabled={isGenerating || isGeneratingPDF}
                                     className="flex-1 md:flex-none px-3 md:px-4 py-2 text-sm bg-orange-500 text-white rounded-lg hover:bg-orange-600 flex items-center justify-center"
@@ -1195,7 +1214,7 @@ export default function InvoiceGenerationModal({
                                             <span className="sm:hidden">Send</span>
                                         </>
                                     )}
-                                </button>
+                                </button> */}
                             </div>
                         </div>
                     </div>

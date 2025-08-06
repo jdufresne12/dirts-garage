@@ -1,8 +1,6 @@
-// app/lib/pdf-generator.ts
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
-// Invoice data interfaces (keeping the same as before)
 interface InvoiceData {
     invoiceNumber: string;
     date: string;

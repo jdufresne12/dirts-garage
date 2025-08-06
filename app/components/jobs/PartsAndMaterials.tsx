@@ -131,12 +131,15 @@ export default function parts({ parts, setParts, job_id }: PartsProps) {
         <div className="bg-white rounded-lg border border-gray-200 p-6 mb-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4">
                 <h2 className="text-xl font-semibold">Parts & Materials</h2>
-                <button
-                    onClick={() => setShowAddPartModal(true)}
-                    className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 whitespace-nowrap"
-                >
-                    Add Part
-                </button>
+                {parts && parts.length > 0 &&
+                    <button
+                        onClick={() => setShowAddPartModal(true)}
+                        className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 whitespace-nowrap"
+                    >
+                        Add Part
+                    </button>
+                }
+
             </div>
 
             <div className="space-y-4">

@@ -162,8 +162,8 @@ export default function JobSteps({ job_id, jobSteps, setJobSteps }: JobStepsProp
                 <div>
                     <h2 className="text-xl font-semibold">Work Progress & Time Tracking</h2>
                     <div className="flex gap-4 text-sm text-gray-600 mt-1">
-                        <span>Estimated: {totalEstimatedHours || 0} hrs</span>
-                        <span>Actual: {totalActualHours} hrs</span>
+                        <span>Estimated: {Number(totalEstimatedHours) || 0} hrs</span>
+                        <span>Actual: {Number(totalActualHours)} hrs</span>
                         {totalEstimatedHours > 0 && (
                             <span className={`font-medium ${totalActualHours > totalEstimatedHours ? 'text-red-600' : 'text-green-600'}`}>
                                 {totalActualHours <= totalEstimatedHours ? 'On Track' : `${(totalActualHours - totalEstimatedHours).toFixed(1)} hrs over`}
