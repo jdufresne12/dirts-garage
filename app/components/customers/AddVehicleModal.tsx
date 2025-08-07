@@ -22,7 +22,7 @@ export default function AddVehicleModal({
     const isEditMode = !!vehicle;
 
     const [formData, setFormData] = useState<Vehicle>({
-        id: vehicle?.id ?? helpers.generateUniqueID(),
+        id: vehicle?.id ?? `VN-${helpers.generateUniqueID()}`,
         customer_id: vehicle?.customer_id ?? customer_id,
         year: vehicle?.year ?? new Date().getFullYear(),
         make: vehicle?.make ?? "",
@@ -40,7 +40,7 @@ export default function AddVehicleModal({
     useEffect(() => {
         if (!isOpen) {
             setFormData({
-                id: vehicle?.id ?? helpers.generateUniqueID(),
+                id: vehicle?.id ?? `VN-${helpers.generateUniqueID()}`,
                 customer_id: vehicle?.customer_id ?? customer_id,
                 year: vehicle?.year ?? new Date().getFullYear(),
                 make: vehicle?.make ?? "",

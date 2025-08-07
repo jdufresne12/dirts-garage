@@ -6,7 +6,16 @@ export async function GET(_req: Request, context: { params: { id: string } }) {
 
     try {
         const result = await pgPool.query('SELECT * FROM job_steps WHERE job_id = $1 ORDER BY "order" ASC', [id]);
-        return NextResponse.json(result.rows);
+
+        // Parse numeric fields before returning
+        const parsedRows = result.rows.map(row => ({
+            ...row,
+            estimated_hours: row.estimated_hours ? parseFloat(row.estimated_hours) : null,
+            actual_hours: row.actual_hours ? parseFloat(row.actual_hours) : null,
+            order: row.order ? parseInt(row.order) : null
+        }));
+
+        return NextResponse.json(parsedRows);
     } catch (error) {
         console.error(`GET /api/jobs/job-steps/${id} error:`, error);
         return new NextResponse('Internal Server Error', { status: 500 });
@@ -138,7 +147,15 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
             return new NextResponse('Job step not found', { status: 404 });
         }
 
-        return NextResponse.json(result.rows[0]);
+        // Parse numeric fields in the returned data
+        const updatedRow = {
+            ...result.rows[0],
+            estimated_hours: result.rows[0].estimated_hours ? parseFloat(result.rows[0].estimated_hours) : null,
+            actual_hours: result.rows[0].actual_hours ? parseFloat(result.rows[0].actual_hours) : null,
+            order: result.rows[0].order ? parseInt(result.rows[0].order) : null
+        };
+
+        return NextResponse.json(updatedRow);
     } catch (error) {
         console.error(`PUT /api/job-steps/${id} error:`, error);
         return new NextResponse('Failed to update job step', { status: 500 });

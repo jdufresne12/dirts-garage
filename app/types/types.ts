@@ -58,13 +58,35 @@ interface Invoice {
     amount: number;
     amount_paid: number;
     status: string;
-    due_date: string;
+    due_date?: string;
     paid_date?: string;
     customer_id: string;
     job_id: string;
-    customer: Customer | null;
-    job: Job | null;
+    customer?: Customer | null;
+    job?: Job | null;
+    subtotal: number;
+    tax_rate: number;
+    tax_amount: number;
+    discount_amount: number;
+    notes?: string;
+    line_items?: InvoiceLineItem[];
+    created_at?: string;
+    updated_at?: string;
 };
+
+interface InvoiceLineItem {
+    id: string;
+    invoice_id: string;
+    key: string;
+    type: 'labor' | 'part' | 'fee' | 'discount' | 'custom';
+    description: string;
+    quantity: number;
+    rate: number;
+    amount: number;
+    taxable: boolean;
+    created_at?: string;
+    updated_at?: string;
+}
 
 interface Part {
     id: string;

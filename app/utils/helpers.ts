@@ -1,7 +1,6 @@
-import { uuidv7 } from "uuidv7";
-
 export const generateUniqueID = (): string => {
-    return uuidv7().toLowerCase();
+    const uuid = crypto.randomUUID().replace(/-/g, '').substring(0, 8).toUpperCase();
+    return `${uuid}`;
 }
 
 export const checkNoActiveJobs = (customer: Customer) => {

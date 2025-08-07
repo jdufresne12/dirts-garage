@@ -109,9 +109,11 @@ export default function JobNotes({ job_id, Notes, setNotes }: JobNotesProps) {
                             <div className="flex justify-between items-start">
                                 <span className="text-xs text-gray-500">{helpers.displayDateAndTimeLong(note.timestamp)}</span>
                                 <Trash
-                                    className="size-4 text-gray-500 hover:text-red-500 cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity"
+                                    className="size-4 text-gray-500 hover:text-red-500 cursor-pointer 
+               opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity"
                                     onClick={() => handleRemovingNote(note.id)}
                                 />
+
                             </div>
                             <p className="text-sm text-gray-900 mt-1">{note.note}</p>
                         </div>

@@ -164,7 +164,6 @@ const JobDetailsPage = () => {
                         costSummary={calculateCostSummary()}
                         jobData={jobData}
                         customer={customer!}
-                        vehicle={vehicle!}
                         jobSteps={jobSteps || []}
                         parts={parts || []}
                     />
@@ -179,7 +178,6 @@ const JobDetailsPage = () => {
                     costSummary={calculateCostSummary()}
                     jobData={jobData}
                     customer={customer!}
-                    vehicle={vehicle!}
                     jobSteps={jobSteps || []}
                     parts={parts || []}
                 />

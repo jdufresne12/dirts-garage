@@ -7,7 +7,7 @@ import AddCustomerModal from '@/app/components/customers/AddCustomerModal';
 import { mockCustomers, mockVehicles } from '@/app/data/mock-data';
 
 const emptyJobForm: Job = {
-    id: helpers.generateUniqueID(),
+    id: `JN-${helpers.generateUniqueID()}`,
     customer_id: '',
     vehicle_id: '',
     title: '',

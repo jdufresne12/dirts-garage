@@ -4,7 +4,6 @@ import autoTable from 'jspdf-autotable';
 interface InvoiceData {
     invoiceNumber: string;
     date: string;
-    dueDate: string;
     subtotal: number;
     taxRate: number;
     taxAmount: number;
@@ -12,7 +11,6 @@ interface InvoiceData {
     totalAmount: number;
     lineItems: InvoiceLineItem[];
     notes: string;
-    terms: string;
 }
 
 interface InvoiceLineItem {
@@ -34,13 +32,6 @@ interface Customer {
     city: string;
     state: string;
     zipcode: string;
-}
-
-interface Vehicle {
-    year: number;
-    make: string;
-    model: string;
-    vin: string;
 }
 
 interface BusinessInfo {
@@ -72,7 +63,6 @@ export class InvoicePDFGenerator {
     async generateInvoicePDF(
         invoiceData: InvoiceData,
         customer: Customer,
-        vehicle: Vehicle,
         businessInfo: BusinessInfo,
         jobTitle: string
     ): Promise<Blob> {
@@ -86,8 +76,8 @@ export class InvoicePDFGenerator {
         // Header - Business Info & Invoice Title
         yPosition = this.addHeader(businessInfo, invoiceData, yPosition);
 
-        // Customer and Vehicle Info
-        yPosition = this.addCustomerInfo(customer, vehicle, jobTitle, yPosition);
+        // Customer Info
+        yPosition = this.addCustomerInfo(customer, jobTitle, yPosition);
 
         // Line Items Table
         yPosition = await this.addLineItemsTable(invoiceData.lineItems, yPosition);
@@ -112,7 +102,7 @@ export class InvoicePDFGenerator {
         this.doc.setFont('helvetica', 'bold');
         this.doc.text(businessInfo.name, leftMargin, yPosition);
 
-        yPosition += 10;
+        yPosition += 8;
 
         // Business address info
         this.doc.setFontSize(10);
@@ -135,25 +125,24 @@ export class InvoicePDFGenerator {
         this.doc.setFont('helvetica', 'bold');
         this.doc.text('INVOICE', rightMargin, rightYPosition, { align: 'right' });
 
-        rightYPosition += 10;
+        rightYPosition += 6;
 
         // Invoice number
         this.doc.setFontSize(12);
         this.doc.setFont('helvetica', 'normal');
         this.doc.text(invoiceData.invoiceNumber, rightMargin, rightYPosition, { align: 'right' });
 
-        rightYPosition += 12;
+        rightYPosition += 6;
 
         // Date info
         this.doc.setFontSize(10);
-        this.doc.text(`Date: ${invoiceData.date}`, rightMargin, rightYPosition, { align: 'right' });
-        rightYPosition += 5;
-        this.doc.text(`Due: ${invoiceData.dueDate}`, rightMargin, rightYPosition, { align: 'right' });
+        this.doc.text(`Date: ${this.formatDate(invoiceData.date)}`, rightMargin, rightYPosition, { align: 'right' });
+        rightYPosition += 2;
 
         return Math.max(yPosition, rightYPosition) + 20;
     }
 
-    private addCustomerInfo(customer: Customer, vehicle: Vehicle, jobTitle: string, yPosition: number): number {
+    private addCustomerInfo(customer: Customer, jobTitle: string, yPosition: number): number {
         const leftColumn = this.margin;
 
         // Bill To section
@@ -174,7 +163,7 @@ export class InvoicePDFGenerator {
         yPosition += 5;
         this.doc.text(customer.email, leftColumn, yPosition);
 
-        return yPosition + 20;
+        return yPosition + 10;
     }
 
     private async addLineItemsTable(lineItems: InvoiceLineItem[], yPosition: number): Promise<number> {
@@ -276,6 +265,11 @@ export class InvoicePDFGenerator {
         }
     }
 
+    private formatDate(date: string): string {
+        const [year, month, day] = date.split('-');
+        return `${Number(month)}/${Number(day)}/${Number(year)}`
+    }
+
     // Method to download PDF
     downloadPDF(filename: string): void {
         this.doc.save(filename);
@@ -292,7 +286,6 @@ export class InvoicePDFGenerator {
 export async function handlePDFGeneration(
     invoiceData: InvoiceData,
     customer: Customer,
-    vehicle: Vehicle,
     jobTitle: string,
     action: 'download' | 'preview' | 'email'
 ): Promise<void> {
@@ -313,7 +306,6 @@ export async function handlePDFGeneration(
         await pdfGenerator.generateInvoicePDF(
             invoiceData,
             customer,
-            vehicle,
             businessInfo,
             jobTitle
         );

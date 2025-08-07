@@ -256,7 +256,7 @@ export default function PhotoDocumentation({ job_id }: PhotoDocumentationProps) 
     // Long press handlers
     const handleTouchStart = (photoId: string) => {
         longPressTimeoutRef.current = setTimeout(() => {
-            setLongPressedPhoto(photoId);
+            setLongPressedPhoto(longPressedPhoto === photoId ? null : photoId);
             // Add haptic feedback if available
             if ('vibrate' in navigator) {
                 navigator.vibrate(50);
@@ -312,15 +312,18 @@ export default function PhotoDocumentation({ job_id }: PhotoDocumentationProps) 
                         )}
                     </div>
 
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 -mb-4">
                         {/* Toggle delete mode on mobile */}
                         {photos.length > 0 && (
-                            <button
-                                onClick={() => setDeleteMode(!deleteMode)}
-                                className="sm:hidden flex items-center gap-2 px-3 py-2 border border-red-300 rounded-lg text-red-600 hover:bg-red-50 transition-colors text-sm"
-                            >
-                                {deleteMode ? 'Done' : 'Edit'}
-                            </button>
+                            <>
+                                <button
+                                    onClick={() => setDeleteMode(!deleteMode)}
+                                    className="sm:hidden flex items-center gap-2 px-3 py-1 border border-red-300 rounded-lg text-red-600 hover:bg-red-50 transition-colors text-sm"
+                                >
+                                    {deleteMode ? 'Done' : 'Edit'}
+                                </button>
+                            </>
+
                         )}
 
                         <button
@@ -503,19 +506,19 @@ export default function PhotoDocumentation({ job_id }: PhotoDocumentationProps) 
                         </div>
 
                         {/* Main Content Area with proper padding for controls */}
-                        <div className="flex items-center justify-center h-full px-4 sm:px-6 pt-20 pb-20">
+                        <div className="flex items-center justify-center h-full px-4 pt-20 pb-20 sm:px-6 ">
                             {/* Navigation buttons - positioned outside content area */}
                             {photos.length > 1 && (
                                 <>
                                     <button
                                         onClick={() => navigatePhoto('prev')}
-                                        className="absolute left-4 top-1/2 -translate-y-1/2 z-20 p-1 bg-white/30 backdrop-blur-sm text-white rounded-full hover:bg-black/50 transition-colors"
+                                        className="absolute left-4 top-1/2 -translate-y-1/2 z-20 p-1 text-white rounded-full hover:bg-black/50 transition-colors sm:bg-white/30 sm:backdrop-blur-sm"
                                     >
                                         <ChevronLeft className="size-6" />
                                     </button>
                                     <button
                                         onClick={() => navigatePhoto('next')}
-                                        className="absolute right-4 top-1/2 -translate-y-1/2 z-20 p-1 bg-white/30 backdrop-blur-sm text-white rounded-full hover:bg-black/50 transition-colors"
+                                        className="absolute right-4 top-1/2 -translate-y-1/2 z-20 p-1 text-white rounded-full hover:bg-black/50 transition-colors sm:bg-white/30 sm:backdrop-blur-sm"
                                     >
                                         <ChevronRight className="size-6" />
                                     </button>

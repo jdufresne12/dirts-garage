@@ -7,6 +7,14 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+CREATE TABLE users (
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    email TEXT NOT NULL,
+    username TEXT NOT NULL,
+    password TEXT NOT NULL,
+);
+
 -- Customers table
 CREATE TABLE customers (
     id TEXT PRIMARY KEY,
@@ -75,7 +83,7 @@ CREATE INDEX idx_jobs_status ON jobs(status);
 -- Parts table
 CREATE TABLE parts (
     id TEXT PRIMARY KEY,
-    job_id TEXT,
+    job_id TEXT NOT NULL,
     name TEXT NOT NULL,
     description TEXT,
     quantity INT NOT NULL DEFAULT 1,
@@ -92,22 +100,42 @@ CREATE INDEX idx_parts_job_id ON parts(job_id);
 -- Invoices table
 CREATE TABLE invoices (
     id TEXT PRIMARY KEY,
+    job_id TEXT NOT NULL,
+    customer_id TEXT,
     date DATE NOT NULL,
     amount NUMERIC(10,2) NOT NULL,
     amount_paid NUMERIC(10,2) NOT NULL DEFAULT 0,
     status TEXT NOT NULL,
-    due_date DATE NOT NULL,
+    due_date DATE,
     paid_date DATE,
-    customer_id TEXT NOT NULL,
-    job_id TEXT NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    subtotal DECIMAL(10,2) NOT NULL DEFAULT 0,
+    tax_rate DECIMAL(5,2) NOT NULL DEFAULT 0,
+    tax_amount DECIMAL(10,2) NOT NULL DEFAULT 0,
+    discount_amount DECIMAL(10,2) NOT NULL DEFAULT 0,
+    notes TEXT;
     FOREIGN KEY (customer_id) REFERENCES customers(id) ON DELETE CASCADE,
     FOREIGN KEY (job_id) REFERENCES jobs(id) ON DELETE CASCADE
 );
+
+CREATE TABLE invoice_line_items (
+    id TEXT PRIMARY KEY,
+    invoice_id TEXT NOT NULL,
+    type TEXT NOT NULL,
+    description TEXT NOT NULL,
+    quantity DECIMAL(10,2) NOT NULL DEFAULT 1,
+    rate DECIMAL(10,2) NOT NULL DEFAULT 0,
+    amount DECIMAL(10,2) NOT NULL DEFAULT 0,
+    taxable BOOLEAN NOT NULL DEFAULT true,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    FOREIGN KEY (invoice_id) REFERENCES invoices(id) ON DELETE CASCADE
+);
+
 CREATE INDEX idx_invoices_customer_id ON invoices(customer_id);
 CREATE INDEX idx_invoices_job_id ON invoices(job_id);
-CREATE INDEX idx_invoices_status ON invoices(status);
+CREATE INDEX idx_invoice_line_items_invoice_id ON invoice_line_items(invoice_id);
 
 -- Notes table
 CREATE TABLE notes (

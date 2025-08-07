@@ -12,7 +12,7 @@ interface AddCustomerModalProps {
 
 export default function AddCustomerModal({ isOpen, onClose, onSubmit }: AddCustomerModalProps) {
     const [formData, setFormData] = useState<Customer>({
-        id: helpers.generateUniqueID(),
+        id: `CN-${helpers.generateUniqueID()}`,
         first_name: "",
         last_name: "",
         email: "",
@@ -32,7 +32,7 @@ export default function AddCustomerModal({ isOpen, onClose, onSubmit }: AddCusto
     useEffect(() => {
         if (!isOpen) {
             setFormData({
-                id: helpers.generateUniqueID(),
+                id: `CN-${helpers.generateUniqueID()}`,
                 first_name: "",
                 last_name: "",
                 email: "",

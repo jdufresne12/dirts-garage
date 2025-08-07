@@ -15,15 +15,26 @@ export default function JobSteps({ job_id, jobSteps, setJobSteps }: JobStepsProp
     const [selectedStep, setSelectedStep] = useState<JobStep>();
     const [showStepInfo, setShowStepInfo] = useState<{ [key: number]: boolean }>({});
 
-    const totalEstimatedHours = jobSteps?.reduce((sum, step: JobStep) => sum + (step.estimated_hours || 0), 0);
-    const totalActualHours = jobSteps?.reduce((sum, step: JobStep) => sum + (step.actual_hours || 0), 0);
-
     useEffect(() => {
         fetch(`/api/jobs/job-steps/${job_id}`)
             .then(res => res.json())
             .then(data => setJobSteps(data))
             .catch(error => console.error("Error fetching job steps:", error))
     }, [])
+
+    const totalEstimatedHours = jobSteps?.reduce((sum, step: JobStep) => {
+        const hours = typeof step.estimated_hours === 'string'
+            ? parseFloat(step.estimated_hours)
+            : step.estimated_hours;
+        return sum + (hours || 0);
+    }, 0);
+
+    const totalActualHours = jobSteps?.reduce((sum, step: JobStep) => {
+        const hours = typeof step.actual_hours === 'string'
+            ? parseFloat(step.actual_hours)
+            : step.actual_hours;
+        return sum + (hours || 0);
+    }, 0);
 
     const getStatusColor = (status: string) => {
         switch (status) {
@@ -163,7 +174,7 @@ export default function JobSteps({ job_id, jobSteps, setJobSteps }: JobStepsProp
                     <h2 className="text-xl font-semibold">Work Progress & Time Tracking</h2>
                     <div className="flex gap-4 text-sm text-gray-600 mt-1">
                         <span>Estimated: {Number(totalEstimatedHours) || 0} hrs</span>
-                        <span>Actual: {Number(totalActualHours)} hrs</span>
+                        <span>Actual: {Number(totalActualHours) || 0} hrs</span>
                         {totalEstimatedHours > 0 && (
                             <span className={`font-medium ${totalActualHours > totalEstimatedHours ? 'text-red-600' : 'text-green-600'}`}>
                                 {totalActualHours <= totalEstimatedHours ? 'On Track' : `${(totalActualHours - totalEstimatedHours).toFixed(1)} hrs over`}

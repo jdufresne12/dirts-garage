@@ -10,13 +10,9 @@ export function newCustomer(customer: Customer): Customer {
         address: customer.address || undefined,
         notes: customer.notes || undefined,
         status: customer.status || "None",
-        vehicleCount: 0,
-        jobCount: 0,
         vehicles: undefined,
         jobs: undefined,
         invoices: undefined,
-        totalSpent: 0,
-        amountOwed: 0
     }
 }
 export default {

@@ -5,7 +5,6 @@ interface CostSummaryProps {
     costSummary: CostSummary;
     jobData: Job;
     customer: Customer;
-    vehicle: Vehicle;
     jobSteps: JobStep[];
     parts: Part[];
 }
@@ -14,7 +13,6 @@ export default function CostSummary({
     costSummary,
     jobData,
     customer,
-    vehicle,
     jobSteps,
     parts
 }: CostSummaryProps) {
@@ -33,6 +31,15 @@ export default function CostSummary({
         } else {
             setShowInvoiceModal(true);
         }
+    };
+
+    const calculateTotalLaborHours = (jobSteps: JobStep[]): number => {
+        return jobSteps?.reduce((sum, step) => {
+            const hours = typeof step.actual_hours === 'string'
+                ? parseFloat(step.actual_hours)
+                : step.actual_hours;
+            return sum + (hours || 0);
+        }, 0) || 0;
     };
 
     return (
@@ -89,8 +96,7 @@ export default function CostSummary({
                 onClose={() => setShowInvoiceModal(false)}
                 jobData={jobData}
                 customer={customer}
-                vehicle={vehicle}
-                jobSteps={jobSteps}
+                totalLaborHours={calculateTotalLaborHours(jobSteps)}
                 parts={parts}
             />
         </>
