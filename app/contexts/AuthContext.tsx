@@ -4,6 +4,7 @@ import { useLoading } from './LoadingContext'
 
 interface User {
     id: string;
+    name: string;
     username: string;
     email: string;
 }
@@ -14,22 +15,6 @@ interface AuthContextType {
     logout: () => void;
     isAuthenticated: boolean;
 }
-
-// Hardcoded user credentials (replace with API call later)
-const HARDCODED_USERS = [
-    {
-        id: '1',
-        username: 'admin',
-        password: 'password123',
-        email: 'admin@dirtsgarage.com'
-    },
-    {
-        id: '2',
-        username: 'user',
-        password: 'user123',
-        email: 'user@dirtsgarage.com'
-    }
-];
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -46,9 +31,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         try {
             showLoading('Authenticating...');
             const response = await fetch('/api/auth/check');
+
             if (response.ok) {
-                const userData = await response.json();
-                setUser(userData.user);
+                const data = await response.json();
+                if (data.success && data.user) {
+                    setUser(data.user);
+                }
             }
         } catch (error) {
             console.error('Auth check failed:', error);
@@ -61,36 +49,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         try {
             showLoading('Logging in...');
 
-            await new Promise(resolve => setTimeout(resolve, 2000));
-            // Find user in hardcoded list
-            const foundUser = HARDCODED_USERS.find(
-                u => u.username === username && u.password === password
-            );
-
-            if (!foundUser) {
-                return false;
-            }
-
-            // Set session cookie
             const response = await fetch('/api/auth/login', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({
-                    id: foundUser.id,
-                    username: foundUser.username,
-                    email: foundUser.email
-                }),
+                body: JSON.stringify({ username, password }),
             });
 
-            if (response.ok) {
-                const userData = await response.json();
-                setUser(userData.user);
+            const data = await response.json();
+
+            if (response.ok && data.success) {
+                setUser(data.user);
                 return true;
+            } else {
+                console.error('Login failed:', data.error);
+                return false;
             }
 
-            return false;
         } catch (error) {
             console.error('Login failed:', error);
             return false;
@@ -102,14 +78,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const logout = async () => {
         try {
             showLoading("Logging out...")
+
             await fetch('/api/auth/logout', {
                 method: 'POST',
             });
+
             setUser(null);
-            window.location.href = 'login';
+            window.location.href = '/login';
         } catch (error) {
             console.error('Logout failed:', error);
+            // Still clear local state even if API call fails
             setUser(null);
+            window.location.href = '/login';
         } finally {
             hideLoading();
         }

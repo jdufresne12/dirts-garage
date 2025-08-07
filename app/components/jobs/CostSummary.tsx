@@ -26,8 +26,7 @@ export default function CostSummary({
 
     const handleInvoiceClick = () => {
         if (isAlreadyInvoiced) {
-            // TODO: Navigate to view existing invoice
-            console.log('Navigate to existing invoice');
+            window.location.href = `/invoices/${"INV-49184236"}`;
         } else {
             setShowInvoiceModal(true);
         }

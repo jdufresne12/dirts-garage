@@ -1,27 +1,31 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { cookies } from 'next/headers';
 
-export async function POST() {
+export async function POST(request: NextRequest) {
     try {
         const cookieStore = cookies();
 
-        // Clear session cookie
+        // Clear the session cookie
         (await cookieStore).set({
             name: 'session',
             value: '',
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
-            sameSite: 'lax',
-            maxAge: 0,
-            expires: new Date(0),
-            path: '/',
+            sameSite: "lax",
+            maxAge: 0, // Expire immediately
+            path: '/'
         });
-        return NextResponse.json({ success: true })
+
+        return NextResponse.json({
+            success: true,
+            message: "Logged out successfully"
+        });
+
     } catch (error) {
         console.error("Logout API error:", error);
         return NextResponse.json(
             { success: false, error: "Logout failed" },
             { status: 500 }
-        )
+        );
     }
 }
