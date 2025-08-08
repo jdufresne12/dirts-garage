@@ -57,6 +57,7 @@ CREATE TABLE jobs (
     id TEXT PRIMARY KEY,
     customer_id TEXT,
     vehicle_id TEXT,
+    invoice_id TEXT,
     title TEXT NOT NULL,
     description TEXT NOT NULL,
     status TEXT NOT NULL,
@@ -79,64 +80,6 @@ CREATE TABLE jobs (
 CREATE INDEX idx_jobs_customer_id ON jobs(customer_id);
 CREATE INDEX idx_jobs_vehicle_id ON jobs(vehicle_id);
 CREATE INDEX idx_jobs_status ON jobs(status);
-
--- Parts table
-CREATE TABLE parts (
-    id TEXT PRIMARY KEY,
-    job_id TEXT NOT NULL,
-    name TEXT NOT NULL,
-    description TEXT,
-    quantity INT NOT NULL DEFAULT 1,
-    price NUMERIC(10,2) NOT NULL DEFAULT 0,
-    part_number TEXT NOT NULL,
-    url TEXT,
-    status TEXT NOT NULL,
-    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
-    FOREIGN KEY (job_id) REFERENCES jobs(id) ON DELETE SET NULL
-);
-CREATE INDEX idx_parts_job_id ON parts(job_id);
-
--- Invoices table
-CREATE TABLE invoices (
-    id TEXT PRIMARY KEY,
-    job_id TEXT NOT NULL,
-    customer_id TEXT,
-    date DATE NOT NULL,
-    amount NUMERIC(10,2) NOT NULL,
-    amount_paid NUMERIC(10,2) NOT NULL DEFAULT 0,
-    status TEXT NOT NULL,
-    due_date DATE,
-    paid_date DATE,
-    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
-    subtotal DECIMAL(10,2) NOT NULL DEFAULT 0,
-    tax_rate DECIMAL(5,2) NOT NULL DEFAULT 0,
-    tax_amount DECIMAL(10,2) NOT NULL DEFAULT 0,
-    discount_amount DECIMAL(10,2) NOT NULL DEFAULT 0,
-    notes TEXT;
-    FOREIGN KEY (customer_id) REFERENCES customers(id) ON DELETE CASCADE,
-    FOREIGN KEY (job_id) REFERENCES jobs(id) ON DELETE CASCADE
-);
-
-CREATE TABLE invoice_line_items (
-    id TEXT PRIMARY KEY,
-    key TEXT NOT NULL,
-    invoice_id TEXT NOT NULL,
-    type TEXT NOT NULL,
-    description TEXT NOT NULL,
-    quantity DECIMAL(10,2) NOT NULL DEFAULT 1,
-    rate DECIMAL(10,2) NOT NULL DEFAULT 0,
-    amount DECIMAL(10,2) NOT NULL DEFAULT 0,
-    taxable BOOLEAN NOT NULL DEFAULT true,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
-    FOREIGN KEY (invoice_id) REFERENCES invoices(id) ON DELETE CASCADE
-);
-
-CREATE INDEX idx_invoices_customer_id ON invoices(customer_id);
-CREATE INDEX idx_invoices_job_id ON invoices(job_id);
-CREATE INDEX idx_invoice_line_items_invoice_id ON invoice_line_items(invoice_id);
 
 -- Notes table
 CREATE TABLE notes (
@@ -166,6 +109,145 @@ CREATE TABLE job_steps (
     updated_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
+-- Parts table
+CREATE TABLE parts (
+    id TEXT PRIMARY KEY,
+    job_id TEXT NOT NULL,
+    name TEXT NOT NULL,
+    description TEXT,
+    quantity INT NOT NULL DEFAULT 1,
+    price NUMERIC(10,2) NOT NULL DEFAULT 0,
+    part_number TEXT NOT NULL,
+    url TEXT,
+    status TEXT NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    FOREIGN KEY (job_id) REFERENCES jobs(id) ON DELETE SET NULL
+);
+CREATE INDEX idx_parts_job_id ON parts(job_id);
+
+-- Invoices table
+CREATE TABLE invoices (
+    id TEXT PRIMARY KEY,
+    date DATE NOT NULL,
+    due_date DATE,
+    amount DECIMAL(10,2) NOT NULL DEFAULT 0,
+    amount_paid DECIMAL(10,2) NOT NULL DEFAULT 0,
+    status TEXT NOT NULL DEFAULT 'draft',
+    paid_date DATE,
+    customer_id TEXT NOT NULL,
+    job_id TEXT NOT NULL,
+    subtotal DECIMAL(10,2) NOT NULL DEFAULT 0,
+    tax_rate DECIMAL(5,2) NOT NULL DEFAULT 0,
+    tax_amount DECIMAL(10,2) NOT NULL DEFAULT 0,
+    discount_amount DECIMAL(10,2) NOT NULL DEFAULT 0,
+    notes TEXT,
+    revision_number INTEGER NOT NULL DEFAULT 1,
+    auto_sync_enabled BOOLEAN NOT NULL DEFAULT TRUE,
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW(),
+    
+    -- Foreign key constraints (adjust table names as needed)
+    CONSTRAINT fk_invoice_customer FOREIGN KEY (customer_id) REFERENCES customers(id),
+    CONSTRAINT fk_invoice_job FOREIGN KEY (job_id) REFERENCES jobs(id),
+    
+    -- Check constraints
+    CONSTRAINT chk_invoice_status CHECK (status IN ('draft', 'pending', 'sent', 'paid', 'overdue', 'cancelled')),
+    CONSTRAINT chk_amount_positive CHECK (amount >= 0),
+    CONSTRAINT chk_amount_paid_positive CHECK (amount_paid >= 0),
+    CONSTRAINT chk_tax_rate_valid CHECK (tax_rate >= 0 AND tax_rate <= 100)
+);
+
+-- Invoice Line Items Table
+CREATE TABLE invoice_line_items (
+    id TEXT PRIMARY KEY,
+    invoice_id TEXT NOT NULL,
+    source_type TEXT,  -- 'job_labor', 'job_part', 'custom', 'fee', 'discount'
+    source_id TEXT,   -- Links to JobStep.id or Part.id for syncing
+    type TEXT NOT NULL, -- 'labor', 'part', 'fee', 'discount', 'custom'
+    description TEXT NOT NULL,
+    quantity DECIMAL(10,3) NOT NULL DEFAULT 1,
+    rate DECIMAL(10,2) NOT NULL DEFAULT 0,
+    amount DECIMAL(10,2) NOT NULL DEFAULT 0,
+    taxable BOOLEAN NOT NULL DEFAULT TRUE,
+    is_locked BOOLEAN NOT NULL DEFAULT FALSE, -- Prevents auto-updates if manually modified
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW(),
+    
+    -- Foreign key constraint
+    CONSTRAINT fk_line_item_invoice FOREIGN KEY (invoice_id) REFERENCES invoices(id) ON DELETE CASCADE,
+    
+    -- Check constraints
+    CONSTRAINT chk_line_item_type CHECK (type IN ('labor', 'part', 'fee', 'discount', 'custom')),
+    CONSTRAINT chk_line_item_source_type CHECK (source_type IN ('job_labor', 'job_part', 'custom', 'fee', 'discount') OR source_type IS NULL),
+    CONSTRAINT chk_quantity_positive CHECK (quantity > 0),
+    CONSTRAINT chk_rate_positive CHECK (rate >= 0),
+    CONSTRAINT chk_amount_valid CHECK (amount >= 0)
+);
+
+-- Invoice Change Log Table
+CREATE TABLE invoice_change_logs (
+    id TEXT PRIMARY KEY,
+    invoice_id TEXT NOT NULL,
+    change_type TEXT NOT NULL, -- 'created', 'updated', 'synced', 'manual_edit', 'status_change'
+    changed_by TEXT, -- User ID or system
+    changes JSONB, -- JSON of what changed
+    previous_values JSONB, -- JSON of previous values for rollback
+    created_at TIMESTAMP DEFAULT NOW(),
+    
+    -- Foreign key constraint
+    CONSTRAINT fk_change_log_invoice FOREIGN KEY (invoice_id) REFERENCES invoices(id) ON DELETE CASCADE,
+    
+    -- Check constraint
+    CONSTRAINT chk_change_type CHECK (change_type IN ('created', 'updated', 'synced', 'manual_edit', 'status_change'))
+);
+
+CREATE TABLE IF NOT EXISTS payments (
+    id VARCHAR(255) PRIMARY KEY,
+    invoice_id VARCHAR(255) NOT NULL REFERENCES invoices(id) ON DELETE CASCADE,
+    amount DECIMAL(10,2) NOT NULL CHECK (amount > 0),
+    payment_date DATE NOT NULL,
+    payment_method VARCHAR(50) NOT NULL CHECK (payment_method IN ('cash', 'check', 'credit_card', 'debit_card', 'bank_transfer', 'other')),
+    reference_number VARCHAR(255),
+    notes TEXT,
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW(),
+    created_by VARCHAR(255) -- for future user tracking
+);
+
+-- 4. Indexes for Performance
+CREATE INDEX idx_invoices_customer_id ON invoices(customer_id);
+CREATE INDEX idx_invoices_job_id ON invoices(job_id);
+CREATE INDEX idx_invoices_status ON invoices(status);
+CREATE INDEX idx_invoices_date ON invoices(date);
+CREATE INDEX idx_invoices_due_date ON invoices(due_date);
+
+CREATE INDEX idx_line_items_invoice_id ON invoice_line_items(invoice_id);
+CREATE INDEX idx_line_items_source ON invoice_line_items(source_type, source_id);
+CREATE INDEX idx_line_items_type ON invoice_line_items(type);
+
+CREATE INDEX idx_change_logs_invoice_id ON invoice_change_logs(invoice_id);
+CREATE INDEX idx_change_logs_date ON invoice_change_logs(created_at);
+
+-- 5. Triggers for Updated Timestamps
+CREATE OR REPLACE FUNCTION update_updated_at_column()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.updated_at = NOW();
+    RETURN NEW;
+END;
+$$ language 'plpgsql';
+
+CREATE TRIGGER update_invoices_updated_at 
+    BEFORE UPDATE ON invoices 
+    FOR EACH ROW 
+    EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_line_items_updated_at 
+    BEFORE UPDATE ON invoice_line_items 
+    FOR EACH ROW 
+    EXECUTE FUNCTION update_updated_at_column();
+
 -- Triggers to auto-update updated_at
 CREATE TRIGGER trg_customers_updated
 BEFORE UPDATE ON customers
@@ -194,3 +276,61 @@ FOR EACH ROW EXECUTE FUNCTION set_updated_at();
 CREATE TRIGGER trg_job_steps_updated
 BEFORE UPDATE ON job_steps
 FOR EACH ROW EXECUTE FUNCTION set_updated_at();
+
+
+-- PAYMENT
+CREATE TABLE IF NOT EXISTS payments (
+    id VARCHAR(255) PRIMARY KEY,
+    invoice_id VARCHAR(255) NOT NULL REFERENCES invoices(id) ON DELETE CASCADE,
+    amount DECIMAL(10,2) NOT NULL CHECK (amount > 0),
+    payment_date DATE NOT NULL,
+    payment_method VARCHAR(50) NOT NULL CHECK (payment_method IN ('cash', 'check', 'credit_card', 'debit_card', 'bank_transfer', 'other')),
+    reference_number VARCHAR(255),
+    notes TEXT,
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Add indexes for better performance
+CREATE INDEX IF NOT EXISTS idx_payments_invoice_id ON payments(invoice_id);
+CREATE INDEX IF NOT EXISTS idx_payments_payment_date ON payments(payment_date);
+
+-- Function to automatically update invoice amount_paid when payments change
+CREATE OR REPLACE FUNCTION update_invoice_amount_paid()
+RETURNS TRIGGER AS $$
+BEGIN
+    -- Update the invoice's amount_paid field
+    UPDATE invoices 
+    SET 
+        amount_paid = COALESCE((
+            SELECT SUM(amount) 
+            FROM payments 
+            WHERE invoice_id = COALESCE(NEW.invoice_id, OLD.invoice_id)
+        ), 0),
+        updated_at = NOW()
+    WHERE id = COALESCE(NEW.invoice_id, OLD.invoice_id);
+    
+    -- Auto-update status to 'paid' if fully paid
+    UPDATE invoices 
+    SET 
+        status = CASE 
+            WHEN amount_paid >= amount AND status != 'paid' THEN 'paid'
+            WHEN amount_paid < amount AND status = 'paid' THEN 'pending'
+            ELSE status
+        END,
+        paid_date = CASE 
+            WHEN amount_paid >= amount THEN CURRENT_DATE
+            ELSE NULL
+        END
+    WHERE id = COALESCE(NEW.invoice_id, OLD.invoice_id);
+    
+    RETURN COALESCE(NEW, OLD);
+END;
+$$ LANGUAGE plpgsql;
+
+-- Create trigger to auto-update invoice amounts
+DROP TRIGGER IF EXISTS payment_update_invoice_trigger ON payments;
+CREATE TRIGGER payment_update_invoice_trigger
+    AFTER INSERT OR UPDATE OR DELETE ON payments
+    FOR EACH ROW
+    EXECUTE FUNCTION update_invoice_amount_paid();
