@@ -5,8 +5,6 @@ import InvoicePreview from './InvoicePreview';
 import InvoiceEditor from './InvoiceEditor';
 import helpers from '@/app/utils/helpers';
 
-// Remove InvoiceData interface and use Invoice from types.ts
-// Add these local interfaces for modal-specific state
 interface LaborSettings {
     laborType: 'hourly' | 'fixed';
     laborRate: number;
@@ -19,8 +17,11 @@ interface InvoiceGenerationModalProps {
     onClose: () => void;
     jobData: Job;
     customer: Customer;
-    totalLaborHours: number; // Just pass the calculated total
+    totalLaborHours: number;
     parts: Part[];
+    existingInvoice?: Invoice | null; // New prop for update mode
+    mode?: 'create' | 'update'; // New prop to determine mode
+    onInvoiceUpdated?: () => void; // Callback for successful updates
 }
 
 const businessInfo = {
@@ -39,7 +40,10 @@ export default function InvoiceGenerationModal({
     jobData,
     customer,
     totalLaborHours,
-    parts
+    parts,
+    existingInvoice = null,
+    mode = 'create',
+    onInvoiceUpdated
 }: InvoiceGenerationModalProps) {
     const [invoiceData, setInvoiceData] = useState<Invoice>({
         id: `INV-${helpers.generateUniqueID()}`,
@@ -65,20 +69,8 @@ export default function InvoiceGenerationModal({
         laborAmount: 0
     });
 
-    const [isCreating, setIsCreating] = useState(false);
+    const [isProcessing, setIsProcessing] = useState(false);
     const [activeTab, setActiveTab] = useState<'preview' | 'edit'>('preview');
-
-    // Initialize invoice data when modal opens
-    useEffect(() => {
-        if (isOpen) {
-            generateLineItems();
-        }
-    }, [isOpen, totalLaborHours, parts]);
-
-    // Calculate totals when line items or adjustments change
-    useEffect(() => {
-        calculateTotals();
-    }, [invoiceData.line_items, invoiceData.discount_amount, invoiceData.tax_rate]);
 
     // Helper function to safely convert values to numbers
     const safeNumber = (value: any): number => {
@@ -87,14 +79,65 @@ export default function InvoiceGenerationModal({
         return isNaN(num) ? 0 : num;
     };
 
-    const generateLineItems = () => {
+    // Initialize invoice data when modal opens
+    useEffect(() => {
+        if (isOpen) {
+            if (mode === 'update' && existingInvoice) {
+                // Load existing invoice data
+                setInvoiceData(existingInvoice);
+                // Extract labor settings from existing line items
+                extractLaborSettingsFromInvoice(existingInvoice);
+            } else {
+                // Create new invoice
+                const newInvoiceData = {
+                    id: `INV-${helpers.generateUniqueID()}`,
+                    date: new Date().toISOString().split('T')[0],
+                    due_date: '',
+                    amount: 0,
+                    amount_paid: 0,
+                    status: 'pending',
+                    customer_id: customer.id,
+                    job_id: jobData.id,
+                    subtotal: 0,
+                    tax_rate: 8.5,
+                    tax_amount: 0,
+                    discount_amount: 0,
+                    line_items: [],
+                    notes: 'Thank you for your business!'
+                };
+                setInvoiceData(newInvoiceData);
+                generateLineItems(newInvoiceData);
+            }
+        }
+    }, [isOpen, mode, existingInvoice, totalLaborHours, parts]);
+
+    // Calculate totals when line items or adjustments change
+    useEffect(() => {
+        calculateTotals();
+    }, [invoiceData.line_items, invoiceData.discount_amount, invoiceData.tax_rate]);
+
+    const extractLaborSettingsFromInvoice = (invoice: Invoice) => {
+        const laborItem = invoice.line_items?.find(item => item.type === 'labor');
+        if (laborItem) {
+            const isFixed = laborItem.quantity === 1;
+            setLaborSettings({
+                laborType: isFixed ? 'fixed' : 'hourly',
+                laborRate: isFixed ? 0 : laborItem.rate,
+                laborAmount: isFixed ? laborItem.amount : 0,
+                laborDescription: laborItem.description
+            });
+        }
+    };
+
+    const generateLineItems = (targetInvoiceData?: Invoice) => {
+        const target = targetInvoiceData || invoiceData;
         const items: InvoiceLineItem[] = [];
 
         // Add labor item if there are hours
         if (totalLaborHours > 0) {
             items.push({
                 id: helpers.generateUniqueID(),
-                invoice_id: invoiceData.id,
+                invoice_id: target.id,
                 key: 'labor-1',
                 type: 'labor',
                 description: laborSettings.laborDescription,
@@ -113,7 +156,7 @@ export default function InvoiceGenerationModal({
 
                 items.push({
                     id: helpers.generateUniqueID(),
-                    invoice_id: invoiceData.id,
+                    invoice_id: target.id,
                     key: `part-${index + 1}`,
                     type: 'part',
                     description: `${part.name} - ${part.part_number}`,
@@ -147,10 +190,9 @@ export default function InvoiceGenerationModal({
     };
 
     const handleCreateInvoice = async () => {
-        setIsCreating(true);
+        setIsProcessing(true);
 
         try {
-            // Create invoice in database
             const response = await fetch('/api/invoices', {
                 method: 'POST',
                 headers: {
@@ -184,7 +226,73 @@ export default function InvoiceGenerationModal({
             console.error('Failed to create invoice:', error);
             alert('Failed to create invoice. Please try again.');
         } finally {
-            setIsCreating(false);
+            setIsProcessing(false);
+        }
+    };
+
+    const handleUpdateInvoice = async () => {
+        setIsProcessing(true);
+
+        try {
+            // Update the main invoice
+            const response = await fetch(`/api/invoices/${invoiceData.id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    date: invoiceData.date,
+                    due_date: invoiceData.due_date,
+                    amount: invoiceData.amount,
+                    amount_paid: invoiceData.amount_paid,
+                    status: invoiceData.status,
+                    subtotal: invoiceData.subtotal,
+                    tax_rate: invoiceData.tax_rate,
+                    tax_amount: invoiceData.tax_amount,
+                    discount_amount: invoiceData.discount_amount,
+                    notes: invoiceData.notes
+                }),
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to update invoice');
+            }
+
+            // Delete existing line items and recreate them
+            await fetch(`/api/invoices/${invoiceData.id}/line-items`, {
+                method: 'DELETE'
+            });
+
+            // Create new line items
+            if (invoiceData.line_items && invoiceData.line_items.length > 0) {
+                await fetch(`/api/invoices/${invoiceData.id}/line-items`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ line_items: invoiceData.line_items }),
+                });
+            }
+
+            alert(`Invoice ${invoiceData.id} updated successfully!`);
+            if (onInvoiceUpdated) {
+                onInvoiceUpdated();
+            }
+            onClose();
+
+        } catch (error) {
+            console.error('Failed to update invoice:', error);
+            alert('Failed to update invoice. Please try again.');
+        } finally {
+            setIsProcessing(false);
+        }
+    };
+
+    const handleSubmit = () => {
+        if (mode === 'create') {
+            handleCreateInvoice();
+        } else {
+            handleUpdateInvoice();
         }
     };
 
@@ -197,9 +305,12 @@ export default function InvoiceGenerationModal({
                 <div className="border-b border-gray-200 p-4 md:p-6 flex-shrink-0">
                     <div className="flex items-center justify-between">
                         <div>
-                            <h2 className="text-lg md:text-2xl font-bold text-gray-900">Create Invoice</h2>
+                            <h2 className="text-lg md:text-2xl font-bold text-gray-900">
+                                {mode === 'create' ? 'Create Invoice' : 'Update Invoice'}
+                            </h2>
                             <p className="text-sm md:text-base text-gray-600">
                                 {jobData.title} - {customer.first_name} {customer.last_name}
+                                {mode === 'update' && ` • ${invoiceData.id}`}
                             </p>
                         </div>
                         <button
@@ -291,10 +402,12 @@ export default function InvoiceGenerationModal({
                 <div className="border-t border-gray-200 p-4 md:p-6 flex-shrink-0">
                     <div className="flex flex-col space-y-3 md:space-y-0 md:flex-row md:items-center md:justify-between">
                         <div className="flex items-center justify-center md:justify-start">
-                            <label className="flex items-center">
-                                <input type="checkbox" className="mr-2" defaultChecked />
-                                <span className="text-xs md:text-sm text-gray-700">Email to customer</span>
-                            </label>
+                            {mode === 'create' && (
+                                <label className="flex items-center">
+                                    <input type="checkbox" className="mr-2" defaultChecked />
+                                    <span className="text-xs md:text-sm text-gray-700">Email to customer</span>
+                                </label>
+                            )}
                         </div>
 
                         <div className="flex space-x-2 md:space-x-3">
@@ -305,17 +418,17 @@ export default function InvoiceGenerationModal({
                                 Cancel
                             </button>
                             <button
-                                onClick={handleCreateInvoice}
-                                disabled={isCreating}
+                                onClick={handleSubmit}
+                                disabled={isProcessing}
                                 className="flex-1 md:flex-none px-3 md:px-4 py-2 text-sm bg-orange-500 text-white rounded-lg hover:bg-orange-600 disabled:opacity-50 flex items-center justify-center"
                             >
-                                {isCreating ? (
+                                {isProcessing ? (
                                     <>
                                         <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white mr-1"></div>
-                                        Creating...
+                                        {mode === 'create' ? 'Creating...' : 'Updating...'}
                                     </>
                                 ) : (
-                                    'Create Invoice'
+                                    mode === 'create' ? 'Create Invoice' : 'Update Invoice'
                                 )}
                             </button>
                         </div>

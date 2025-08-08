@@ -13,27 +13,6 @@ interface InvoiceData {
     notes: string;
 }
 
-interface InvoiceLineItem {
-    id: string;
-    type: 'labor' | 'part' | 'fee' | 'discount' | 'custom';
-    description: string;
-    quantity: number;
-    rate: number;
-    amount: number;
-    taxable: boolean;
-}
-
-interface Customer {
-    first_name: string;
-    last_name: string;
-    email: string;
-    phone: string;
-    address: string;
-    city: string;
-    state: string;
-    zipcode: string;
-}
-
 interface BusinessInfo {
     name: string;
     address: string;
@@ -155,7 +134,7 @@ export class InvoicePDFGenerator {
         this.doc.setFont('helvetica', 'normal');
         this.doc.text(`${customer.first_name} ${customer.last_name}`, leftColumn, yPosition);
         yPosition += 5;
-        this.doc.text(customer.address, leftColumn, yPosition);
+        this.doc.text(customer.address!, leftColumn, yPosition);
         yPosition += 5;
         this.doc.text(`${customer.city}, ${customer.state} ${customer.zipcode}`, leftColumn, yPosition);
         yPosition += 5;

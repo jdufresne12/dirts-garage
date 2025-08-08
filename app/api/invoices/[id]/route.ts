@@ -76,7 +76,7 @@ export async function GET(_req: Request, context: { params: { id: string } }) {
             line_items: lineItemsResult.rows.map(item => ({
                 id: item.id,
                 invoice_id: item.invoice_id,
-                key: item.id, // Using id as key since your schema doesn't have key field
+                key: item.key || item.id, // Use key field if available, otherwise fall back to id
                 type: item.type,
                 description: item.description,
                 quantity: parseFloat(item.quantity),

@@ -121,6 +121,7 @@ CREATE TABLE invoices (
 
 CREATE TABLE invoice_line_items (
     id TEXT PRIMARY KEY,
+    key TEXT NOT NULL,
     invoice_id TEXT NOT NULL,
     type TEXT NOT NULL,
     description TEXT NOT NULL,
