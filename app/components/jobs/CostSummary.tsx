@@ -202,23 +202,6 @@ export default function CostSummary({
                                     </span>
                                 )}
                             </div>
-
-                            <div className="flex items-center space-x-1">
-                                <button
-                                    onClick={handleViewInvoice}
-                                    className="p-1 text-gray-500 hover:text-gray-700 hover:bg-gray-200 rounded"
-                                    title="View invoice"
-                                >
-                                    <Eye size={14} />
-                                </button>
-                                <button
-                                    onClick={handleInvoiceClick}
-                                    className="p-1 text-gray-500 hover:text-gray-700 hover:bg-gray-200 rounded"
-                                    title="Edit invoice"
-                                >
-                                    <Edit size={14} />
-                                </button>
-                            </div>
                         </div>
 
                         {syncStatus.needed && (

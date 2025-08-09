@@ -12,6 +12,18 @@ interface BusinessInfo {
     website?: string;
 }
 
+interface Payment {
+    id: string;
+    invoice_id: string;
+    amount: number;
+    payment_date: string;
+    payment_method: 'cash' | 'check' | 'credit_card' | 'debit_card' | 'bank_transfer' | 'other';
+    reference_number?: string;
+    notes?: string;
+    created_at?: string;
+    updated_at?: string;
+}
+
 // Updated PDF Generator Class for new invoice schema
 export class InvoicePDFGenerator {
     private doc: jsPDF;
@@ -31,7 +43,8 @@ export class InvoicePDFGenerator {
         invoice: Invoice,
         customer: Customer,
         businessInfo: BusinessInfo,
-        vehicle?: Vehicle
+        vehicle?: Vehicle,
+        payments?: Payment[]
     ): Promise<Blob> {
         // Reset document
         this.doc = new jsPDF();
@@ -46,16 +59,53 @@ export class InvoicePDFGenerator {
         // Customer Info & Vehicle Info
         yPosition = this.addCustomerInfo(customer, vehicle, yPosition);
 
-        // Line Items Table
-        yPosition = await this.addLineItemsTable(invoice.line_items || [], yPosition);
+        const lineItemsCount = invoice.line_items?.length || 0;
 
-        // Totals
-        yPosition = this.addTotals(invoice, yPosition);
+        // For 7 items or fewer, force everything on one page
+        if (lineItemsCount <= 7) {
+            // Add line items table
+            yPosition = await this.addLineItemsTable(invoice.line_items || [], yPosition);
+
+            // Add small spacing and keep totals on same page
+            yPosition += 5;
+        } else {
+            // For more than 7 items, use the splitting logic
+            const paymentsCount = payments?.length || 0;
+            const notesLines = invoice.notes ? Math.ceil(invoice.notes.length / 80) : 1;
+            const totalsSpaceNeeded = 100 + (paymentsCount * 8) + (notesLines * 15);
+
+            let shouldSplitTable = true;
+            const itemsForPage1 = lineItemsCount - Math.min(3, Math.floor(lineItemsCount * 0.3));
+
+            const page1Items = invoice.line_items?.slice(0, itemsForPage1) || [];
+            const page2Items = invoice.line_items?.slice(itemsForPage1) || [];
+
+            // Page 1 - Header + partial table
+            if (page1Items.length > 0) {
+                yPosition = await this.addLineItemsTable(page1Items, yPosition, {
+                    showBottomBorder: false,
+                    isContinuation: false
+                });
+            }
+
+            // Page 2 - Continuation of table + totals
+            this.doc.addPage();
+            yPosition = this.margin + 20;
+
+            if (page2Items.length > 0) {
+                yPosition = await this.addLineItemsTable(page2Items, yPosition, {
+                    showBottomBorder: true,
+                    isContinuation: true
+                });
+            }
+        }
+
+        // Totals (including payment information)
+        yPosition = this.addTotals(invoice, payments || [], yPosition);
 
         // Footer Notes
         this.addFooter(invoice.notes || '', businessInfo);
 
-        // Return as blob for download or saving
         return this.doc.output('blob');
     }
 
@@ -97,18 +147,18 @@ export class InvoicePDFGenerator {
         // Invoice number
         this.doc.setFontSize(12);
         this.doc.setFont('helvetica', 'normal');
+        this.doc.setTextColor(0, 0, 0);
         this.doc.text(invoice.id, rightMargin, rightYPosition, { align: 'right' });
 
         rightYPosition += 6;
 
-        // Status
-        this.doc.setFontSize(9);
-        this.doc.setFont('helvetica', 'bold');
-        const statusColor = this.getStatusColor(invoice.status);
-        this.doc.setTextColor(statusColor.r, statusColor.g, statusColor.b);
-        this.doc.text(`Status: ${invoice.status.toUpperCase()}`, rightMargin, rightYPosition, { align: 'right' });
-
-        rightYPosition += 5;
+        // Revision number (if > 1)
+        if (invoice.revision_number && invoice.revision_number > 1) {
+            this.doc.setFontSize(8);
+            this.doc.setTextColor(100, 100, 100);
+            this.doc.text(`Revision ${invoice.revision_number}`, rightMargin, rightYPosition, { align: 'right' });
+            rightYPosition += 5;
+        }
 
         // Date info
         this.doc.setFontSize(10);
@@ -127,14 +177,7 @@ export class InvoicePDFGenerator {
             rightYPosition += 4;
         }
 
-        if (invoice.revision_number > 1) {
-            this.doc.setFontSize(8);
-            this.doc.setTextColor(100, 100, 100);
-            this.doc.text(`Revision ${invoice.revision_number}`, rightMargin, rightYPosition, { align: 'right' });
-            rightYPosition += 4;
-        }
-
-        return Math.max(yPosition, rightYPosition) + 20;
+        return Math.max(yPosition, rightYPosition) + 15;
     }
 
     private addCustomerInfo(customer: Customer, vehicle: Vehicle | undefined, yPosition: number): number {
@@ -196,10 +239,16 @@ export class InvoicePDFGenerator {
             }
         }
 
-        return Math.max(leftY, rightY) + 15;
+        return Math.max(leftY, rightY) + 5;
     }
 
-    private async addLineItemsTable(lineItems: InvoiceLineItem[], yPosition: number): Promise<number> {
+    private async addLineItemsTable(
+        lineItems: InvoiceLineItem[],
+        yPosition: number,
+        options: { showBottomBorder?: boolean; isContinuation?: boolean } = {}
+    ): Promise<number> {
+        const { showBottomBorder = true, isContinuation = false } = options;
+
         if (!lineItems || lineItems.length === 0) {
             this.doc.setFontSize(10);
             this.doc.setTextColor(100, 100, 100);
@@ -210,57 +259,83 @@ export class InvoicePDFGenerator {
         const tableData = lineItems.map(item => [
             item.description,
             item.quantity % 1 === 0 ? item.quantity.toString() : item.quantity.toFixed(3),
-            `$${item.rate.toFixed(2)}`,
-            `$${item.amount.toFixed(2)}`
+            `${item.rate.toFixed(2)}`,
+            `${item.amount.toFixed(2)}`
         ]);
 
-        // Clean table styling
+        // Calculate column widths for better alignment
+        const availableWidth = this.pageWidth - (this.margin * 2);
+        const descriptionWidth = availableWidth * 0.50;  // 50% for description
+        const qtyWidth = availableWidth * 0.15;         // 15% for quantity
+        const rateWidth = availableWidth * 0.175;       // 17.5% for rate
+        const amountWidth = availableWidth * 0.175;     // 17.5% for amount
+
+        // Determine if we should show header (don't show on continuation)
+        const showHeader = !isContinuation;
+        const headData = showHeader ? [['Description', '        Qty', '                  Rate', '            Amount']] : undefined;
+
+        // Clean table styling with proper alignment
         autoTable(this.doc, {
-            head: [['Description', 'Qty', 'Rate', 'Amount']],
+            head: headData,
             body: tableData,
             startY: yPosition,
             theme: 'plain',
-            headStyles: {
+            headStyles: showHeader ? {
                 fillColor: [255, 255, 255],
                 textColor: [0, 0, 0],
                 fontStyle: 'bold',
                 fontSize: 10,
-                cellPadding: { top: 4, bottom: 4, left: 0, right: 0 }
-            },
+                cellPadding: { top: 6, bottom: 6, left: 2, right: 2 }
+            } : undefined,
             bodyStyles: {
                 textColor: [0, 0, 0],
                 fontSize: 10,
-                cellPadding: { top: 6, bottom: 4, left: 0, right: 0 }
+                cellPadding: { top: 6, bottom: 4, left: 2, right: 2 },
+                lineWidth: 0,
+                lineColor: [255, 255, 255]
             },
             columnStyles: {
-                0: { cellWidth: 'auto', halign: 'left' },
-                1: { cellWidth: 25, halign: 'center' },
-                2: { cellWidth: 30, halign: 'right' },
-                3: { cellWidth: 30, halign: 'right' }
+                0: { cellWidth: descriptionWidth, halign: 'left' },
+                1: { cellWidth: qtyWidth, halign: 'center' },   // Center align quantity
+                2: { cellWidth: rateWidth, halign: 'right' },   // Right align rate
+                3: { cellWidth: amountWidth, halign: 'right' }  // Right align amount
             },
             margin: { left: this.margin, right: this.margin },
+            alternateRowStyles: {
+                fillColor: [249, 249, 249] // Very light gray for alternating rows
+            },
             didDrawPage: (data) => {
                 this.lastTableY = data.cursor?.y || yPosition + 50;
 
-                // Draw header underline
-                const headerY = yPosition + 14;
-                this.doc.setDrawColor(0, 0, 0);
-                this.doc.setLineWidth(0.5);
-                this.doc.line(this.margin, headerY, this.pageWidth - this.margin, headerY);
+                // Draw header underline only if showing header
+                if (showHeader) {
+                    const headerY = yPosition + 16;
+                    this.doc.setDrawColor(0, 0, 0);
+                    this.doc.setLineWidth(1);
+                    this.doc.line(this.margin, headerY, this.pageWidth - this.margin, headerY);
+                }
 
-                // Draw bottom border
-                if (this.lastTableY) {
+                // Draw top border for continuation tables
+                if (isContinuation) {
+                    this.doc.setDrawColor(0, 0, 0);
+                    this.doc.setLineWidth(1);
+                    this.doc.line(this.margin, yPosition, this.pageWidth - this.margin, yPosition);
+                }
+
+                // Draw bottom border if requested
+                if (showBottomBorder && this.lastTableY) {
+                    this.doc.setLineWidth(1);
                     this.doc.line(this.margin, this.lastTableY, this.pageWidth - this.margin, this.lastTableY);
                 }
             }
         });
 
-        return this.lastTableY + 15;
+        return this.lastTableY + 10; // Reduced spacing
     }
 
-    private addTotals(invoice: Invoice, yPosition: number): number {
+    private addTotals(invoice: Invoice, payments: Payment[], yPosition: number): number {
         const rightAlign = this.pageWidth - this.margin;
-        const labelX = rightAlign - 60;
+        const labelX = rightAlign - 60; // Better alignment to match your image
         const amountX = rightAlign;
 
         this.doc.setFontSize(10);
@@ -269,101 +344,87 @@ export class InvoicePDFGenerator {
 
         // Subtotal
         this.doc.text('Subtotal:', labelX, yPosition);
-        this.doc.text(`$${invoice.subtotal.toFixed(2)}`, amountX, yPosition, { align: 'right' });
-        yPosition += 8;
-
-        // Discount (if any)
-        if (invoice.discount_amount > 0) {
-            this.doc.setTextColor(0, 150, 0); // Green for discount
-            this.doc.text('Discount:', labelX, yPosition);
-            this.doc.text(`-$${invoice.discount_amount.toFixed(2)}`, amountX, yPosition, { align: 'right' });
-            yPosition += 8;
-            this.doc.setTextColor(0, 0, 0); // Reset to black
-        }
+        this.doc.text(`${invoice.subtotal.toFixed(2)}`, amountX, yPosition, { align: 'right' });
+        yPosition += 6;
 
         // Tax
         this.doc.text(`Tax (${invoice.tax_rate}%):`, labelX, yPosition);
-        this.doc.text(`$${invoice.tax_amount.toFixed(2)}`, amountX, yPosition, { align: 'right' });
-        yPosition += 12;
+        this.doc.text(`${invoice.tax_amount.toFixed(2)}`, amountX, yPosition, { align: 'right' });
+        yPosition += 8;
 
-        // Total - Bold and larger
+        // Invoice Total - Bold and larger
         this.doc.setFontSize(12);
         this.doc.setFont('helvetica', 'bold');
         this.doc.text('Total:', labelX, yPosition);
-        this.doc.text(`$${invoice.amount.toFixed(2)}`, amountX, yPosition, { align: 'right' });
+        this.doc.text(`${invoice.amount.toFixed(2)}`, amountX, yPosition, { align: 'right' });
+        yPosition += 8;
+
+        // Separator line after first total
+        this.doc.setDrawColor(128, 128, 128);
+        this.doc.setLineWidth(0.5);
+        this.doc.line(labelX - 5, yPosition, rightAlign, yPosition);
         yPosition += 10;
 
-        // Payment info (if any)
-        if (invoice.amount_paid > 0) {
+        // Payment Information Section (like in your image)
+        if (payments && payments.length > 0) {
+            // Sort payments by date
+            const sortedPayments = [...payments].sort((a, b) =>
+                new Date(a.payment_date).getTime() - new Date(b.payment_date).getTime()
+            );
+
             this.doc.setFontSize(10);
             this.doc.setFont('helvetica', 'normal');
-            this.doc.setTextColor(0, 150, 0); // Green for payments
+            this.doc.setTextColor(255, 0, 0); // Red color for payments like in image
 
-            this.doc.text('Amount Paid:', labelX, yPosition);
-            this.doc.text(`$${invoice.amount_paid.toFixed(2)}`, amountX, yPosition, { align: 'right' });
+            sortedPayments.forEach(payment => {
+                const paymentMethodDisplay = payment.payment_method.replace('_', ' ');
+                const paymentText = `${paymentMethodDisplay} - ${this.formatDate(payment.payment_date)}`;
+
+                this.doc.text(paymentText, labelX, yPosition);
+                this.doc.text(`-${payment.amount.toFixed(2)}`, amountX, yPosition, { align: 'right' });
+                yPosition += 6;
+            });
+
+            // Separator line after payments
+            this.doc.setDrawColor(128, 128, 128);
+            this.doc.setLineWidth(0.5);
+            this.doc.line(labelX - 5, yPosition + 2, rightAlign, yPosition + 2);
             yPosition += 8;
-
-            const balance = invoice.amount - invoice.amount_paid;
-            if (balance > 0) {
-                this.doc.setTextColor(200, 0, 0); // Red for balance due
-                this.doc.setFont('helvetica', 'bold');
-                this.doc.text('Balance Due:', labelX, yPosition);
-                this.doc.text(`$${balance.toFixed(2)}`, amountX, yPosition, { align: 'right' });
-            } else {
-                this.doc.setTextColor(0, 150, 0); // Green for paid in full
-                this.doc.setFont('helvetica', 'bold');
-                this.doc.text('PAID IN FULL', labelX, yPosition);
-            }
-            yPosition += 10;
         }
+
+        // Final Balance Due - this is the ONLY final total line
+        const balanceDue = invoice.amount - invoice.amount_paid;
+        this.doc.setFontSize(12);
+        this.doc.setFont('helvetica', 'bold');
+        this.doc.setTextColor(0, 0, 0); // Black for final total
+
+        this.doc.text('Total:', labelX, yPosition);
+        this.doc.text(`${balanceDue.toFixed(2)}`, amountX, yPosition, { align: 'right' });
+        yPosition += 8;
 
         return yPosition + 10;
     }
 
     private addFooter(notes: string, businessInfo: BusinessInfo): void {
-        const footerY = this.pageHeight - 40;
+        const footerStartY = this.pageHeight - 35; // More space from bottom
 
-        // Notes section
+        // Notes section - positioned better
         if (notes) {
             this.doc.setFontSize(10);
-            this.doc.setFont('helvetica', 'normal');
+            this.doc.setFont('helvetica', 'bold');
             this.doc.setTextColor(0, 0, 0);
+            this.doc.text('Notes:', this.margin, footerStartY - 25);
 
+            this.doc.setFont('helvetica', 'normal');
             // Split long notes into multiple lines
             const maxWidth = this.pageWidth - (this.margin * 2);
             const noteLines = this.doc.splitTextToSize(notes, maxWidth);
-
-            this.doc.text('Notes:', this.margin, footerY - 10);
-            this.doc.text(noteLines, this.margin, footerY);
+            this.doc.text(noteLines, this.margin, footerStartY - 17);
         }
 
-        // Footer line
-        const footerLineY = this.pageHeight - 20;
-        this.doc.setDrawColor(200, 200, 200);
-        this.doc.setLineWidth(0.5);
-        this.doc.line(this.margin, footerLineY, this.pageWidth - this.margin, footerLineY);
-
-        // Thank you message
-        this.doc.setFontSize(8);
-        this.doc.setTextColor(100, 100, 100);
-        this.doc.text('Thank you for your business!', this.pageWidth / 2, footerLineY + 8, { align: 'center' });
-    }
-
-    private getStatusColor(status: string): { r: number, g: number, b: number } {
-        switch (status.toLowerCase()) {
-            case 'paid':
-                return { r: 0, g: 150, b: 0 }; // Green
-            case 'overdue':
-                return { r: 200, g: 0, b: 0 }; // Red
-            case 'sent':
-                return { r: 0, g: 100, b: 200 }; // Blue
-            case 'pending':
-                return { r: 200, g: 150, b: 0 }; // Orange
-            case 'cancelled':
-                return { r: 100, g: 100, b: 100 }; // Gray
-            default:
-                return { r: 0, g: 0, b: 0 }; // Black
-        }
+        // Add invoice creation date
+        const creationDate = new Date().toLocaleDateString();
+        this.doc.text(`Invoice created on ${creationDate}`, this.pageWidth / 2, footerStartY + 15, { align: 'center' });
     }
 
     private formatDate(date: string): string {
@@ -383,11 +444,12 @@ export class InvoicePDFGenerator {
     }
 }
 
-// Updated usage function for new schema
+// Updated usage function for new schema with payments
 export async function handlePDFGeneration(
     invoice: Invoice,
     customer: Customer,
     vehicle?: Vehicle,
+    payments?: Payment[],
     action: 'download' | 'preview' | 'email' = 'download'
 ): Promise<void> {
     const businessInfo = {
@@ -408,7 +470,8 @@ export async function handlePDFGeneration(
             invoice,
             customer,
             businessInfo,
-            vehicle
+            vehicle,
+            payments
         );
 
         // Handle the action

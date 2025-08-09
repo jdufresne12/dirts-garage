@@ -146,9 +146,9 @@ export default function InvoicePreview({
                         <h3 className="font-semibold text-gray-900 mb-2">Vehicle:</h3>
                         <div className="text-gray-700 text-sm md:text-base">
                             <p className="font-medium">{vehicle.year} {vehicle.make} {vehicle.model}</p>
-                            {vehicle.vin && <p>VIN: {vehicle.vin}</p>}
-                            {vehicle.license_plate && <p>License: {vehicle.license_plate}</p>}
-                            {vehicle.mileage && <p>Mileage: {vehicle.mileage.toLocaleString()}</p>}
+                            {vehicle.vin ? <p>VIN: {vehicle.vin}</p> : ''}
+                            {vehicle.license_plate ? <p>License: {vehicle.license_plate}</p> : ''}
+                            {vehicle.mileage ? <p>Mileage: {vehicle.mileage.toLocaleString()}</p> : ''}
                         </div>
                     </div>
                 )}
@@ -208,11 +208,6 @@ export default function InvoicePreview({
                                                 <span>{item.description}</span>
                                                 {getSourceIndicator(item)}
                                             </div>
-                                            {showSyncIndicators && item.source_id && (
-                                                <div className="text-xs text-gray-500 mt-1">
-                                                    ID: {item.source_id}
-                                                </div>
-                                            )}
                                         </div>
                                     </td>
                                     <td className="py-2 md:py-3 text-center text-gray-700 text-sm md:text-base">

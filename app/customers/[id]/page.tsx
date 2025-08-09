@@ -1,26 +1,21 @@
 'use client'
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import {
-    User,
-    Phone,
-    MapPin,
-    Edit3,
-    Save,
-    X,
     Plus,
     Wrench,
     FileText,
-    ChevronLeft,
-    Mail
+    ChevronLeft
 } from 'lucide-react';
 
-import mockData from '../../data/mock-data';
 import VehicleCard from '@/app/components/customers/VehicleCard';
 import AddVehicleModal from '@/app/components/customers/AddVehicleModal';
-import helpers from '@/app/utils/helpers';
+import CustomerInformation from '@/app/components/customers/CustomerInformation';
+import CustomerOverview from '@/app/components/customers/CustomerOverview';
+import JobsTable from '@/app/components/customers/JobsTable';
+import InvoicesTable from '@/app/components/customers/InvoicesTable';
 
 const CustomerDetailsPage = () => {
     const { id } = useParams();
@@ -30,7 +25,34 @@ const CustomerDetailsPage = () => {
     const [showAddVehicle, setShowAddVehicle] = useState<boolean>(false);
     const [initCustomerData, setInitCustomerData] = useState<Customer | undefined>();
     const [customerData, setCustomerData] = useState<Customer | undefined>();
+    const [jobs, setJobs] = useState<Job[]>([]);
+    const [invoices, setInvoices] = useState<Invoice[]>([]);
+    const [financialSummary, setFinancialSummary] = useState<{
+        total_spent: number;
+        amount_owed: number;
+        total_invoiced: number;
+        invoice_count: number;
+        job_count: number;
+        total_job_costs: number;
+    }>({
+        total_spent: 0,
+        amount_owed: 0,
+        total_invoiced: 0,
+        invoice_count: 0,
+        job_count: 0,
+        total_job_costs: 0
+    });
     const [isInitialLoading, setIsInitialLoading] = useState<boolean>(true);
+    const [isJobsLoading, setIsJobsLoading] = useState<boolean>(false);
+    const [isInvoicesLoading, setIsInvoicesLoading] = useState<boolean>(false);
+
+    // Use financial summary from API instead of calculating from invoices
+    const { totalSpent, amountOwed } = useMemo(() => {
+        return {
+            totalSpent: financialSummary.total_spent,
+            amountOwed: financialSummary.amount_owed
+        };
+    }, [financialSummary]);
 
     useEffect(() => {
         async function fetchCustomerData(id: string) {
@@ -50,6 +72,81 @@ const CustomerDetailsPage = () => {
         }
     }, [id]);
 
+    // Fetch jobs when jobs tab is active
+    useEffect(() => {
+        if (activeTab === 'jobs' && id) {
+            fetchJobs();
+        }
+    }, [activeTab, id]);
+
+    // Fetch invoices when invoices tab is active
+    useEffect(() => {
+        if (activeTab === 'invoices' && id) {
+            fetchInvoices();
+        }
+    }, [activeTab, id]);
+
+    // Fetch financial summary when customer data is loaded
+    useEffect(() => {
+        if (customerData?.id) {
+            fetchFinancialSummary();
+        }
+    }, [customerData?.id]);
+
+    const fetchJobs = async () => {
+        setIsJobsLoading(true);
+        try {
+            const res = await fetch(`/api/customers/${id}/jobs`);
+
+            if (res.ok) {
+                const jobsData = await res.json();
+                setJobs(jobsData);
+            } else {
+                const errorText = await res.text();
+                console.error('Jobs API error:', res.status, errorText);
+            }
+        } catch (err) {
+            console.error('Error fetching jobs:', err);
+        } finally {
+            setIsJobsLoading(false);
+        }
+    };
+
+    const fetchInvoices = async () => {
+        setIsInvoicesLoading(true);
+        try {
+            const res = await fetch(`/api/customers/${id}/invoices`);
+
+            if (res.ok) {
+                const invoicesData = await res.json();
+                setInvoices(invoicesData);
+            } else {
+                const errorText = await res.text();
+                console.error('Invoices API error:', res.status, errorText);
+            }
+        } catch (err) {
+            console.error('Error fetching invoices:', err);
+        } finally {
+            setIsInvoicesLoading(false);
+        }
+    };
+
+    const fetchFinancialSummary = async () => {
+        try {
+            const res = await fetch(`/api/customers/${id}/financial-summary`);
+
+            if (res.ok) {
+                const summaryData = await res.json();
+                setFinancialSummary(summaryData);
+            } else {
+                const errorText = await res.text();
+                console.error('Financial summary API error:', res.status, errorText);
+            }
+        } catch (err) {
+            console.error('Error fetching financial summary:', err);
+        }
+    };
+
     const handleSave = async () => {
         setIsEditing(false);
 
@@ -59,7 +156,7 @@ const CustomerDetailsPage = () => {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify(customerData), // Send only the fields to update
+                body: JSON.stringify(customerData),
             });
 
             if (!res.ok) {
@@ -74,7 +171,6 @@ const CustomerDetailsPage = () => {
             console.error('Error saving customer:', err);
         }
     };
-
 
     const handleCancel = () => {
         setIsEditing(false);
@@ -92,6 +188,8 @@ const CustomerDetailsPage = () => {
                 return `${baseClasses} bg-orange-100 text-orange-800`;
             case "Payment":
                 return `${baseClasses} bg-red-100 text-red-800`;
+            case "Completed":
+                return `${baseClasses} bg-green-100 text-green-800`;
             default:
                 return `${baseClasses} bg-gray-100 text-gray-600`;
         }
@@ -100,10 +198,16 @@ const CustomerDetailsPage = () => {
     const getInvoiceStatusBadge = (status: string) => {
         const baseClasses = "px-2 py-1 rounded text-xs font-medium";
         switch (status) {
-            case "Completed":
+            case "paid":
                 return `${baseClasses} bg-green-100 text-green-800`;
-            case "Awaiting Payment":
+            case "sent":
+                return `${baseClasses} bg-blue-100 text-blue-800`;
+            case "pending":
                 return `${baseClasses} bg-yellow-100 text-yellow-800`;
+            case "overdue":
+                return `${baseClasses} bg-red-100 text-red-800`;
+            case "draft":
+                return `${baseClasses} bg-gray-100 text-gray-800`;
             default:
                 return `${baseClasses} bg-gray-100 text-gray-600`;
         }
@@ -188,229 +292,24 @@ const CustomerDetailsPage = () => {
                     </div>
                 </div>
 
-                {/* Customer Information Card */}
+                {/* Customer Information and Overview Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
-                        <div className="flex items-center justify-between mb-4">
-                            <h2 className="text-xl font-semibold text-gray-900">Customer Information</h2>
-                            {!isEditing ? (
-                                <button
-                                    onClick={() => setIsEditing(true)}
-                                    className="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 hover:text-gray-800 border border-gray-300 rounded-lg hover:bg-gray-50"
-                                >
-                                    <Edit3 className="size-4" />
-                                    Edit
-                                </button>
-                            ) : (
-                                <div className="flex gap-2">
-                                    <button
-                                        onClick={handleSave}
-                                        className="flex items-center gap-2 px-3 py-2 text-sm bg-green-600 text-white rounded-lg hover:bg-green-700"
-                                    >
-                                        <Save className="size-4" />
-                                        Save
-                                    </button>
-                                    <button
-                                        onClick={handleCancel}
-                                        className="flex items-center gap-2 px-3 py-2 text-sm border border-gray-300 text-gray-600 rounded-lg hover:bg-gray-50"
-                                    >
-                                        <X className="size-4" />
-                                        Cancel
-                                    </button>
-                                </div>
-                            )}
-                        </div>
+                    <CustomerInformation
+                        customerData={customerData}
+                        setCustomerData={setCustomerData}
+                        isEditing={isEditing}
+                        setIsEditing={setIsEditing}
+                        handleSave={handleSave}
+                        handleCancel={handleCancel}
+                    />
 
-                        <div className="space-y-5">
-                            {/* Name Section */}
-                            <div>
-                                {isEditing ? (
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div>
-                                            <label className="flex items-center text-xs font-medium text-gray-700 mb-2">
-                                                First Name
-                                            </label>
-                                            <input
-                                                value={customerData.first_name}
-                                                onChange={(e) => setCustomerData({
-                                                    ...customerData,
-                                                    first_name: e.target.value
-                                                })}
-                                                className="w-full border border-gray-300 rounded-lg px-3 py-2"
-                                            />
-                                        </div>
-                                        <div>
-                                            <label className="flex items-center text-xs font-medium text-gray-700 mb-2">
-                                                Last Name
-                                            </label>
-                                            <input
-                                                value={customerData.last_name}
-                                                onChange={(e) => setCustomerData({
-                                                    ...customerData,
-                                                    last_name: e.target.value
-                                                })}
-                                                className="w-full border border-gray-300 rounded-lg px-3 py-2"
-                                            />
-                                        </div>
-                                    </div>
-                                ) : (
-                                    <>
-                                        <label className="flex items-center text-xs font-medium text-gray-700 mb-2">
-                                            <User className="size-3 mr-2" />
-                                            Name
-                                        </label>
-                                        <p className="text-gray-900">{customerData.first_name} {customerData.last_name}</p>
-                                    </>
-                                )}
-                            </div>
-
-                            {/* Phone */}
-                            <div>
-                                <label className="flex items-center text-xs font-medium text-gray-700 mb-2">
-                                    <Phone className="size-3 mr-2" />
-                                    Phone
-                                </label>
-                                {isEditing ? (
-                                    <input
-                                        value={customerData.phone}
-                                        onChange={(e) => setCustomerData({
-                                            ...customerData,
-                                            phone: helpers.formatPhoneNumber(e.target.value)
-                                        })}
-                                        className="w-full border border-gray-300 rounded-lg px-3 py-2"
-                                    />
-                                ) : (
-                                    <p className="text-gray-900">{customerData.phone}</p>
-                                )}
-                            </div>
-
-                            {/* Email */}
-                            <div>
-                                <label className="flex items-center text-xs font-medium text-gray-700 mb-2">
-                                    <Mail className="size-3 mr-2" />
-                                    Email
-                                </label>
-                                {isEditing ? (
-                                    <input
-                                        value={customerData.email}
-                                        onChange={(e) => setCustomerData({
-                                            ...customerData,
-                                            email: e.target.value
-                                        })}
-                                        className="w-full border border-gray-300 rounded-lg px-3 py-2"
-                                    />
-                                ) : (
-                                    <p className="text-gray-900">{customerData.email}</p>
-                                )}
-                            </div>
-
-                            <div>
-                                <label className="flex items-center text-xs font-medium text-gray-700 mb-2">
-                                    <MapPin className="size-3 mr-2" />
-                                    Address
-                                </label>
-
-                                {isEditing ? (
-                                    <div className="space-y-2">
-                                        <textarea
-                                            placeholder="Street Address"
-                                            value={customerData.address || ''}
-                                            onChange={(e) =>
-                                                setCustomerData({ ...customerData, address: e.target.value })
-                                            }
-                                            className="w-full border border-gray-300 rounded-lg px-3 py-2"
-                                            rows={2}
-                                        />
-                                        <div className="grid grid-cols-3 gap-2">
-                                            <input
-                                                type="text"
-                                                placeholder="City"
-                                                value={customerData.city || ''}
-                                                onChange={(e) =>
-                                                    setCustomerData({ ...customerData, city: e.target.value })
-                                                }
-                                                className="border border-gray-300 rounded-lg px-3 py-2"
-                                            />
-                                            <select
-                                                value={customerData.state || ''}
-                                                onChange={(e) =>
-                                                    setCustomerData({ ...customerData, state: e.target.value })
-                                                }
-                                                className="border border-gray-300 rounded-lg px-3 py-2"
-                                            >
-                                                <option value="">Select State</option>
-                                                {helpers.US_STATES.map((state) => (
-                                                    <option key={state.abbreviation} value={state.abbreviation}>
-                                                        {state.name}
-                                                    </option>
-                                                ))}
-                                            </select>
-                                            <input
-                                                type="text"
-                                                placeholder="ZIP Code"
-                                                value={customerData.zipcode || ''}
-                                                onChange={(e) =>
-                                                    setCustomerData({ ...customerData, zipcode: e.target.value })
-                                                }
-                                                className="border border-gray-300 rounded-lg px-3 py-2"
-                                            />
-                                        </div>
-                                    </div>
-                                ) : (
-                                    <p className="text-gray-900">
-                                        {customerData.address || 'No address provided'}
-                                        {customerData.city || customerData.state || customerData.zipcode ? (
-                                            <>
-                                                {customerData.city ? `, ${customerData.city}` : ''}
-                                                {customerData.state ? `, ${customerData.state}` : ''}
-                                                {customerData.zipcode ? ` ${customerData.zipcode}` : ''}
-                                            </>
-                                        ) : null}
-                                    </p>
-                                )}
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Customer Stats */}
-                    <div className="hidden md:block bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
-                        <h3 className="text-lg font-semibold text-gray-900 mb-4">Customer Overview</h3>
-
-                        <div className="space-y-8">
-                            <div>
-                                <label className="text-sm font-medium text-gray-700 mb-2 block">Status</label>
-                                <span className={`px-2 py-1 rounded text-xs font-medium ${getStatusBadge(customerData.status)}`}>
-                                    {customerData.status === "In Progress" ? "Active Job" : customerData.status}
-                                </span>
-                            </div>
-
-                            <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label className="text-sm font-medium text-gray-700 mb-2 block">Total Vehicles</label>
-                                    <p className="text-2xl font-bold text-gray-900">{customerData.vehicles?.length || 0}</p>
-                                </div>
-                                <div>
-                                    <label className="text-sm font-medium text-gray-700 mb-2 block">Total Jobs</label>
-                                    <p className="text-2xl font-bold text-gray-900">{customerData.jobs?.length || 0}</p>
-                                </div>
-                            </div>
-
-                            <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label className="text-sm font-medium text-gray-700 mb-2 block">Total Spent</label>
-                                    <p className="text-xl font-bold text-green-600">
-                                        ${customerData.invoices?.totalSpent ? customerData.totalSpent.toLocaleString() : 0}
-                                    </p>
-                                </div>
-                                <div>
-                                    <label className="text-sm font-medium text-gray-700 mb-2 block">Amount Owed</label>
-                                    <p className={`text-xl font-bold ${customerData.amountOwed && customerData.amountOwed > 0 ? 'text-red-600' : 'text-green-600'}`}>
-                                        ${customerData.amountOwed ? customerData.amountOwed.toLocaleString() : 0}
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    <CustomerOverview
+                        customerData={customerData}
+                        jobs={jobs}
+                        totalSpent={totalSpent}
+                        amountOwed={amountOwed}
+                        getStatusBadge={getStatusBadge}
+                    />
                 </div>
 
                 {/* Vehicles Section */}
@@ -446,7 +345,6 @@ const CustomerDetailsPage = () => {
                             {[
                                 { id: 'jobs', label: 'Jobs', icon: Wrench },
                                 { id: 'invoices', label: 'Invoices', icon: FileText },
-                                // { id: 'analytics', label: 'Analytics', icon: TrendingUp }
                             ].map(tab => (
                                 <button
                                     key={tab.id}
@@ -465,124 +363,21 @@ const CustomerDetailsPage = () => {
 
                     <div className="p-6">
                         {activeTab === 'jobs' && (
-                            <div>
-                                <Link
-                                    href="/jobs/new-job"
-                                    className="flex w-fit items-center mb-2 p-1 text-center text-sm font-medium transition-colors whitespace-nowrap
-                            text-orange-400 rounded-lg hover:border-orange-400 hover:border-1"
-                                >
-                                    <Plus className="size-3 mr-1 text-orange-400 md:size-4" /> New Job
-                                </Link>
-                                {customerData.jobs && customerData.jobs.length > 0 ? (
-                                    <div className="overflow-x-auto">
-                                        <table className="min-w-full divide-y divide-gray-200">
-                                            <thead className="bg-gray-50">
-                                                <tr>
-                                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Job</th>
-                                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Vehicle</th>
-                                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Start Date</th>
-                                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Est. Cost</th>
-                                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody className="bg-white divide-y divide-gray-200">
-                                                {customerData.jobs.map(job => {
-                                                    const vehicle = customerData.vehicles?.find(v => v.id === job.vehicle_id);
-                                                    return (
-                                                        <tr key={job.id} className="hover:bg-gray-50">
-                                                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                                                {job.title}
-                                                            </td>
-                                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                                                {vehicle ? `${vehicle.year} ${vehicle.make} ${vehicle.model}` : 'Unknown Vehicle'}
-                                                            </td>
-                                                            <td className="px-6 py-4 whitespace-nowrap">
-                                                                <span className={`px-2 py-1 rounded text-xs font-medium ${getStatusBadge(job.status)}`}>
-                                                                    {job.status}
-                                                                </span>
-                                                            </td>
-                                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                                                {job.start_date}
-                                                            </td>
-                                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                                                ${job.estimated_cost.toLocaleString()}
-                                                            </td>
-                                                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                                                <button className="text-orange-600 hover:text-orange-900 mr-3">View</button>
-                                                                <button className="text-gray-600 hover:text-gray-900">Edit</button>
-                                                            </td>
-                                                        </tr>
-                                                    );
-                                                })}
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                ) : (
-                                    <div className="text-center py-8 text-gray-500">
-                                        No jobs found for this customer
-                                    </div>
-                                )}
-                            </div>
+                            <JobsTable
+                                jobs={jobs}
+                                customerData={customerData}
+                                isJobsLoading={isJobsLoading}
+                                getStatusBadge={getStatusBadge}
+                            />
                         )}
 
                         {activeTab === 'invoices' && (
-                            <div>
-                                <Link
-                                    href="/jobs/new-job"
-                                    className="flex w-fit items-center mb-2 p-1 text-center text-sm font-medium transition-colors whitespace-nowrap
-                            text-orange-400 rounded-lg hover:border-orange-400 hover:border-1"
-                                >
-                                    <Plus className="size-3 mr-1 text-orange-400 md:size-4" /> Create Invoice
-                                </Link>
-                                {customerData.invoices && customerData.invoices.length > 0 ? (
-                                    <div className="overflow-x-auto">
-                                        <table className="min-w-full divide-y divide-gray-200">
-                                            <thead className="bg-gray-50">
-                                                <tr>
-                                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Invoice #</th>
-                                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
-                                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Paid</th>
-                                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody className="bg-white divide-y divide-gray-200">
-                                                {customerData.invoices.map(invoice => (
-                                                    <tr key={invoice.id} className="hover:bg-gray-50">
-                                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                                            INV-{invoice.id.toString().padStart(3, '0')}
-                                                        </td>
-                                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                                            ${invoice.amount.toLocaleString()}
-                                                        </td>
-                                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                                            ${invoice.amount_paid.toLocaleString()}
-                                                        </td>
-                                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                                            {invoice.date}
-                                                        </td>
-                                                        <td className="px-6 py-4 whitespace-nowrap">
-                                                            <span className={`px-2 py-1 rounded text-xs font-medium ${getInvoiceStatusBadge(invoice.status)}`}>
-                                                                {invoice.status}
-                                                            </span>
-                                                        </td>
-                                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                                            <button className="text-orange-600 hover:text-orange-900 mr-3">View</button>
-                                                            <button className="text-gray-600 hover:text-gray-900">Download</button>
-                                                        </td>
-                                                    </tr>
-                                                ))}
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                ) : (
-                                    <div className="text-center py-8 text-gray-500">
-                                        No invoices found for this customer
-                                    </div>
-                                )}
-                            </div>
+                            <InvoicesTable
+                                invoices={invoices}
+                                customerData={customerData}
+                                isInvoicesLoading={isInvoicesLoading}
+                                getInvoiceStatusBadge={getInvoiceStatusBadge}
+                            />
                         )}
                     </div>
                 </div>

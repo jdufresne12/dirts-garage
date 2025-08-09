@@ -134,6 +134,7 @@ export default function InvoiceDetailPage() {
                 invoice,
                 invoice.customer!,
                 invoice.job?.vehicle,
+                payments,
                 'download'
             );
         } catch (error) {
@@ -153,6 +154,7 @@ export default function InvoiceDetailPage() {
                 invoice,
                 invoice.customer!,
                 invoice.job?.vehicle,
+                payments,
                 'preview'
             );
         } catch (error) {
@@ -206,9 +208,6 @@ export default function InvoiceDetailPage() {
                 notes: ''
             });
             setShowPaymentForm(false);
-
-            alert('Payment added successfully!');
-
         } catch (error) {
             console.error('Failed to add payment:', error);
             alert('Failed to add payment. Please try again.');
@@ -295,59 +294,26 @@ export default function InvoiceDetailPage() {
         <div className="min-h-screen bg-gray-50">
             {/* Header */}
             <div className="bg-white border-b border-gray-200">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex items-center justify-between py-4">
-                        <div className="flex items-center space-x-4">
-                            <button
-                                onClick={() => router.back()}
-                                className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md text-sm text-gray-700 hover:bg-gray-50"
-                            >
-                                <ArrowLeft className="mr-2" size={16} />
-                                Back
-                            </button>
+                <div className="flex items-center p-4 gap-6">
+                    <button
+                        onClick={() => router.back()}
+                        className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md text-sm text-gray-700 hover:bg-gray-50"
+                    >
+                        <ArrowLeft className="mr-2" size={16} />
+                        Back
+                    </button>
 
-                            <div>
-                                <h1 className="text-2xl font-bold text-gray-900">
-                                    Invoice {invoice.id}
-                                </h1>
-                                <div className="flex items-center space-x-3 mt-1">
-                                    {getStatusBadge(invoice.status)}
-                                    {invoice.revision_number > 1 && (
-                                        <span className="text-sm text-gray-500">
-                                            Revision {invoice.revision_number}
-                                        </span>
-                                    )}
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="flex items-center space-x-2">
-                            <button
-                                onClick={handlePreviewPDF}
-                                disabled={isProcessingPDF}
-                                className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md text-sm text-gray-700 hover:bg-gray-50 disabled:opacity-50"
-                            >
-                                <Eye className="mr-2" size={16} />
-                                Preview PDF
-                            </button>
-
-                            <button
-                                onClick={handleDownloadPDF}
-                                disabled={isProcessingPDF}
-                                className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md text-sm text-gray-700 hover:bg-gray-50 disabled:opacity-50"
-                            >
-                                <Download className="mr-2" size={16} />
-                                {isProcessingPDF ? 'Generating...' : 'Download PDF'}
-                            </button>
-
-                            <button
-                                onClick={() => setShowEditModal(true)}
-                                disabled={!jobData} // Disable if job data not loaded
-                                className="inline-flex items-center px-3 py-2 bg-orange-500 text-white rounded-md text-sm hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                                <Edit className="mr-2" size={16} />
-                                {!jobData ? 'Loading...' : 'Edit Invoice'}
-                            </button>
+                    <div>
+                        <h1 className="text-2xl font-bold text-gray-900">
+                            Invoice {invoice.id}
+                        </h1>
+                        <div className="flex items-center space-x-3 mt-1">
+                            {getStatusBadge(invoice.status)}
+                            {invoice.revision_number > 1 && (
+                                <span className="text-sm text-gray-500">
+                                    Revision {invoice.revision_number}
+                                </span>
+                            )}
                         </div>
                     </div>
                 </div>
