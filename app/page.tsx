@@ -1,25 +1,20 @@
 'use client';
 import React, { useState, useEffect } from 'react';
 import {
+  Clock,
   Wrench,
   FileText,
-  CheckCircle,
   DollarSign,
-  Plus
 } from 'lucide-react';
 
 import AnalyticsCard from './components/dashboard/AnalyticsCard';
 import RevenueTrendGraph from './components/dashboard/RevenueTrendGraph';
-import RecentActivity from './components/dashboard/RecentActivity';
-import JobsRequiringAttention from './components/dashboard/JobsRequiringAttention';
+import PendingInvoicesTable from './components/dashboard/PendingInvoicesTable';
+import ActiveJobsTable from './components/dashboard/ActiveJobsTable';
+import WaitingJobsTable from './components/dashboard/WaitingJobsTable';
 
 interface AnalyticsData {
-  activeJobs: {
-    value: number;
-    change: string;
-    changeType: 'positive' | 'negative';
-  };
-  revenue: {
+  revenueThisMonth: {
     value: number;
     change: string;
     changeType: 'positive' | 'negative';
@@ -29,14 +24,19 @@ interface AnalyticsData {
     change: string;
     changeType: 'positive' | 'negative';
   };
-  completedThisWeek: {
+  activeJobs: {
+    value: number;
+    change: string;
+    changeType: 'positive' | 'negative';
+  };
+  jobsWaiting: {
     value: number;
     change: string;
     changeType: 'positive' | 'negative';
   };
 }
 
-export default function Home() {
+export default function Dashboard() {
   const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -47,10 +47,9 @@ export default function Home() {
   const fetchAnalytics = async () => {
     try {
       const response = await fetch('/api/dashboard/analytics');
-      if (!response.ok) {
-        throw new Error('Failed to fetch analytics');
-      }
+      if (!response.ok) throw new Error('Failed to fetch analytics');
       const data = await response.json();
+      console.log('Analytics data:', data); // Debug log
       setAnalytics(data);
     } catch (error) {
       console.error('Error fetching analytics:', error);
@@ -74,7 +73,7 @@ export default function Home() {
         <div className="w-full mx-auto p-6 lg:p-8">
           <div className="grid grid-cols-2 w-full gap-4 mb-6 sm:gap-6 sm:mb-10">
             {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="bg-white rounded-lg border-l-4 border-l-gray-300 p-3 sm:p-4 lg:p-6 shadow-sm animate-pulse">
+              <div key={i} className="bg-white rounded-lg border-l-4 border-l-gray-300 p-6 shadow-sm animate-pulse">
                 <div className="h-4 bg-gray-200 rounded mb-2"></div>
                 <div className="h-8 bg-gray-200 rounded mb-2"></div>
                 <div className="h-3 bg-gray-200 rounded w-3/4"></div>
@@ -89,51 +88,51 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-gray-50 w-full overflow-x-hidden">
       <div className="w-full mx-auto p-6 lg:p-8">
-        {/* Analytics Cards */}
-        <div className="grid grid-cols-2 w-full gap-4 mb-6 sm:gap-6 sm:mb-10">
-          <AnalyticsCard
-            title="Active Jobs"
-            value={analytics?.activeJobs.value.toString() || "0"}
-            change={analytics?.activeJobs.change || ""}
-            changeType={analytics?.activeJobs.changeType || "positive"}
-            icon={Wrench}
-          />
+
+        {/* Top Analytics Cards - 2x2 Grid */}
+        <div className="grid grid-cols-2 w-full gap-4 mb-8 sm:gap-6">
           <AnalyticsCard
             title="Revenue This Month"
-            value={analytics?.revenue.value ? formatCurrency(analytics.revenue.value) : "$0"}
-            change={analytics?.revenue.change || ""}
-            changeType={analytics?.revenue.changeType || "positive"}
+            value={analytics?.revenueThisMonth.value ? formatCurrency(analytics.revenueThisMonth.value) : "$0"}
+            change={analytics?.revenueThisMonth.change || "+0.0% from last month"}
+            changeType={analytics?.revenueThisMonth.changeType || "positive"}
             icon={DollarSign}
           />
           <AnalyticsCard
             title="Pending Invoices"
-            value={analytics?.pendingInvoices.value ? formatCurrency(analytics.pendingInvoices.value) : "$0"}
-            change={analytics?.pendingInvoices.change || ""}
+            value={analytics?.pendingInvoices.value?.toString() || "0"}
+            change={analytics?.pendingInvoices.change || "All current"}
             changeType={analytics?.pendingInvoices.changeType || "positive"}
             icon={FileText}
           />
           <AnalyticsCard
-            title="Completed This Week"
-            value={analytics?.completedThisWeek.value.toString() || "0"}
-            change={analytics?.completedThisWeek.change || ""}
-            changeType={analytics?.completedThisWeek.changeType || "positive"}
-            icon={CheckCircle}
+            title="Active Jobs"
+            value={analytics?.activeJobs.value?.toString() || "0"}
+            change={analytics?.activeJobs.change || "0 from last week"}
+            changeType={analytics?.activeJobs.changeType || "positive"}
+            icon={Wrench}
+          />
+          <AnalyticsCard
+            title="Jobs Waiting"
+            value={analytics?.jobsWaiting.value?.toString() || "0"}
+            change={analytics?.jobsWaiting.change || "On schedule"}
+            changeType={analytics?.jobsWaiting.changeType || "positive"}
+            icon={Clock}
           />
         </div>
 
-        <div className="w-full min-w-0 mb-6">
+        {/* Main Content Grid - Split into 2 columns */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
           <RevenueTrendGraph />
+          <PendingInvoicesTable />
         </div>
 
-        {/* Main Content Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mb-6 sm:mb-8 w-full">
-          <div className="w-full min-w-0">
-            <RecentActivity />
-          </div>
-          <div className="w-full min-w-0">
-            <JobsRequiringAttention />
-          </div>
+        {/* Bottom Section - Jobs Activity */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <ActiveJobsTable />
+          <WaitingJobsTable />
         </div>
+
       </div>
     </div>
   );
