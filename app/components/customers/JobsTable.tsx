@@ -19,7 +19,7 @@ const JobsTable: React.FC<JobsTableProps> = ({
         <div>
             <Link
                 href={`/jobs/new-job?customer_id=${customerData.id}`}
-                className="flex w-fit items-center mb-4 p-1 text-center text-sm font-medium transition-colors whitespace-nowrap
+                className="flex w-fit mb-2 p-1 text-center text-sm font-medium transition-colors whitespace-nowrap
                 text-orange-400 rounded-lg hover:border-orange-400 hover:border-1"
             >
                 <Plus className="size-3 mr-1 text-orange-400 md:size-4" /> New Job

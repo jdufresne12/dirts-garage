@@ -9,49 +9,51 @@ import customerHelpers from '../utils/customerHelpers';
 import mockData from '../data/mock-data';
 import helpers from '../utils/helpers';
 
-const allCustomers = mockData.customers;
 
 export default function CustomersPage() {
-    const useMockData = false;
-    const [initCustomers, setInitCustomers] = useState<Customer[]>(useMockData ? allCustomers : []);
-    const [customers, setCustomers] = useState<Customer[]>(useMockData ? allCustomers : []);
+    const [initCustomers, setInitCustomers] = useState<Customer[]>([]);
+    const [customers, setCustomers] = useState<Customer[]>([]);
     const [showAddCustomerModal, setShowAddCustomerModal] = useState<boolean>(false);
     const [searchTerm, setSearchTerm] = useState<string>("");
-    const [isInitialLoading, setIsInitialLoading] = useState<boolean>(!useMockData);
+    const [isInitialLoading, setIsInitialLoading] = useState<boolean>(true);
 
     useEffect(() => {
-        if (!useMockData) {
-            fetch('/api/customers')
-                .then(res => res.json())
-                .then(data => {
-                    setInitCustomers(data);
-                    setCustomers(data);
-                })
-                .catch(error => {
-                    console.error('Error fetching customers:', error);
-                    // Handle error appropriately
-                })
-                .finally(() => {
-                    setIsInitialLoading(false);
-                });
-        }
-    }, [useMockData]);
+        fetch('/api/customers')
+            .then(res => res.json())
+            .then(data => {
+                const sortedData = sortCustomersByStatus(data);
+                setInitCustomers(sortedData);
+                setCustomers(sortedData);
+            })
+            .catch(error => {
+                console.error('Error fetching customers:', error);
+                // Handle error appropriately
+            })
+            .finally(() => {
+                setIsInitialLoading(false);
+            });
+    }, []);
 
     useEffect(() => {
         if (searchTerm === "") {
-            setCustomers(initCustomers)
+            // Sort the initial customers by status when no search term
+            const sortedCustomers = sortCustomersByStatus(initCustomers);
+            setCustomers(sortedCustomers);
         } else {
             const term = searchTerm.toLowerCase();
 
-            // Will need to call an API with real data
-            const filteredCustomers: Customer[] = (customers).filter((customer: Customer) => {
+            // Filter customers based on search term
+            const filteredCustomers: Customer[] = initCustomers.filter((customer: Customer) => {
                 return customer.first_name.toLowerCase().includes(term) ||
                     customer.last_name.toLowerCase().includes(term) ||
                     customer.email.toLowerCase().includes(term)
             });
-            setCustomers(filteredCustomers);
+
+            // Sort the filtered results by status
+            const sortedFilteredCustomers = sortCustomersByStatus(filteredCustomers);
+            setCustomers(sortedFilteredCustomers);
         }
-    }, [searchTerm, initCustomers])
+    }, [searchTerm, initCustomers]);
 
     const getStatusBadge = (status: string) => {
         const baseClasses = "px-2 py-1 rounded-full text-xs font-medium";
@@ -69,20 +71,63 @@ export default function CustomersPage() {
         }
     };
 
-    const getStatusText = (status: string) => {
+    const getStatusText = (customer: Customer): string => {
+        if (customer.jobs?.find(job => job.status === "In Progress"))
+            return "In Progress";
+        else if (customer.jobs?.find(job => job.status === "Payment"))
+            return "Payment";
+        else if (customer.jobs?.find(job => job.status === "On Hold"))
+            return "On Hold";
+        else if (customer.jobs?.find(job => job.status === "Waiting"))
+            return "Waiting";
+        else
+            return "No Active Jobs";
+    };
+
+    const getStatusPriority = (status: string): number => {
         switch (status) {
-            case "In Progress":
-                return "Active Job";
-            case "Waiting":
-                return "Waiting";
-            case "On Hold":
-                return "On Hold";
             case "Payment":
-                return "Awaiting Payment"
+                return 1;
+            case "In Progress":
+                return 2;
+            case "On Hold":
+                return 3;
+            case "Waiting":
+                return 4;
+            case "No Active Jobs":
             default:
-                return "No Active Jobs";
+                return 5;
         }
     };
+
+    const sortCustomersByStatus = (customers: Customer[]): Customer[] => {
+        return [...customers].sort((a, b) => {
+            const statusA = getStatusText(a);
+            const statusB = getStatusText(b);
+
+            const priorityA = getStatusPriority(statusA);
+            const priorityB = getStatusPriority(statusB);
+
+            // Primary sort: by status priority
+            if (priorityA !== priorityB) {
+                return priorityA - priorityB;
+            }
+
+            // Secondary sort: alphabetically by last name, then first name
+            const lastNameComparison = a.last_name.localeCompare(b.last_name);
+            if (lastNameComparison !== 0) {
+                return lastNameComparison;
+            }
+
+            return a.first_name.localeCompare(b.first_name);
+        });
+    };
+
+    const handleAddCustomer = (customer: Customer) => {
+        const newCustomer = customerHelpers.newCustomer(customer);
+        setSearchTerm("");
+        setCustomers([...customers, newCustomer])
+    }
 
     const getCurrentJob = (customer: Customer) => {
         if (customer.jobs && customer.jobs.length > 0) {
@@ -95,18 +140,15 @@ export default function CustomersPage() {
         }
     }
 
-    const handleAddCustomer = (customer: Customer) => {
-        const newCustomer = customerHelpers.newCustomer(customer);
-        setSearchTerm("");
-        setCustomers([...customers, newCustomer])
-    }
-
     return (
         <div className="min-h-screen bg-gray-50 w-full overflow-x-hidden">
             <div className="w-full mx-auto p-4 sm:p-6">
+                <div className='flex w-full p-2 mt-2 justify-center bg-white shadow-md rounded-lg sm:mt-0'>
+                    <h1 className="text-xl font-bold">Customers</h1>
+                </div>
                 {/* Action Buttons */}
-                <div className="flex flex-row w-full items-center my-4 gap-5 ">
-                    <div className="flex w-full sm:w-7/12 items-center relative border border-gray-300 rounded-lg hover:border-orange-400 focus-within:border-orange-400">
+                <div className="flex flex-row w-full items-center mt-8 gap-5 ">
+                    <div className="flex w-full items-center relative border border-gray-300 rounded-lg sm:w-7/12 hover:border-orange-400 focus-within:border-orange-400">
                         <div>
                             <Search className="size-4 mx-2 text-gray-500" />
                         </div>
@@ -153,7 +195,7 @@ export default function CustomersPage() {
                         </div>
                     </div>
                 ) : (
-                    <div className="grid grid-cols-1 gap-4 sm:mt-10 md:grid-cols-2 lg:grid-cols-3 sm:gap-6">
+                    <div className="grid grid-cols-1 gap-4 mt-5 md:grid-cols-2 lg:grid-cols-3 sm:gap-6">
                         {customers.length > 0
                             ? customers.map((customer) => (
                                 <Link
@@ -165,8 +207,8 @@ export default function CustomersPage() {
                                     <div className="flex items-start justify-between mb-4">
                                         <div className="flex-1 min-w-0">
                                             <h3 className="font-semibold text-gray-900 truncate">{customer.first_name} {customer.last_name}</h3>
-                                            <span className={`${getStatusBadge(customer.status)} mt-2 inline-block`}>
-                                                {getStatusText(customer.status)}
+                                            <span className={`${getStatusBadge(getStatusText(customer))} mt-2 inline-block`}>
+                                                {getStatusText(customer)}
                                             </span>
                                         </div>
                                     </div>

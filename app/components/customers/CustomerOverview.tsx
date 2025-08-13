@@ -15,15 +15,25 @@ const CustomerOverview: React.FC<CustomerOverviewProps> = ({
     amountOwed,
     getStatusBadge
 }) => {
+    const getStatus = (): string => {
+        if (jobs.find(job => job.status === "In Progress" || job.status === "On Hold"))
+            return "In Progress";
+        else if (jobs.find(job => job.status === "Payment"))
+            return "Payment";
+        else if (jobs.find(job => job.status === "Waiting"))
+            return "Waiting";
+        else return "None";
+    }
+
     return (
         <div className="hidden md:block bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Customer Overview</h3>
+            <h3 className="text-xl font-semibold text-gray-900 mb-4">Customer Overview</h3>
 
             <div className="space-y-8">
                 <div>
                     <label className="text-sm font-medium text-gray-700 mb-2 block">Status</label>
-                    <span className={`px-2 py-1 rounded text-xs font-medium ${getStatusBadge(customerData.status)}`}>
-                        {customerData.status === "In Progress" ? "Active Job" : customerData.status}
+                    <span className={`px-2 py-1 rounded text-xs font-medium ${getStatusBadge(getStatus())}`}>
+                        {getStatus()}
                     </span>
                 </div>
 

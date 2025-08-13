@@ -67,24 +67,14 @@ const CustomerDetailsPage = () => {
                     setCustomerData(data)
                     setInitCustomerData(data);
                 })
+                .then(() => {
+                    fetchJobs();
+                    fetchInvoices();
+                })
                 .catch((err) => console.error(err))
                 .finally(() => setIsInitialLoading(false));
         }
     }, [id]);
-
-    // Fetch jobs when jobs tab is active
-    useEffect(() => {
-        if (activeTab === 'jobs' && id) {
-            fetchJobs();
-        }
-    }, [activeTab, id]);
-
-    // Fetch invoices when invoices tab is active
-    useEffect(() => {
-        if (activeTab === 'invoices' && id) {
-            fetchInvoices();
-        }
-    }, [activeTab, id]);
 
     // Fetch financial summary when customer data is loaded
     useEffect(() => {

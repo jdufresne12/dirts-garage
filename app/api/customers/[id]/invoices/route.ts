@@ -7,7 +7,7 @@ export async function GET(
     { params }: { params: { id: string } }
 ) {
     try {
-        const customerId = params.id;
+        const customerId = (await params).id;
 
         // Get invoices for the customer with job information - using the same structure as the main invoices API
         const query = `

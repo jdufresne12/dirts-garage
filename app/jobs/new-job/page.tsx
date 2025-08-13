@@ -368,7 +368,7 @@ export default function NewJob() {
                                             <input
                                                 type="date"
                                                 value={jobForm.estimated_start_date}
-                                                onChange={(e) => setJobForm(prev => ({ ...prev, estimated_start: e.target.value }))}
+                                                onChange={(e) => setJobForm(prev => ({ ...prev, estimated_start_date: e.target.value }))}
                                                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                                             />
                                         </div>

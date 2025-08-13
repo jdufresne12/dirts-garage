@@ -99,7 +99,7 @@ const JobsTable: React.FC<JobsTableProps> = ({ searchTerm, currentPage, itemsPer
     return (
         <div className="bg-white rounded-lg shadow-sm">
             {/* Tabs */}
-            <div className="border-b border-gray-200 mb-4">
+            <div className="border-b border-gray-200">
                 <nav className="-mb-px flex">
                     {[
                         { label: 'All', value: 'all' },
@@ -111,7 +111,7 @@ const JobsTable: React.FC<JobsTableProps> = ({ searchTerm, currentPage, itemsPer
                         <button
                             key={tab.value}
                             onClick={() => setActiveTab(tab.value)}
-                            className={`px-6 py-3 border-b-2 font-medium text-sm ${activeTab === tab.value
+                            className={`px-6 py-3 border-b-2 font-medium text-xs ${activeTab === tab.value
                                 ? 'border-orange-500 text-orange-600'
                                 : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                                 }`}
@@ -156,7 +156,7 @@ const JobsTable: React.FC<JobsTableProps> = ({ searchTerm, currentPage, itemsPer
                     {/* Table Content */}
                     <div className="overflow-x-auto">
                         <table className="min-w-full">
-                            <thead className="bg-gray-50">
+                            <thead className="bg-gray-50 border-b border-b-gray-200">
                                 <tr>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Customer & Vehicle</th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Work Order</th>
@@ -204,7 +204,7 @@ const JobsTable: React.FC<JobsTableProps> = ({ searchTerm, currentPage, itemsPer
                                         {activeTab === 'Waiting' && (
                                             <td className="px-6 py-4">
                                                 <span className="text-sm text-gray-900">
-                                                    {job.estimated_start || 'Unknown'}
+                                                    {job.estimated_start_date || 'Unknown'}
                                                 </span>
                                             </td>
                                         )}

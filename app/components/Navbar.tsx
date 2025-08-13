@@ -105,6 +105,17 @@ export default function Navbar({ isMobile }: NavbarProps) {
                                     </li>
                                 );
                             })}
+                            <li key={'Sign Out'} className="relative group">
+                                <button
+                                    onClick={() => setShowSignoutModal(true)}
+                                    className='w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg transition-all duration-200 text-slate-300 hover:bg-slate-700 hover:text-white'
+                                >
+                                    <LogOut className='size-5 flex-shrink-0 text-slate-400 group-hover:text-white' />
+                                    {!isCollapsed && (
+                                        <span className="font-medium">Sign Out</span>
+                                    )}
+                                </button>
+                            </li>
                         </ul>
                     </nav>
 
