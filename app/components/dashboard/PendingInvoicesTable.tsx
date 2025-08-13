@@ -7,6 +7,7 @@ interface PendingInvoice {
   amount: number;
   jobTitle: string;
   completedDate: string;
+  invoiceDate: string;
   daysOverdue: number;
 }
 
@@ -59,7 +60,11 @@ export default function PendingInvoicesTable() {
         <div className="overflow-hidden">
           <div className="space-y-3 max-h-80 overflow-y-auto">
             {invoices.map((invoice) => (
-              <div key={invoice.id} className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50">
+              <div
+                key={invoice.id}
+                onClick={() => window.location.href = `/invoices/${invoice.id}`}
+                className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50"
+              >
                 <div className="flex justify-between items-start mb-2">
                   <div className="flex-1">
                     <h4 className="font-medium text-gray-900">{invoice.customer}</h4>
@@ -72,13 +77,13 @@ export default function PendingInvoicesTable() {
                     )}
                   </div>
                 </div>
-                <div className="flex justify-between items-center">
+                <div className="flex flex-col gap-1 mt-4">
                   <p className="text-xs text-gray-500">
-                    Completed: {new Date(invoice.completedDate).toLocaleDateString()}
+                    Job Completed: {invoice.completedDate ? new Date(invoice.completedDate).toLocaleDateString() : 'N/A'}
                   </p>
-                  <button className="text-xs bg-orange-500 text-white px-3 py-1 rounded-lg hover:bg-orange-600">
-                    Generate Invoice
-                  </button>
+                  <p className="text-xs text-gray-500">
+                    Invoiced: {invoice.invoiceDate ? new Date(invoice.invoiceDate).toLocaleDateString() : 'N/A'}
+                  </p>
                 </div>
               </div>
             ))}

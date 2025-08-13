@@ -4,32 +4,40 @@ import { pgPool } from '@/app/lib/db';
 
 export async function GET() {
     try {
-        // Get revenue data for the last 6 months
-        const sixMonthsAgo = new Date();
-        sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
-
         const result = await pgPool.query(`
             SELECT 
-                DATE_TRUNC('month', completion_date) as month,
-                SUM(actual_cost) as revenue,
-                COUNT(*) as job_count
-            FROM jobs 
-            WHERE completion_date >= $1 
-                AND status = 'Completed'
-                AND actual_cost > 0
-            GROUP BY DATE_TRUNC('month', completion_date)
+                DATE_TRUNC('month', payment_date) as month,
+                SUM(amount) as revenue
+            FROM payments 
+            WHERE amount > 0
+            GROUP BY DATE_TRUNC('month', payment_date)
             ORDER BY month ASC
-        `, [sixMonthsAgo.toISOString()]);
+        `);
+
+        console.log('Database result:', result.rows);
 
         // Format data for chart
-        const revenueData = result.rows.map(row => ({
-            month: new Date(row.month).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }),
-            revenue: parseFloat(row.revenue),
-            jobCount: parseInt(row.job_count)
-        }));
+        const revenueData = result.rows.map(row => {
+            // Extract year and month directly from the UTC date string
+            const date = new Date(row.month);
+            const year = date.getUTCFullYear();
+            const monthIndex = date.getUTCMonth(); // 0-based month
 
-        // Fill in missing months with zero revenue
-        const filledData = fillMissingMonths(revenueData, sixMonthsAgo);
+            // Create month string manually to avoid timezone issues
+            const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+                'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+            const monthString = `${monthNames[monthIndex]} ${year}`;
+
+            return {
+                month: monthString,
+                revenue: parseFloat(row.revenue)
+            };
+        });
+
+        console.log('Formatted revenue data:', revenueData);
+
+        // Fill in missing months to ensure exactly 6 months ending with current month
+        const filledData = generateSixMonthsData(revenueData);
 
         return NextResponse.json(filledData);
     } catch (error) {
@@ -38,23 +46,33 @@ export async function GET() {
     }
 }
 
-function fillMissingMonths(data: any[], startDate: Date) {
+function generateSixMonthsData(existingData: any[]) {
     const result = [];
-    const currentDate = new Date(startDate);
-    const now = new Date();
+    const currentDate = new Date();
 
-    while (currentDate <= now) {
-        const monthKey = currentDate.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
-        const existingData = data.find(d => d.month === monthKey);
+    // Create month names array for consistent formatting
+    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+        'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+    // Start from 5 months ago to include current month (6 total)
+    for (let i = 5; i >= 0; i--) {
+        const targetDate = new Date();
+        targetDate.setMonth(currentDate.getMonth() - i);
+
+        const year = targetDate.getFullYear();
+        const monthIndex = targetDate.getMonth();
+        const monthKey = `${monthNames[monthIndex]} ${year}`;
+
+        const existingRecord = existingData.find(d => d.month === monthKey);
+
+        console.log(`Looking for ${monthKey}, found:`, existingRecord);
 
         result.push({
             month: monthKey,
-            revenue: existingData ? existingData.revenue : 0,
-            jobCount: existingData ? existingData.jobCount : 0
+            revenue: existingRecord ? existingRecord.revenue : 0
         });
-
-        currentDate.setMonth(currentDate.getMonth() + 1);
     }
 
+    console.log('Final generated data:', result);
     return result;
 }

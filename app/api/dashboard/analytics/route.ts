@@ -13,32 +13,32 @@ export async function GET() {
 
         // 1. Revenue This Month
         const revenueResult = await pgPool.query(
-            `SELECT COALESCE(SUM(actual_cost), 0) as revenue FROM jobs WHERE completion_date >= $1 AND status = 'Completed'`,
+            `SELECT COALESCE(SUM(amount), 0) as revenue FROM payments WHERE payment_date >= $1`,
             [thisMonth.toISOString()]
         );
         const thisMonthRevenue = parseFloat(revenueResult.rows[0].revenue);
 
         // Last month revenue for comparison
         const lastMonthRevenueResult = await pgPool.query(
-            `SELECT COALESCE(SUM(actual_cost), 0) as revenue FROM jobs WHERE completion_date >= $1 AND completion_date < $2 AND status = 'Completed'`,
+            `SELECT COALESCE(SUM(amount), 0) as revenue FROM payments WHERE payment_date >= $1 AND payment_date < $2`,
             [lastMonth.toISOString(), thisMonth.toISOString()]
         );
         const lastMonthRevenue = parseFloat(lastMonthRevenueResult.rows[0].revenue);
         const revenueChangePercent = lastMonthRevenue > 0 ? ((thisMonthRevenue - lastMonthRevenue) / lastMonthRevenue * 100) : 0;
 
         // 2. Pending Invoices Count AND Amount
-        const pendingInvoicesResult = await pgPool.query(
-            `SELECT COUNT(*) as count, COALESCE(SUM(actual_cost), 0) as amount FROM jobs WHERE invoiced = false AND status = 'Completed'`
-        );
+        const pendingInvoicesResult = await pgPool.query(`
+            SELECT COUNT(*) as count, COALESCE(SUM(amount), 0) as amount FROM invoices 
+            WHERE status NOT IN ('cancelled', 'paid', 'draft')
+        `);
         const pendingInvoicesCount = parseInt(pendingInvoicesResult.rows[0].count);
         const pendingInvoicesAmount = parseFloat(pendingInvoicesResult.rows[0].amount);
 
-        // Check for overdue invoices (jobs completed > 30 days ago without invoicing)
+        // Check for overdue invoices
         const overdueDate = new Date();
         overdueDate.setDate(overdueDate.getDate() - 30);
         const overdueInvoicesResult = await pgPool.query(
-            `SELECT COUNT(*) as count FROM jobs WHERE invoiced = false AND status = 'Completed' AND completion_date < $1`,
-            [overdueDate.toISOString()]
+            `SELECT COUNT(*) as count FROM invoices WHERE status = 'overdue'`
         );
         const overdueCount = parseInt(overdueInvoicesResult.rows[0].count);
 

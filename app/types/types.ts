@@ -101,7 +101,7 @@ interface Invoice {
     due_date?: string;
     amount: number;
     amount_paid: number;
-    status: 'draft' | 'pending' | 'sent' | 'paid' | 'overdue' | 'cancelled';
+    status: string;
     paid_date?: string;
     customer_id: string;
     job_id: string;

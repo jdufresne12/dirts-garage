@@ -5,38 +5,37 @@ export async function GET() {
     try {
         const result = await pgPool.query(`
             SELECT 
-                j.id,
-                j.title,
-                j.actual_cost,
+                i.id,
+                i.amount,
+                i.amount_paid,
+                i.due_date,
+                i.date,
+                i.status,
+                j.title as job_title,
                 j.completion_date,
                 c.first_name,
-                c.last_name,
-                v.year,
-                v.make,
-                v.model
-            FROM jobs j
+                c.last_name
+            FROM invoices i
+            LEFT JOIN jobs j ON i.job_id = j.id
             LEFT JOIN customers c ON j.customer_id = c.id
-            LEFT JOIN vehicles v ON j.vehicle_id = v.id
-            WHERE j.status = 'Completed' 
-                AND j.invoiced = false
-                AND j.actual_cost > 0
+            WHERE i.status NOT IN ('cancelled', 'paid', 'draft')
             ORDER BY j.completion_date ASC
             LIMIT 10
         `);
 
         const pendingInvoices = result.rows.map(row => {
-            const completedDate = new Date(row.completion_date);
+            const dueDate = new Date(row.due_date);
             const now = new Date();
-            const diffTime = Math.abs(now.getTime() - completedDate.getTime());
-            const daysOverdue = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) - 30; // Consider overdue after 30 days
-
+            const diffTime = now.getTime() - dueDate.getTime();
+            const daysOverdue = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
             return {
                 id: row.id,
                 customer: row.first_name && row.last_name ? `${row.first_name} ${row.last_name}` : 'Unknown Customer',
-                amount: parseFloat(row.actual_cost),
-                jobTitle: row.title,
+                amount: parseFloat(row.amount) - parseFloat(row.amount_paid) || 0,
+                jobTitle: row.job_title || 'No Job Title',
                 completedDate: row.completion_date,
-                daysOverdue: daysOverdue > 0 ? daysOverdue : 0
+                invoiceDate: row.date,
+                daysOverdue: row.due_Date && daysOverdue > 0 ? daysOverdue : 0
             };
         });
 

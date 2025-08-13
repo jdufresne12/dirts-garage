@@ -1,5 +1,5 @@
 'use client';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Clock,
   Wrench,
@@ -39,10 +39,11 @@ interface AnalyticsData {
 export default function Dashboard() {
   const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
     fetchAnalytics();
-  }, []);
+  }, [refreshKey]);
 
   const fetchAnalytics = async () => {
     try {
@@ -57,6 +58,11 @@ export default function Dashboard() {
       setIsLoading(false);
     }
   };
+
+  // Callback function to refresh all dashboard data
+  const refreshDashboard = useCallback(() => {
+    setRefreshKey(prev => prev + 1);
+  }, []);
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-US', {
@@ -123,14 +129,17 @@ export default function Dashboard() {
 
         {/* Main Content Grid - Split into 2 columns */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-          <RevenueTrendGraph />
-          <PendingInvoicesTable />
+          <RevenueTrendGraph key={`revenue-${refreshKey}`} />
+          <PendingInvoicesTable key={`invoices-${refreshKey}`} />
         </div>
 
         {/* Bottom Section - Jobs Activity */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <ActiveJobsTable />
-          <WaitingJobsTable />
+          <ActiveJobsTable key={`active-${refreshKey}`} />
+          <WaitingJobsTable
+            key={`waiting-${refreshKey}`}
+            onJobStarted={refreshDashboard}
+          />
         </div>
 
       </div>

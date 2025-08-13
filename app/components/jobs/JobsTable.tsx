@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
+import { ChevronDown } from 'lucide-react';
 
 interface JobsTableProps {
     searchTerm: string;
@@ -15,6 +16,7 @@ const JobsTable: React.FC<JobsTableProps> = ({ searchTerm, currentPage, itemsPer
     const [jobs, setJobs] = useState<Job[]>([]);
     const [activeTab, setActiveTab] = useState<string>('all');
     const [initialLoading, setInitialLoading] = useState<boolean>(true);
+    const [isDropdownOpen, setIsDropdownOpen] = useState<boolean>(false);
 
     useEffect(() => {
         fetch('/api/jobs')
@@ -68,6 +70,24 @@ const JobsTable: React.FC<JobsTableProps> = ({ searchTerm, currentPage, itemsPer
         }
     };
 
+    const tabs = [
+        { label: 'All', value: 'all' },
+        { label: 'In Progress', value: 'In Progress' },
+        { label: 'Waiting', value: 'Waiting' },
+        { label: 'Completed', value: 'Completed' },
+        { label: 'On Hold', value: 'On Hold' },
+    ];
+
+    const getTabCount = (tabValue: string) => {
+        if (tabValue === 'all') return jobs.length;
+        return jobs.length > 0 ? jobs.filter((j) => j.status.toLowerCase() === tabValue.toLowerCase()).length : 0;
+    };
+
+    const getCurrentTabLabel = () => {
+        const currentTab = tabs.find(tab => tab.value === activeTab);
+        return `${currentTab?.label} (${getTabCount(activeTab)})`;
+    };
+
     const filteredJobs = Array.isArray(jobs) ? jobs.filter(job => {
         const matchesTab =
             activeTab === 'all' ||
@@ -98,33 +118,55 @@ const JobsTable: React.FC<JobsTableProps> = ({ searchTerm, currentPage, itemsPer
 
     return (
         <div className="bg-white rounded-lg shadow-sm">
-            {/* Tabs */}
-            <div className="border-b border-gray-200">
+            {/* Desktop Tabs */}
+            <div className="hidden md:block border-b border-gray-200">
                 <nav className="-mb-px flex">
-                    {[
-                        { label: 'All', value: 'all' },
-                        { label: 'In Progress', value: 'In Progress' },
-                        { label: 'Waiting', value: 'Waiting' },
-                        { label: 'Completed', value: 'Completed' },
-                        { label: 'On Hold', value: 'On Hold' },
-                    ].map((tab) => (
+                    {tabs.map((tab) => (
                         <button
                             key={tab.value}
                             onClick={() => setActiveTab(tab.value)}
-                            className={`px-6 py-3 border-b-2 font-medium text-xs ${activeTab === tab.value
+                            className={`px-6 py-3 border-b-2 font-medium text-xs md:text-sm ${activeTab === tab.value
                                 ? 'border-orange-500 text-orange-600'
                                 : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                                 }`}
                         >
-                            {tab.label} ({
-                                tab.value === 'all'
-                                    ? jobs.length
-                                    : jobs.length > 0 && jobs
-                                        .filter((j) => j.status.toLowerCase() === tab.value.toLowerCase()).length
-                            })
+                            {tab.label} ({getTabCount(tab.value)})
                         </button>
                     ))}
                 </nav>
+            </div>
+
+            {/* Mobile Dropdown */}
+            <div className="md:hidden border-b border-gray-200">
+                <div className="relative">
+                    <button
+                        onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                        className="w-full px-4 py-3 text-left text-sm font-semibold text-gray-700 bg-white border-0 border-b border-gray-200 flex items-center justify-between"
+                    >
+                        <span>{getCurrentTabLabel()}</span>
+                        <ChevronDown className={`w-5 h-5 transition-transform duration-200 ${isDropdownOpen ? 'rotate-180' : ''}`} />
+                    </button>
+
+                    {isDropdownOpen && (
+                        <div className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-b-md shadow-lg z-10">
+                            {tabs.map((tab) => (
+                                <button
+                                    key={tab.value}
+                                    onClick={() => {
+                                        setActiveTab(tab.value);
+                                        setIsDropdownOpen(false);
+                                    }}
+                                    className={`w-full px-4 py-3 text-left text-sm hover:bg-gray-50 ${activeTab === tab.value
+                                        ? 'bg-orange-50 text-orange-600 font-medium'
+                                        : 'text-gray-700'
+                                        }`}
+                                >
+                                    {tab.label} ({getTabCount(tab.value)})
+                                </button>
+                            ))}
+                        </div>
+                    )}
+                </div>
             </div>
 
             {/* Loading State */}
@@ -158,89 +200,75 @@ const JobsTable: React.FC<JobsTableProps> = ({ searchTerm, currentPage, itemsPer
                         <table className="min-w-full">
                             <thead className="bg-gray-50 border-b border-b-gray-200">
                                 <tr>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Customer & Vehicle</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Work Order</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Priority</th>
-                                    {activeTab === 'Waiting' && (
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Est. Start</th>
-                                    )}
-                                    {activeTab === 'Completed' && (
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Completed Date</th>
-                                    )}
-                                    {activeTab !== 'Completed' && (
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Est. Completion</th>
-                                    )}
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Cost</th>
+                                    <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Customer & Vehicle</th>
+                                    <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Work Order</th>
+                                    <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                                    <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Priority</th>
+                                    {/* Hide additional columns on mobile */}
+                                    <th className="hidden md:table-cell px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                        {activeTab === 'Waiting' && 'Est. Start'}
+                                        {activeTab === 'Completed' && 'Completed Date'}
+                                        {activeTab !== 'Completed' && activeTab !== 'Waiting' && 'Est. Completion'}
+                                    </th>
+                                    <th className="hidden md:table-cell px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Cost</th>
                                 </tr>
                             </thead>
                             <tbody className="bg-white divide-y divide-gray-200">
                                 {currentJobs.map((job) => (
                                     <tr key={job.id} className="hover:bg-gray-50" onClick={() => router.push(`/jobs/${job.id}`)}>
-                                        <td className="px-6 py-4">
+                                        <td className="px-3 md:px-6 py-4">
                                             {job.customer_id ? (
                                                 <div>
                                                     <div className="text-sm font-medium text-gray-900">{getCustomerName(job.customer || null)}</div>
                                                     {job.vehicle_id && (
-                                                        <div className="hidden md:block text-xs text-gray-500">{getVehicleInfo(job.vehicle || null)}</div>
+                                                        <div className="text-xs text-gray-500 mt-1">{getVehicleInfo(job.vehicle || null)}</div>
                                                     )}
                                                 </div>
                                             ) : (
                                                 <span className="text-sm font-medium text-gray-900">N/A</span>
                                             )}
                                         </td>
-                                        <td className="px-6 py-4">
+                                        <td className="px-3 md:px-6 py-4">
                                             <div className="text-sm text-gray-900">{job.title}</div>
                                             {job.latest_update && (
                                                 <div className="hidden md:block text-xs text-gray-500 mt-1">{job.latest_update}</div>
                                             )}
                                         </td>
-                                        <td className="px-6 py-4 whitespace-nowrap">
+                                        <td className="px-3 md:px-6 py-4 text-left whitespace-nowrap">
                                             <span className={getStatusBadge(job.status)}>{job.status}</span>
                                         </td>
-                                        <td className="px-6 py-4 whitespace-nowrap">
+                                        <td className="px-3 md:px-6 py-4 whitespace-nowrap">
                                             <span className={getPriorityBadge(job.priority)}>{job.priority}</span>
                                         </td>
-                                        {activeTab === 'Waiting' && (
-                                            <td className="px-6 py-4">
-                                                <span className="text-sm text-gray-900">
-                                                    {job.estimated_start_date || 'Unknown'}
-                                                </span>
-                                            </td>
-                                        )}
-                                        {activeTab === 'Completed' && (
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                                {formatDate(job.completion_date || job.estimated_completion)}
-                                            </td>
-                                        )}
-                                        {activeTab !== 'Completed' && (
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                                {formatDate(job.estimated_completion)}
-                                            </td>
-                                        )}
-                                        <td className="px-6 py-4">
+                                        {/* Hide additional columns on mobile */}
+                                        <td className="hidden md:table-cell px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                            {activeTab === 'Waiting' && (job.estimated_start_date || 'Unknown')}
+                                            {activeTab === 'Completed' && formatDate(job.completion_date || job.estimated_completion)}
+                                            {activeTab !== 'Completed' && activeTab !== 'Waiting' && formatDate(job.estimated_completion)}
+                                        </td>
+                                        <td className="hidden md:table-cell px-6 py-4">
                                             <div className="text-sm text-gray-900">
                                                 {activeTab === 'Completed'
                                                     ? formatCurrency(job.actual_cost)
                                                     : `${formatCurrency(job.actual_cost)} / ${formatCurrency(job.estimated_cost)}`
                                                 }
-                                            </div >
-                                        </td >
-                                    </tr >
+                                            </div>
+                                        </td>
+                                    </tr>
                                 ))}
-                            </tbody >
-                        </table >
+                            </tbody>
+                        </table>
 
                         {filteredJobs.length === 0 && (
                             <div className="text-center py-8 text-gray-500">
                                 No jobs found matching your criteria.
                             </div>
                         )}
-                    </div >
+                    </div>
 
                     {/* Pagination */}
                     {jobs && filteredJobs.length > itemsPerPage && (
-                        <div className="px-6 py-3 flex items-center justify-between border-t border-gray-200">
+                        <div className="px-3 md:px-6 py-3 flex items-center justify-between border-t border-gray-200">
                             <div className="flex-1 flex justify-between sm:hidden">
                                 <button
                                     onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
@@ -334,9 +362,8 @@ const JobsTable: React.FC<JobsTableProps> = ({ searchTerm, currentPage, itemsPer
                     )}
                 </>
             )}
-        </div >
+        </div>
     );
-
 };
 
 export default JobsTable;

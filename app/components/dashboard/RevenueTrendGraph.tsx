@@ -3,7 +3,6 @@ import React, { useState, useEffect } from 'react';
 interface RevenueData {
     month: string;
     revenue: number;
-    jobCount: number;
 }
 
 export default function RevenueTrendGraph() {
@@ -27,15 +26,17 @@ export default function RevenueTrendGraph() {
         }
     };
 
-    const maxValue = data.length > 0 ? Math.max(...data.map(d => d.revenue)) : 0;
-    const chartHeight = 200;
-    const chartWidth = 580;
-    const barWidth = data.length > 0 ? Math.min(60, (chartWidth - 80) / data.length - 20) : 60;
-    const barSpacing = data.length > 0 ? (chartWidth - 80) / data.length : 90;
+    const maxValue = data.length > 0 ? Math.max(...data.map(d => d.revenue)) : 1000;
+    // Add 10% padding above the highest value, then round up to nearest 50
+    const paddedMax = maxValue * 1.1;
+    const chartMax = Math.ceil(paddedMax / 50) * 50;
+    const yAxisSteps = 5;
+    const stepValue = chartMax / yAxisSteps;
 
     const formatCurrency = (amount: number) => {
+        if (amount >= 1000000) return `$${(amount / 1000000).toFixed(1)}M`;
         if (amount >= 1000) return `$${(amount / 1000).toFixed(0)}K`;
-        return `$${amount.toFixed(0)}`;
+        return `$${Math.round(amount)}`;
     };
 
     if (isLoading) {
@@ -53,90 +54,94 @@ export default function RevenueTrendGraph() {
         <div className="bg-white rounded-lg p-6 shadow-sm h-full">
             <div className="flex items-center justify-between mb-6">
                 <h3 className="text-lg font-semibold text-gray-900">Revenue Trend</h3>
-                <button className="px-3 py-2 text-sm text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-100">
-                    View Details
-                </button>
+                <div className="text-xs text-gray-500">Last 6 months</div>
             </div>
 
             {data.length > 0 ? (
-                <div className="h-80">
-                    <svg className="w-full h-full" viewBox="0 0 600 280" preserveAspectRatio="xMidYMid meet">
-                        {/* Grid lines */}
-                        {[0, 1, 2, 3, 4, 5].map(i => (
-                            <line
-                                key={i}
-                                x1="60"
-                                y1={i * 40 + 40}
-                                x2="580"
-                                y2={i * 40 + 40}
-                                stroke="#f3f4f6"
-                                strokeWidth="1"
-                            />
-                        ))}
-
-                        {/* Bars */}
-                        {data.map((d, i) => {
-                            const barHeight = maxValue > 0 ? (d.revenue / maxValue) * 180 : 0;
-                            const x = i * barSpacing + 70;
-                            const y = 240 - barHeight;
-
-                            return (
-                                <g key={i}>
-                                    <rect
-                                        x={x - barWidth / 2}
-                                        y={y}
-                                        width={barWidth}
-                                        height={barHeight}
-                                        fill="#f97316"
-                                        rx="4"
-                                        ry="4"
-                                        className="hover:fill-orange-600 transition-colors cursor-pointer"
-                                    />
-                                    {barHeight > 20 && (
-                                        <text
-                                            x={x}
-                                            y={y - 5}
-                                            textAnchor="middle"
-                                            className="fill-gray-700 text-xs font-medium"
-                                            fontSize="10"
-                                        >
-                                            {formatCurrency(d.revenue)}
-                                        </text>
-                                    )}
-                                </g>
-                            );
-                        })}
-
-                        {/* X-axis labels */}
-                        {data.map((d, i) => (
-                            <text
-                                key={i}
-                                x={i * barSpacing + 70}
-                                y="260"
-                                textAnchor="middle"
-                                className="fill-gray-600 text-sm"
-                                fontSize="12"
-                            >
-                                {d.month}
-                            </text>
-                        ))}
-
+                <div className="relative h-64">
+                    {/* Chart container with proper positioning */}
+                    <div className="absolute inset-0 flex">
                         {/* Y-axis labels */}
-                        {maxValue > 0 && [0, 1, 2, 3, 4, 5].map((i) => {
-                            const value = (maxValue / 5) * i;
-                            return (
-                                <text
-                                    key={i}
-                                    x="5"
-                                    y={240 - i * 36}
-                                    className="fill-gray-600 text-xs"
-                                    fontSize="10"
-                                >
-                                    {formatCurrency(value)}
-                                </text>
-                            );
-                        })}
-                    </svg>
+                        <div className="w-8 flex flex-col justify-between text-xs text-gray-500 pr-2 pb-6">
+                            {Array.from({ length: yAxisSteps + 1 }, (_, i) => {
+                                const value = stepValue * (yAxisSteps - i);
+                                return (
+                                    <div key={i} className="flex items-center justify-end h-0">
+                                        <span>{formatCurrency(value)}</span>
+                                    </div>
+                                );
+                            })}
+                        </div>
+
+                        {/* Chart area */}
+                        <div className="flex-1 flex flex-col">
+                            {/* Grid and bars container */}
+                            <div className="flex-1 relative border-l border-b border-gray-200">
+                                {/* Horizontal grid lines */}
+                                {Array.from({ length: yAxisSteps + 1 }, (_, i) => (
+                                    <div
+                                        key={i}
+                                        className="absolute w-full border-t border-gray-100"
+                                        style={{
+                                            top: `${(i / yAxisSteps) * 100}%`,
+                                            borderTopWidth: i === yAxisSteps ? '0px' : '1px'
+                                        }}
+                                    />
+                                ))}
+
+                                {/* Bars */}
+                                <div className="absolute inset-0 flex items-end px-2" style={{ justifyContent: 'space-around' }}>
+                                    {data.map((d, i) => {
+                                        const heightPercentage = chartMax > 0 ? (d.revenue / chartMax) * 100 : 0; // Use full 100% with chartMax
+                                        const barHeight = Math.max(heightPercentage, d.revenue > 0 ? 2 : 0); // Minimum 2% height if there's revenue
+                                        const currentDate = new Date();
+                                        const currentMonthKey = currentDate.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+                                        const isCurrentMonth = d.month === currentMonthKey;
+
+                                        return (
+                                            <div key={i} className="flex flex-col items-center justify-end h-full" style={{ flex: '1 1 0%' }}>
+                                                {/* Value label above bar - positioned relative to the bar */}
+                                                {/* {d.revenue > 0 && (
+                                                    <div
+                                                        className="text-xs font-medium text-gray-700 mb-1"
+                                                        style={{
+                                                            marginBottom: `${Math.max(barHeight + 2, 5)}%`,
+                                                            position: 'absolute',
+                                                            bottom: '100%'
+                                                        }}
+                                                    >
+                                                        {formatCurrency(d.revenue)}
+                                                    </div>
+                                                )} */}
+
+                                                {/* Bar */}
+                                                <div
+                                                    className={`w-8 rounded-t-md transition-all duration-300 hover:opacity-80 cursor-pointer ${isCurrentMonth
+                                                        ? 'bg-orange-500'
+                                                        : 'bg-orange-400'
+                                                        }`}
+                                                    style={{
+                                                        height: `${barHeight}%`,
+                                                        minHeight: d.revenue > 0 ? '8px' : '2px'
+                                                    }}
+                                                    title={`${d.month}: ${formatCurrency(d.revenue)}`}
+                                                />
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+
+                            {/* X-axis labels */}
+                            <div className="flex pt-3 text-xs text-gray-600" style={{ paddingLeft: '16px', paddingRight: '16px' }}>
+                                {data.map((d, i) => (
+                                    <div key={i} className="text-center" style={{ width: `${100 / data.length}%` }}>
+                                        {d.month}
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
                 </div>
             ) : (
                 <div className="h-64 flex items-center justify-center">

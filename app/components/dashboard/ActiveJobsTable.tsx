@@ -51,7 +51,11 @@ export default function ActiveJobsTable() {
                 <div className="overflow-hidden">
                     <div className="space-y-3 max-h-80 overflow-y-auto">
                         {jobs.map((job) => (
-                            <div key={job.id} className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50">
+                            <div
+                                key={job.id}
+                                onClick={() => window.location.href = `/jobs/${job.id}`}
+                                className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50"
+                            >
                                 <div className="flex justify-between items-start mb-2">
                                     <div className="flex-1">
                                         <h4 className="font-medium text-gray-900">{job.customer}</h4>
@@ -71,8 +75,8 @@ export default function ActiveJobsTable() {
                     </div>
                 </div>
             ) : (
-                <div className="h-64 flex items-center justify-center">
-                    <div className="text-center text-gray-500">
+                <div className="flex h-40 items-center justify-center">
+                    <div className="text-center text-gray-500 -mt-5">
                         <div className="text-4xl mb-2">🔧</div>
                         <p className="text-sm italic">No jobs currently being worked on</p>
                     </div>

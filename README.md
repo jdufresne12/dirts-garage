@@ -34,13 +34,3 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
-
-## .env.local
-
-```
-DATABASE_URL=postgresql://postgres:JohnDirt30@dirtsgarage-db.csufql09s2yt.us-east-1.rds.amazonaws.com:5432/dirtsgarage_db
-S3_ACCESS_KEY_ID=AKIAWMXGC7TZSAYJVOKO
-S3_SECRET_ACCESS_KEY=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
-S3_REGION=us-east-1
-S3_BASE_URL='https://dirts-garage.s3.us-east-1.amazonaws.com'
-```
