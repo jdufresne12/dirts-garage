@@ -3,11 +3,11 @@ import { NextResponse, NextRequest } from 'next/server';
 import { pgPool } from '@/app/lib/db';
 
 export async function GET(
-    request: NextRequest,
-    { params }: { params: { id: string } }
+    _request: NextRequest,
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        const customerId = (await params).id;
+        const { id: customerId } = await params;
 
         // Get invoices for the customer with job information - using the same structure as the main invoices API
         const query = `
