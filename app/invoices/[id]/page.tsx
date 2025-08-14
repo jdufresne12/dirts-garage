@@ -269,7 +269,7 @@ export default function InvoiceDetailPage() {
                         {error || 'Invoice not found'}
                     </h2>
                     <p className="text-gray-600 mb-4">
-                        The invoice you're looking for doesn't exist or couldn't be loaded.
+                        The invoice you&apos;re looking for doesn&apos;t exist or couldn&apos;t be loaded.
                     </p>
                     <button
                         onClick={() => router.push('/invoices')}

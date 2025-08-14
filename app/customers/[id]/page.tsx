@@ -234,7 +234,7 @@ const CustomerDetailsPage = () => {
             <div className="min-h-screen bg-gray-50 p-6 flex items-center justify-center">
                 <div className="text-center">
                     <h1 className="text-2xl font-bold text-gray-900 mb-2">Customer Not Found</h1>
-                    <p className="text-gray-600">The customer with ID "{id}" could not be found.</p>
+                    <p className="text-gray-600">The customer with ID &quot;{id}&quot; could not be found.</p>
                 </div>
             </div>
         );

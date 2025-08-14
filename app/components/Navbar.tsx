@@ -56,13 +56,13 @@ export default function Navbar({ isMobile }: NavbarProps) {
                         <div className="flex items-center space-x-3 min-w-0">
                             <Image
                                 src="/gear.png"
-                                alt="Dirt's Garage Logo"
+                                alt="Dirt&apos;s Garage Logo"
                                 width={28}
                                 height={28}
                                 className="flex-shrink-0"
                                 priority
                             />
-                            <span className="text-lg font-bold text-orange-400 truncate">Dirt's Garage</span>
+                            <span className="text-lg font-bold text-orange-400 truncate">Dirt&apos;s Garage</span>
                         </div>
                         <button
                             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}

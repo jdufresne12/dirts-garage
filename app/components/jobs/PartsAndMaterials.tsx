@@ -257,7 +257,7 @@ export default function parts({ parts, setParts, job_id }: PartsProps) {
                             {/* Subtitle */}
                             <p className="text-sm text-gray-500 mb-6 max-w-md">
                                 Add parts and materials needed for this job to track inventory, costs, and ordering status.
-                                Click "Add Part" to get started.
+                                Click &quot;Add Part&quot; to get started.
                             </p>
 
                             {/* CTA Button */}

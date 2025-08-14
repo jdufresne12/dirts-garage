@@ -6,7 +6,6 @@ import { Phone, Mail, Search, Plus, Users } from 'lucide-react';
 
 import AddCustomerModal from '../components/customers/AddCustomerModal';
 import customerHelpers from '../utils/customerHelpers';
-import mockData from '../data/mock-data';
 import helpers from '../utils/helpers';
 
 

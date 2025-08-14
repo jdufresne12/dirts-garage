@@ -8,7 +8,7 @@ export async function GET(req: Request) {
 
     try {
         let query = 'SELECT * FROM payments';
-        let params: any[] = [];
+        const params: any[] = [];
 
         if (invoiceId) {
             query += ' WHERE invoice_id = $1';

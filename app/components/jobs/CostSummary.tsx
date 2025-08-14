@@ -89,13 +89,6 @@ export default function CostSummary({
         }
     };
 
-    const handleViewInvoice = () => {
-        if (existingInvoice) {
-            setModalMode('view');
-            setShowInvoiceModal(true);
-        }
-    };
-
     const handleSyncInvoice = async () => {
         if (!existingInvoice) return;
 

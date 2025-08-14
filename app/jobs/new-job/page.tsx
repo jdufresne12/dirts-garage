@@ -1,10 +1,9 @@
 'use client'
 import React, { useEffect, useState } from 'react';
-import { ArrowRight, ArrowLeft, User, Car, Plus, X, Save, Trash } from 'lucide-react';
+import { ArrowRight, ArrowLeft, User, Car, Plus, Save, Trash } from 'lucide-react';
 import helpers from '@/app/utils/helpers';
 import AddVehicleModal from '@/app/components/customers/AddVehicleModal';
 import AddCustomerModal from '@/app/components/customers/AddCustomerModal';
-import { mockCustomers, mockVehicles } from '@/app/data/mock-data';
 
 const emptyJobForm: Job = {
     id: `JN-${helpers.generateUniqueID()}`,

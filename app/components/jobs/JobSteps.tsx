@@ -345,7 +345,7 @@ export default function JobSteps({ job_id, jobSteps, setJobSteps }: JobStepsProp
                             {/* Subtitle */}
                             <p className="text-sm text-gray-500 mb-6 max-w-md">
                                 Break down this job into manageable steps to track progress and time.
-                                Click "Add Step" to get started.
+                                Click &quot;Add Step&quot; to get started.
                             </p>
 
                             {/* CTA Button */}

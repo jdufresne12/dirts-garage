@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { pgPool } from '@/app/lib/db';
 import helpers from '@/app/utils/helpers';
 
-// GET /api/invoices/[id] - Get single invoice with line items
 export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
     try {
         const { id } = await params;
@@ -101,12 +100,11 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
     }
 }
 
-// PUT /api/invoices/[id] - Update invoice
 export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
     try {
         const { id } = await params;
         const body = await req.json();
-        const { invoice, line_items, sync_with_job = false } = body;
+        const { invoice, line_items } = body;
 
         const client = await pgPool.connect();
         try {
