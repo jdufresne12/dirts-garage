@@ -44,7 +44,7 @@ export default function AddPartModal({ isOpen, partData, job_id, onClose, onSave
         setErrors({});
         setShowDeleteConfirm(false);
         setIsSubmitting(false);
-    }, [partData, isOpen]);
+    }, [partData, isOpen, job_id]);
 
     // Handle escape key
     useEffect(() => {

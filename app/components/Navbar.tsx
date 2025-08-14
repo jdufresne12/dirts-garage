@@ -8,9 +8,6 @@ import {
     LayoutDashboard,
     Users,
     Wrench,
-    Receipt,
-    Calendar,
-    Settings,
     ChevronLeft,
     ChevronRight,
     X,
@@ -30,7 +27,7 @@ interface MenuItem {
 }
 
 export default function Navbar({ isMobile }: NavbarProps) {
-    const { user, logout } = useAuth();
+    const { user } = useAuth();
     const pathname = `/${usePathname().split('/')[1]}`;
 
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);

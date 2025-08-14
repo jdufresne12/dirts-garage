@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { pgPool } from '@/app/lib/db';
 import helpers from '@/app/utils/helpers';
 
-// GET /api/invoices - List all invoices with optional filters
 export async function GET(req: NextRequest) {
     try {
         const { searchParams } = new URL(req.url);
@@ -25,7 +24,7 @@ export async function GET(req: NextRequest) {
             WHERE 1=1
         `;
 
-        const params: any[] = [];
+        const params: (string | number)[] = [];
         let paramIndex = 1;
 
         if (customer_id) {

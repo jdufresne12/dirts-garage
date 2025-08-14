@@ -84,7 +84,7 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
         ];
 
         // Extract and map fields from the request body
-        const updates: Record<string, any> = {};
+        const updates: Record<string, string | number | boolean | null> = {};
 
         // First, handle direct field matches
         validFields.forEach(field => {

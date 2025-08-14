@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Plus, Camera, X, ChevronLeft, ChevronRight, Trash2, Upload, Loader2 } from 'lucide-react';
+import { Plus, X, ChevronLeft, ChevronRight, Trash2, Upload, Loader2 } from 'lucide-react';
 import Image from 'next/image';
 
 interface Photo {
@@ -12,7 +12,7 @@ interface Photo {
 
 const S3_BASE_URL = 'https://dirts-garage.s3.us-east-1.amazonaws.com';
 // Custom loader for S3
-const s3Loader = ({ src, width, quality }: any) => {
+const s3Loader = ({ src, width, quality }: S3LoaderParams) => {
     return `${S3_BASE_URL}/${src}?w=${width}&q=${quality || 75}`
 }
 
@@ -33,6 +33,31 @@ export default function PhotoDocumentation({ job_id }: PhotoDocumentationProps) 
 
     // Load existing media on component mount
     useEffect(() => {
+        const loadMedia = async () => {
+            try {
+                const response = await fetch(`/api/media/${job_id}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.success) {
+                        const formattedPhotos = data.media.map((item: Photo) => ({
+                            id: item.id,
+                            fileName: item.fileName,
+                            contentType: item.contentType,
+                            fileKey: item.fileKey,
+                            size: 0 // We don't have size from the API response
+                        }));
+                        setPhotos(formattedPhotos);
+                    }
+                } else {
+                    console.error('Failed to load media, response status:', response.status);
+                }
+            } catch (error) {
+                console.error('Failed to load media:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
         if (job_id) {
             loadMedia();
         } else {
@@ -40,6 +65,16 @@ export default function PhotoDocumentation({ job_id }: PhotoDocumentationProps) 
             setLoading(false);
         }
     }, [job_id]);
+
+    const navigatePhoto = (direction: 'prev' | 'next') => {
+        if (selectedPhotoIndex === null) return;
+
+        if (direction === 'prev') {
+            setSelectedPhotoIndex(selectedPhotoIndex === 0 ? photos.length - 1 : selectedPhotoIndex - 1);
+        } else {
+            setSelectedPhotoIndex(selectedPhotoIndex === photos.length - 1 ? 0 : selectedPhotoIndex + 1);
+        }
+    };
 
     // Handle keyboard navigation in lightbox
     useEffect(() => {
@@ -71,32 +106,7 @@ export default function PhotoDocumentation({ job_id }: PhotoDocumentationProps) 
             document.removeEventListener('keydown', handleKeyPress);
             document.body.style.overflow = 'unset';
         };
-    }, [selectedPhotoIndex]);
-
-    const loadMedia = async () => {
-        try {
-            const response = await fetch(`/api/media/${job_id}`);
-            if (response.ok) {
-                const data = await response.json();
-                if (data.success) {
-                    const formattedPhotos = data.media.map((item: any) => ({
-                        id: item.id,
-                        fileName: item.fileName,
-                        contentType: item.contentType,
-                        fileKey: item.fileKey,
-                        size: 0 // We don't have size from the API response
-                    }));
-                    setPhotos(formattedPhotos);
-                }
-            } else {
-                console.error('Failed to load media, response status:', response.status);
-            }
-        } catch (error) {
-            console.error('Failed to load media:', error);
-        } finally {
-            setLoading(false);
-        }
-    };
+    }, [selectedPhotoIndex, navigatePhoto]);
 
     const uploadToApi = async (file: File): Promise<Photo> => {
         if (!job_id) {
@@ -232,16 +242,6 @@ export default function PhotoDocumentation({ job_id }: PhotoDocumentationProps) 
 
     const closeLightbox = () => {
         setSelectedPhotoIndex(null);
-    };
-
-    const navigatePhoto = (direction: 'prev' | 'next') => {
-        if (selectedPhotoIndex === null) return;
-
-        if (direction === 'prev') {
-            setSelectedPhotoIndex(selectedPhotoIndex === 0 ? photos.length - 1 : selectedPhotoIndex - 1);
-        } else {
-            setSelectedPhotoIndex(selectedPhotoIndex === photos.length - 1 ? 0 : selectedPhotoIndex + 1);
-        }
     };
 
     // Long press handlers

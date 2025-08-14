@@ -1,6 +1,6 @@
 'use client'
 import React from 'react';
-import { Wrench, Package, Edit3, Lock, Unlock } from 'lucide-react';
+import { Wrench, Package, Edit3, Lock } from 'lucide-react';
 
 interface InvoicePreviewProps {
     invoice: Invoice;
@@ -12,7 +12,7 @@ interface InvoicePreviewProps {
 }
 
 // Helper function to safely convert values to numbers
-const safeNumber = (value: any): number => {
+const safeNumber = (value: string | number | null): number => {
     if (value === null || value === undefined || value === '') return 0;
     const num = typeof value === 'string' ? parseFloat(value) : Number(value);
     return isNaN(num) ? 0 : num;

@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { pgPool } from '@/app/lib/db';
 import helpers from '@/app/utils/helpers';
 
-// POST /api/invoices/[id]/sync - Sync invoice with job data
 export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
     try {
         const { id } = await params;
@@ -87,8 +86,8 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
             const newLineItems = [];
 
             // Add labor items from job steps
-            const totalLaborHours = jobSteps.reduce((sum: number, step: any) =>
-                sum + (parseFloat(step.actual_hours) || 0), 0
+            const totalLaborHours = jobSteps.reduce((sum: number, step: JobStep) =>
+                sum + (parseFloat(String(step.actual_hours)) || 0), 0
             );
 
             if (totalLaborHours > 0) {
@@ -107,7 +106,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
             }
 
             // Add part items
-            parts.forEach((part: any) => {
+            parts.forEach((part: Part) => {
                 if (part.id) {
                     newLineItems.push({
                         id: helpers.generateUniqueID(),
@@ -115,9 +114,9 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
                         source_id: part.id,
                         type: 'part',
                         description: `${part.name} - ${part.part_number}`,
-                        quantity: parseFloat(part.quantity) || 1,
-                        rate: parseFloat(part.price) || 0,
-                        amount: (parseFloat(part.quantity) || 1) * (parseFloat(part.price) || 0),
+                        quantity: parseFloat(String(part.quantity)) || 1,
+                        rate: parseFloat(String(part.price)) || 0,
+                        amount: (parseFloat(String(part.quantity)) || 1) * (parseFloat(String(part.price)) || 0),
                         taxable: true,
                         is_locked: false
                     });

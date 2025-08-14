@@ -1,6 +1,4 @@
 import React from 'react';
-import Link from 'next/link';
-import { Plus } from 'lucide-react';
 
 interface InvoicesTableProps {
     invoices: Invoice[];
@@ -11,7 +9,6 @@ interface InvoicesTableProps {
 
 const InvoicesTable: React.FC<InvoicesTableProps> = ({
     invoices,
-    customerData,
     isInvoicesLoading,
     getInvoiceStatusBadge
 }) => {

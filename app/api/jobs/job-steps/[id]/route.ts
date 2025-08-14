@@ -22,7 +22,7 @@ export async function GET(_req: Request, context: { params: { id: string } }) {
     }
 }
 
-export async function DELETE(req: Request, { params }: { params: { id: string } }) {
+export async function DELETE(_req: Request, { params }: { params: { id: string } }) {
     const { id } = await params;
 
     try {
@@ -79,7 +79,7 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
             'estimated_start_date'
         ];
 
-        const updates: Record<string, any> = {};
+        const updates: Record<string, string | number | boolean | null> = {};
         validFields.forEach(field => {
             if (body.hasOwnProperty(field)) {
                 let value = body[field];

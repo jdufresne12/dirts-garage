@@ -8,10 +8,8 @@ import {
     Trash2,
     Lock,
     Unlock,
-    RefreshCw,
     Wrench,
-    Package,
-    DollarSign
+    Package
 } from 'lucide-react';
 import helpers from '@/app/utils/helpers';
 
@@ -34,7 +32,7 @@ interface InvoiceEditorProps {
 }
 
 // Helper function to safely convert values to numbers
-const safeNumber = (value: any): number => {
+const safeNumber = (value: string | number | null): number => {
     if (value === null || value === undefined || value === '') return 0;
     const num = typeof value === 'string' ? parseFloat(value) : Number(value);
     return isNaN(num) ? 0 : num;
@@ -43,7 +41,6 @@ const safeNumber = (value: any): number => {
 export default function InvoiceEditor({
     invoice,
     onInvoiceChange,
-    jobData,
     laborSettings,
     onLaborSettingsChange,
     syncEnabled,
@@ -102,7 +99,7 @@ export default function InvoiceEditor({
     };
 
     // Update invoice field with automatic total recalculation
-    const updateInvoiceField = useCallback((field: keyof Invoice, value: any) => {
+    const updateInvoiceField = useCallback((field: keyof Invoice, value: string | number | boolean | null | undefined) => {
         const updatedInvoice = {
             ...invoice,
             [field]: value
@@ -230,7 +227,7 @@ export default function InvoiceEditor({
     }, [invoice.line_items, updateLineItem]);
 
     // Handle labor settings change
-    const handleLaborSettingChange = useCallback((field: keyof LaborSettings, value: any) => {
+    const handleLaborSettingChange = useCallback((field: keyof LaborSettings, value: string | number | boolean | null | undefined) => {
         onLaborSettingsChange({
             ...laborSettings,
             [field]: value

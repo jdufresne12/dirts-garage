@@ -28,7 +28,7 @@ const JobsTable: React.FC<JobsTableProps> = ({ searchTerm, currentPage, itemsPer
 
     useEffect(() => {
         setCurrentPage(1);
-    }, [activeTab]);
+    }, [activeTab, setCurrentPage]);
 
     const formatCurrency = (amount: number) => `$${amount ? amount.toLocaleString() : 0}`;
     const formatDate = (date: string | undefined) => date ? new Date(date).toLocaleDateString() : 'TBD';

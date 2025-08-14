@@ -15,21 +15,21 @@ export default function JobNotes({ job_id, Notes, setNotes }: JobNotesProps) {
 
     // Fetch notes when component mounts or job_id changes
     useEffect(() => {
-        fetchNotes();
-    }, [job_id]);
-
-    const fetchNotes = async () => {
-        try {
-            const response = await fetch(`/api/jobs/notes/${job_id}`);
-            if (!response.ok) {
-                throw new Error('Failed to fetch notes');
+        const fetchNotes = async () => {
+            try {
+                const response = await fetch(`/api/jobs/notes/${job_id}`);
+                if (!response.ok) {
+                    throw new Error('Failed to fetch notes');
+                }
+                const notesData = await response.json();
+                setNotes(notesData);
+            } catch (error) {
+                console.error('Error fetching notes:', error);
             }
-            const notesData = await response.json();
-            setNotes(notesData);
-        } catch (error) {
-            console.error('Error fetching notes:', error);
-        }
-    };
+        };
+        if (job_id)
+            fetchNotes();
+    }, [job_id]);
 
     const handleNewNote = async () => {
         if (!newNote.trim()) return; // Don't add empty notes

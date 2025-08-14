@@ -22,7 +22,7 @@ export default function PartsAndMaterials({ parts, setParts, job_id }: PartsProp
         } catch (error) {
             console.error('Error fetching parts:', error);
         }
-    }, [job_id]);
+    }, [job_id, setParts]);
 
     const getPartStatusBadge = (status: string) => {
         const baseClasses = "px-2 py-1 h-8 rounded text-xs font-medium";

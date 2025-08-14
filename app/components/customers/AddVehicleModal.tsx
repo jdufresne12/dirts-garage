@@ -55,7 +55,7 @@ export default function AddVehicleModal({
             setErrors({});
             setIsSubmitting(false);
         }
-    }, [isOpen, vehicle]);
+    }, [isOpen, vehicle, customer_id]);
 
     useEffect(() => {
         const handleEscape = (e: KeyboardEvent) => {

@@ -69,12 +69,12 @@ export class InvoicePDFGenerator {
             // Add small spacing and keep totals on same page
             yPosition += 5;
         } else {
-            // For more than 7 items, use the splitting logic
-            const paymentsCount = payments?.length || 0;
-            const notesLines = invoice.notes ? Math.ceil(invoice.notes.length / 80) : 1;
-            const totalsSpaceNeeded = 100 + (paymentsCount * 8) + (notesLines * 15);
+            // For more than 7 items, use the splitting logic (TODO)
+            // const paymentsCount = payments?.length || 0;
+            // const notesLines = invoice.notes ? Math.ceil(invoice.notes.length / 80) : 1;
+            // const totalsSpaceNeeded = 100 + (paymentsCount * 8) + (notesLines * 15);
 
-            let shouldSplitTable = true;
+            // let shouldSplitTable = true;
             const itemsForPage1 = lineItemsCount - Math.min(3, Math.floor(lineItemsCount * 0.3));
 
             const page1Items = invoice.line_items?.slice(0, itemsForPage1) || [];
@@ -102,6 +102,7 @@ export class InvoicePDFGenerator {
 
         // Totals (including payment information)
         yPosition = this.addTotals(invoice, payments || [], yPosition);
+        console.log(yPosition)
 
         // Footer Notes
         this.addFooter(invoice.notes || '', businessInfo);
@@ -405,7 +406,7 @@ export class InvoicePDFGenerator {
         return yPosition + 10;
     }
 
-    private addFooter(notes: string, businessInfo: BusinessInfo): void {
+    private addFooter(notes: string, _businessInfo: BusinessInfo): void {
         const footerStartY = this.pageHeight - 35; // More space from bottom
 
         // Notes section - positioned better

@@ -1,6 +1,6 @@
 'use client';
 import React, { useEffect, useState } from 'react';
-import { Contact2, Edit, Phone, Mail, MapPin } from 'lucide-react';
+import { Edit, Phone, Mail, MapPin } from 'lucide-react';
 import AddCustomerModal from '../customers/AddCustomerModal';
 
 interface CustomerInfoProps {

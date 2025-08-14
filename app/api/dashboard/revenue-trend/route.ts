@@ -2,6 +2,11 @@
 import { NextResponse } from 'next/server';
 import { pgPool } from '@/app/lib/db';
 
+interface RevenueData {
+    month: string;
+    revenue: number;
+}
+
 export async function GET() {
     try {
         const result = await pgPool.query(`
@@ -15,7 +20,7 @@ export async function GET() {
         `);
 
         // Format data for chart
-        const revenueData = result.rows.map(row => {
+        const revenueData: RevenueData[] = result.rows.map(row => {
             // Extract year and month directly from the UTC date string
             const date = new Date(row.month);
             const year = date.getUTCFullYear();
@@ -42,7 +47,7 @@ export async function GET() {
     }
 }
 
-function generateSixMonthsData(existingData: any[]) {
+function generateSixMonthsData(existingData: RevenueData[]) {
     const result = [];
     const currentDate = new Date();
 

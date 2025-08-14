@@ -71,7 +71,6 @@ const JobDetailsPage = () => {
                     throw new Error('Failed to update job');
                 }
 
-                const updatedJob = await response.json();
             } catch (error) {
                 console.error("Job detail update failed: ", error);
             }

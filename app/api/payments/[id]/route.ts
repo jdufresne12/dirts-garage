@@ -38,7 +38,7 @@ export async function PUT(req: Request, context: { params: { id: string } }) {
             'notes'
         ];
 
-        const updates: Record<string, any> = {};
+        const updates: Record<string, string | number | boolean | null> = {};
         validFields.forEach(field => {
             if (body.hasOwnProperty(field)) {
                 let value = body[field];

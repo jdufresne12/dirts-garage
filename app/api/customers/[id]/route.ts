@@ -53,7 +53,7 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
         ];
 
         // Extract only the valid fields from the request body
-        const updates: Record<string, any> = {};
+        const updates: Record<string, string | number | boolean | null> = {};
         validFields.forEach(field => {
             if (body.hasOwnProperty(field)) {
                 updates[field] = body[field];

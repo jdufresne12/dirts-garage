@@ -1,8 +1,8 @@
-// app/api/customers/[id]/financial-summary/route.ts
-import { NextResponse } from 'next/server';
+import { NextResponse, NextRequest } from 'next/server';
 import { pgPool } from '@/app/lib/db';
 
 export async function GET(
+    _request: NextRequest,
     { params }: { params: { id: string } }
 ) {
     try {

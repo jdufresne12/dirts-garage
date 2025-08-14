@@ -44,7 +44,7 @@ export default function AddJobStepModal({ isOpen, stepData, job_id, numSteps, on
             });
         }
         setShowDeleteConfirm(false);
-    }, [stepData, isOpen]);
+    }, [stepData, isOpen, job_id, numSteps]);
 
     const handleSave = () => {
         onSave(formData);

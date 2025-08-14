@@ -197,7 +197,6 @@ export default function NewJob() {
                 throw new Error('Failed to create job');
             }
 
-            const result = await response.text();
         } catch (error) {
             console.error('Error creating job:', error);
         }

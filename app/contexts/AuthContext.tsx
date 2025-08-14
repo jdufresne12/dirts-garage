@@ -24,26 +24,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     // Check for existing session on mount
     useEffect(() => {
+        const checkAuthStatus = async () => {
+            try {
+                showLoading('Authenticating...');
+                const response = await fetch('/api/auth/check');
+
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.success && data.user) {
+                        setUser(data.user);
+                    }
+                }
+            } catch (error) {
+                console.error('Auth check failed:', error);
+            } finally {
+                hideLoading();
+            }
+        };
+
         checkAuthStatus();
     }, []);
-
-    const checkAuthStatus = async () => {
-        try {
-            showLoading('Authenticating...');
-            const response = await fetch('/api/auth/check');
-
-            if (response.ok) {
-                const data = await response.json();
-                if (data.success && data.user) {
-                    setUser(data.user);
-                }
-            }
-        } catch (error) {
-            console.error('Auth check failed:', error);
-        } finally {
-            hideLoading();
-        }
-    };
 
     const login = async (username: string, password: string): Promise<boolean> => {
         try {

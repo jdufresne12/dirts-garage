@@ -1,5 +1,5 @@
 'use client'
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -54,6 +54,60 @@ const CustomerDetailsPage = () => {
         };
     }, [financialSummary]);
 
+    const fetchJobs = useCallback(async () => {
+        setIsJobsLoading(true);
+        try {
+            const res = await fetch(`/api/customers/${id}/jobs`);
+
+            if (res.ok) {
+                const jobsData = await res.json();
+                setJobs(jobsData);
+            } else {
+                const errorText = await res.text();
+                console.error('Jobs API error:', res.status, errorText);
+            }
+        } catch (err) {
+            console.error('Error fetching jobs:', err);
+        } finally {
+            setIsJobsLoading(false);
+        }
+    }, [id]);
+
+    const fetchInvoices = useCallback(async () => {
+        setIsInvoicesLoading(true);
+        try {
+            const res = await fetch(`/api/customers/${id}/invoices`);
+
+            if (res.ok) {
+                const invoicesData = await res.json();
+                setInvoices(invoicesData);
+            } else {
+                const errorText = await res.text();
+                console.error('Invoices API error:', res.status, errorText);
+            }
+        } catch (err) {
+            console.error('Error fetching invoices:', err);
+        } finally {
+            setIsInvoicesLoading(false);
+        }
+    }, [id]);
+
+    const fetchFinancialSummary = useCallback(async () => {
+        try {
+            const res = await fetch(`/api/customers/${id}/financial-summary`);
+
+            if (res.ok) {
+                const summaryData = await res.json();
+                setFinancialSummary(summaryData);
+            } else {
+                const errorText = await res.text();
+                console.error('Financial summary API error:', res.status, errorText);
+            }
+        } catch (err) {
+            console.error('Error fetching financial summary:', err);
+        }
+    }, [id]);
+
     useEffect(() => {
         async function fetchCustomerData(id: string) {
             const res = await fetch(`/api/customers/${id}`);
@@ -74,68 +128,14 @@ const CustomerDetailsPage = () => {
                 .catch((err) => console.error(err))
                 .finally(() => setIsInitialLoading(false));
         }
-    }, [id]);
+    }, [id, fetchJobs, fetchInvoices]);
 
     // Fetch financial summary when customer data is loaded
     useEffect(() => {
         if (customerData?.id) {
             fetchFinancialSummary();
         }
-    }, [customerData?.id]);
-
-    const fetchJobs = async () => {
-        setIsJobsLoading(true);
-        try {
-            const res = await fetch(`/api/customers/${id}/jobs`);
-
-            if (res.ok) {
-                const jobsData = await res.json();
-                setJobs(jobsData);
-            } else {
-                const errorText = await res.text();
-                console.error('Jobs API error:', res.status, errorText);
-            }
-        } catch (err) {
-            console.error('Error fetching jobs:', err);
-        } finally {
-            setIsJobsLoading(false);
-        }
-    };
-
-    const fetchInvoices = async () => {
-        setIsInvoicesLoading(true);
-        try {
-            const res = await fetch(`/api/customers/${id}/invoices`);
-
-            if (res.ok) {
-                const invoicesData = await res.json();
-                setInvoices(invoicesData);
-            } else {
-                const errorText = await res.text();
-                console.error('Invoices API error:', res.status, errorText);
-            }
-        } catch (err) {
-            console.error('Error fetching invoices:', err);
-        } finally {
-            setIsInvoicesLoading(false);
-        }
-    };
-
-    const fetchFinancialSummary = async () => {
-        try {
-            const res = await fetch(`/api/customers/${id}/financial-summary`);
-
-            if (res.ok) {
-                const summaryData = await res.json();
-                setFinancialSummary(summaryData);
-            } else {
-                const errorText = await res.text();
-                console.error('Financial summary API error:', res.status, errorText);
-            }
-        } catch (err) {
-            console.error('Error fetching financial summary:', err);
-        }
-    };
+    }, [customerData?.id, fetchFinancialSummary]);
 
     const handleSave = async () => {
         setIsEditing(false);
@@ -244,7 +244,7 @@ const CustomerDetailsPage = () => {
                 <div className="bg-white rounded-lg p-8 shadow-xl flex flex-col items-center max-w-sm w-full mx-4">
                     <Image
                         src="/gear.png"
-                        alt="Dirt's Garage Logo"
+                        alt="Dirt&apos;s Garage Logo"
                         width={500}
                         height={500}
                         className="size-20 mb-4 slow-spin"

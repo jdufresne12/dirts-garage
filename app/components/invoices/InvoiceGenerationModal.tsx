@@ -65,7 +65,7 @@ export default function InvoiceGenerationModal({
     const [isInitialized, setIsInitialized] = useState(false);
     const [payments, setPayments] = useState<Payment[]>([]);
 
-    const safeNumber = (value: any): number => {
+    const safeNumber = (value: string | number | null | undefined): number => {
         if (value === null || value === undefined || value === '') return 0;
         const num = typeof value === 'string' ? parseFloat(value) : Number(value);
         return isNaN(num) ? 0 : num;
@@ -322,7 +322,6 @@ export default function InvoiceGenerationModal({
         if (!invoice) return;
 
         setIsProcessing(true);
-
         try {
             if (mode === 'create') {
                 const response = await fetch('/api/invoices', {

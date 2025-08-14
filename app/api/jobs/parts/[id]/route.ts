@@ -13,7 +13,7 @@ export async function GET(_req: Request, context: { params: { id: string } }) {
     }
 }
 
-export async function DELETE(req: Request, { params }: { params: { id: string } }) {
+export async function DELETE(_req: Request, { params }: { params: { id: string } }) {
     const { id } = await params;
 
     try {
@@ -53,7 +53,7 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
             'status'
         ];
 
-        const updates: Record<string, any> = {};
+        const updates: Record<string, string | number | boolean | null> = {};
 
         // First, handle direct field matches
         validFields.forEach(field => {

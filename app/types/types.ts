@@ -68,6 +68,7 @@ interface Part {
     status: string
 };
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 interface Note {
     id: string;
     note: string;
@@ -89,6 +90,7 @@ interface JobStep {
     technician?: string;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 interface CostSummary {
     partsAndMaterials: number,
     hours: number,
@@ -153,6 +155,7 @@ interface JobSyncData {
     }>;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 interface InvoiceSyncResult {
     invoice: Invoice;
     job_data: JobSyncData;
@@ -160,13 +163,14 @@ interface InvoiceSyncResult {
         type: 'added' | 'updated' | 'removed';
         item_type: 'labor' | 'part';
         description: string;
-        old_value?: any;
-        new_value?: any;
+        old_value?: string | number | boolean;
+        new_value?: string | number | boolean;
     }>;
     recommended_action: 'auto_sync' | 'prompt_user' | 'no_action';
     can_auto_sync: boolean;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 interface LaborSettings {
     type: 'hourly' | 'fixed';
     hourly_rate: number;
@@ -175,6 +179,7 @@ interface LaborSettings {
     consolidate_labor: boolean; // Whether to show as one line item or separate by job step
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 interface BusinessInfo {
     name: string;
     address: string;
@@ -185,6 +190,7 @@ interface BusinessInfo {
     email: string;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 interface Payment {
     id: string;
     invoice_id: string;
@@ -195,4 +201,10 @@ interface Payment {
     notes?: string;
     created_at?: string;
     updated_at?: string;
+}
+
+interface S3LoaderParams {
+    src: string;
+    width: number;
+    quality?: number;
 }

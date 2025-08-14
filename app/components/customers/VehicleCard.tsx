@@ -3,7 +3,7 @@
 
 import React, { useState } from 'react';
 import AddVehicleModal from './AddVehicleModal';
-import { Car, Edit3, Trash } from 'lucide-react';
+import { Car, Edit3 } from 'lucide-react';
 
 interface VehicleCardProps {
     vehicle: Vehicle;

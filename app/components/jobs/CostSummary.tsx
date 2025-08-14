@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Edit, Eye, RefreshCw } from 'lucide-react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { RefreshCw } from 'lucide-react';
 import InvoiceGenerationModal from '../invoices/InvoiceGenerationModal';
 
 interface CostSummaryProps {
@@ -27,19 +27,22 @@ export default function CostSummary({
     }>({ needed: false });
 
     const total = costSummary.partsAndMaterials + costSummary.labor;
-
-    // Determine if job is ready for invoicing
     const isReadyForInvoice = jobData.status === "Completed" || jobData.status === "completed";
     const hasInvoice = Boolean(jobData.invoice_id);
 
-    // Load existing invoice if available
-    useEffect(() => {
-        if (hasInvoice && jobData.invoice_id) {
-            loadExistingInvoice(jobData.invoice_id);
+    const checkSyncStatus = useCallback(async (invoiceId: string) => {
+        try {
+            const response = await fetch(`/api/invoices/${invoiceId}/sync-status`);
+            if (response.ok) {
+                const status = await response.json();
+                setSyncStatus(status);
+            }
+        } catch (error) {
+            console.error('Error checking sync status:', error);
         }
-    }, [hasInvoice, jobData.invoice_id]);
+    }, []);
 
-    const loadExistingInvoice = async (invoiceId: string) => {
+    const loadExistingInvoice = useCallback(async (invoiceId: string) => {
         setIsLoadingInvoice(true);
         try {
             const response = await fetch(`/api/invoices/${invoiceId}`);
@@ -66,19 +69,14 @@ export default function CostSummary({
         } finally {
             setIsLoadingInvoice(false);
         }
-    };
+    }, [checkSyncStatus]);
 
-    const checkSyncStatus = async (invoiceId: string) => {
-        try {
-            const response = await fetch(`/api/invoices/${invoiceId}/sync-status`);
-            if (response.ok) {
-                const status = await response.json();
-                setSyncStatus(status);
-            }
-        } catch (error) {
-            console.error('Error checking sync status:', error);
+    // Load existing invoice if available
+    useEffect(() => {
+        if (hasInvoice && jobData.invoice_id) {
+            loadExistingInvoice(jobData.invoice_id);
         }
-    };
+    }, [hasInvoice, jobData.invoice_id, loadExistingInvoice]);
 
     const handleInvoiceClick = () => {
         if (hasInvoice && existingInvoice) {

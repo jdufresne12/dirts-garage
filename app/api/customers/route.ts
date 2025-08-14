@@ -41,9 +41,9 @@ export async function GET() {
         return NextResponse.json(result.rows);
     } catch (error) {
         console.error('GET /api/customers error:', error);
-        console.error('Error details:', (error as any).message);
+        console.error('Error details:', (error as Error).message);
         return NextResponse.json(
-            { error: 'Failed to fetch customers', details: (error as any).message },
+            { error: 'Failed to fetch customers', details: (error as Error).message },
             { status: 500 }
         );
     }

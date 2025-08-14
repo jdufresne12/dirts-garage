@@ -20,7 +20,7 @@ export default function JobSteps({ job_id, jobSteps, setJobSteps }: JobStepsProp
             .then(res => res.json())
             .then(data => setJobSteps(data))
             .catch(error => console.error("Error fetching job steps:", error))
-    }, [])
+    }, [job_id, setJobSteps])
 
     const totalEstimatedHours = jobSteps?.reduce((sum, step: JobStep) => {
         const hours = typeof step.estimated_hours === 'string'

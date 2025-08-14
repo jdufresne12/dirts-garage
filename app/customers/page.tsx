@@ -1,5 +1,5 @@
 'use client'
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Phone, Mail, Search, Plus, Users } from 'lucide-react';
@@ -15,44 +15,6 @@ export default function CustomersPage() {
     const [showAddCustomerModal, setShowAddCustomerModal] = useState<boolean>(false);
     const [searchTerm, setSearchTerm] = useState<string>("");
     const [isInitialLoading, setIsInitialLoading] = useState<boolean>(true);
-
-    useEffect(() => {
-        fetch('/api/customers')
-            .then(res => res.json())
-            .then(data => {
-                const sortedData = sortCustomersByStatus(data);
-                setInitCustomers(sortedData);
-                setCustomers(sortedData);
-            })
-            .catch(error => {
-                console.error('Error fetching customers:', error);
-                // Handle error appropriately
-            })
-            .finally(() => {
-                setIsInitialLoading(false);
-            });
-    }, []);
-
-    useEffect(() => {
-        if (searchTerm === "") {
-            // Sort the initial customers by status when no search term
-            const sortedCustomers = sortCustomersByStatus(initCustomers);
-            setCustomers(sortedCustomers);
-        } else {
-            const term = searchTerm.toLowerCase();
-
-            // Filter customers based on search term
-            const filteredCustomers: Customer[] = initCustomers.filter((customer: Customer) => {
-                return customer.first_name.toLowerCase().includes(term) ||
-                    customer.last_name.toLowerCase().includes(term) ||
-                    customer.email.toLowerCase().includes(term)
-            });
-
-            // Sort the filtered results by status
-            const sortedFilteredCustomers = sortCustomersByStatus(filteredCustomers);
-            setCustomers(sortedFilteredCustomers);
-        }
-    }, [searchTerm, initCustomers]);
 
     const getStatusBadge = (status: string) => {
         const baseClasses = "px-2 py-1 rounded-full text-xs font-medium";
@@ -99,7 +61,7 @@ export default function CustomersPage() {
         }
     };
 
-    const sortCustomersByStatus = (customers: Customer[]): Customer[] => {
+    const sortCustomersByStatus = useCallback((customers: Customer[]): Customer[] => {
         return [...customers].sort((a, b) => {
             const statusA = getStatusText(a);
             const statusB = getStatusText(b);
@@ -120,7 +82,45 @@ export default function CustomersPage() {
 
             return a.first_name.localeCompare(b.first_name);
         });
-    };
+    }, []);
+
+    useEffect(() => {
+        fetch('/api/customers')
+            .then(res => res.json())
+            .then(data => {
+                const sortedData = sortCustomersByStatus(data);
+                setInitCustomers(sortedData);
+                setCustomers(sortedData);
+            })
+            .catch(error => {
+                console.error('Error fetching customers:', error);
+                // Handle error appropriately
+            })
+            .finally(() => {
+                setIsInitialLoading(false);
+            });
+    }, [sortCustomersByStatus]);
+
+    useEffect(() => {
+        if (searchTerm === "") {
+            // Sort the initial customers by status when no search term
+            const sortedCustomers = sortCustomersByStatus(initCustomers);
+            setCustomers(sortedCustomers);
+        } else {
+            const term = searchTerm.toLowerCase();
+
+            // Filter customers based on search term
+            const filteredCustomers: Customer[] = initCustomers.filter((customer: Customer) => {
+                return customer.first_name.toLowerCase().includes(term) ||
+                    customer.last_name.toLowerCase().includes(term) ||
+                    customer.email.toLowerCase().includes(term)
+            });
+
+            // Sort the filtered results by status
+            const sortedFilteredCustomers = sortCustomersByStatus(filteredCustomers);
+            setCustomers(sortedFilteredCustomers);
+        }
+    }, [searchTerm, initCustomers, sortCustomersByStatus]);
 
     const handleAddCustomer = (customer: Customer) => {
         const newCustomer = customerHelpers.newCustomer(customer);
@@ -139,6 +139,10 @@ export default function CustomersPage() {
         }
     }
 
+    const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setSearchTerm(e.target.value);
+    };
+
     return (
         <div className="min-h-screen bg-gray-50 w-full overflow-x-hidden">
             <div className="w-full mx-auto p-4 sm:p-6">
@@ -155,7 +159,7 @@ export default function CustomersPage() {
                             type="text"
                             placeholder="Search customers..."
                             className="w-full py-1.5 focus:ring-0 focus:outline-none"
-                            onChange={(e: any) => setSearchTerm(e.target.value)}
+                            onChange={handleSearchChange}
                         />
                     </div>
 
@@ -175,7 +179,7 @@ export default function CustomersPage() {
                         <div className="bg-white rounded-lg p-8 shadow-xl flex flex-col items-center max-w-sm w-full mx-4">
                             <Image
                                 src="/gear.png"
-                                alt="Dirt's Garage Logo"
+                                alt="Dirt&apos;s Garage Logo"
                                 width={500}
                                 height={500}
                                 className="size-20 mb-4 slow-spin"
