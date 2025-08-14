@@ -116,10 +116,6 @@ export default function AddCustomerModal({ isOpen, onClose, onSubmit }: AddCusto
                 throw new Error('Failed to create customer');
             }
 
-            const result = await response.text();
-
-            console.log("Result: ", result);
-
             if (onSubmit) {
                 onSubmit(formData);
             }

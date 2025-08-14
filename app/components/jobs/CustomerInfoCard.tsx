@@ -47,7 +47,6 @@ export default function CustomerInfo({ customer, handleUpdate }: CustomerInfoPro
     };
 
     const handleAddNewCustomer = async (customerData: Customer) => {
-        console.log('New customer:', customerData);
         await handleUpdate?.(customerData);
         setSelectedCustomerId(customerData.id);
         setIsEditing(false);

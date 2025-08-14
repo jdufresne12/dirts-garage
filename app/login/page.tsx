@@ -1,18 +1,18 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 import { Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '@/app/contexts/AuthContext';
 
-export default function LoginPage() {
+// Create a separate component for the login form that uses useSearchParams
+function LoginForm() {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
-    const [showCredentials, setShowCredentials] = useState(false);
 
     const { login, isAuthenticated } = useAuth();
     const router = useRouter();
@@ -47,11 +47,6 @@ export default function LoginPage() {
         }
     };
 
-    const handleDemoLogin = (demoUsername: string, demoPassword: string) => {
-        setUsername(demoUsername);
-        setPassword(demoPassword);
-    };
-
     return (
         <div className="min-h-screen flex items-center justify-center bg-gray-950 py-12 px-4 sm:px-6 lg:px-8">
             <div className="max-w-md w-full space-y-8">
@@ -65,7 +60,7 @@ export default function LoginPage() {
                         priority
                     />
                     <h2 className="mt-6 text-center text-3xl font-extrabold text-orange-400">
-                        Dirt's Garage
+                        Dirt&apos;s Garage
                     </h2>
                     <p className="mt-2 text-center text-sm text-white">
                         Welcome back! Please sign in to your account.
@@ -141,54 +136,26 @@ export default function LoginPage() {
                             {isLoading ? 'Signing in...' : 'Sign in'}
                         </button>
                     </div>
-
-                    {/* Demo Credentials Section */}
-                    {/* <div className="mt-6">
-                        <div className="relative">
-                            <div className="absolute inset-0 flex items-center">
-                                <div className="w-full border-t border-gray-600" />
-                            </div>
-                            <div className="relative flex justify-center text-sm">
-                                <span className="px-2 bg-gray-950 text-gray-400">Demo Credentials</span>
-                            </div>
-                        </div>
-
-                        <div className="mt-4">
-                            <button
-                                type="button"
-                                onClick={() => setShowCredentials(!showCredentials)}
-                                className="text-sm text-gray-400 hover:text-gray-300 underline transition-colors duration-200"
-                            >
-                                {showCredentials ? 'Hide' : 'Show'} demo login options
-                            </button>
-
-                            {showCredentials && (
-                                <div className="mt-3 space-y-2">
-                                    <div className="text-xs text-gray-400 mb-2">
-                                        Click to auto-fill credentials:
-                                    </div>
-                                    <button
-                                        type="button"
-                                        onClick={() => handleDemoLogin('admin', 'password123')}
-                                        className="w-full text-left px-3 py-2 text-sm bg-gray-800 hover:bg-gray-700 text-white rounded border border-gray-600
-                                            transition-colors duration-200"
-                                    >
-                                        <strong>Admin:</strong> admin / password123
-                                    </button>
-                                    <button
-                                        type="button"
-                                        onClick={() => handleDemoLogin('user', 'user123')}
-                                        className="w-full text-left px-3 py-2 text-sm bg-gray-800 hover:bg-gray-700 text-white rounded border border-gray-600
-                                            transition-colors duration-200"
-                                    >
-                                        <strong>User:</strong> user / user123
-                                    </button>
-                                </div>
-                            )}
-                        </div>
-                    </div> */}
                 </form>
             </div>
         </div>
+    );
+}
+
+// Loading component to show while suspense boundary loads
+function LoginLoading() {
+    return (
+        <div className="min-h-screen flex items-center justify-center bg-gray-950">
+            <div className="text-white">Loading...</div>
+        </div>
+    );
+}
+
+// Main component with Suspense boundary
+export default function LoginPage() {
+    return (
+        <Suspense fallback={<LoginLoading />}>
+            <LoginForm />
+        </Suspense>
     );
 }

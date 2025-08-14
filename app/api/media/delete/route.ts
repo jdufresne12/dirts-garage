@@ -17,8 +17,6 @@ export async function DELETE(request: NextRequest) {
     try {
         const { mediaId } = await request.json();
 
-        console.log('Delete request for mediaId:', mediaId);
-
         if (!mediaId) {
             return NextResponse.json(
                 { error: 'Media ID is required' },
@@ -41,7 +39,6 @@ export async function DELETE(request: NextRequest) {
         }
 
         const fileKey = result.rows[0].file_key;
-        console.log('Deleting file with key:', fileKey);
 
         // Delete from S3
         const deleteParams = {
@@ -51,16 +48,13 @@ export async function DELETE(request: NextRequest) {
 
         try {
             await s3Client.send(new DeleteObjectCommand(deleteParams));
-            console.log('Successfully deleted from S3:', fileKey);
         } catch (s3Error) {
             console.error('S3 delete error:', s3Error);
-            // Continue with database deletion even if S3 delete fails
-            // This prevents orphaned database records
+            throw s3Error;
         }
 
         // Delete from database
         await client.query('DELETE FROM media WHERE id = $1', [mediaId]);
-        console.log('Successfully deleted from database:', mediaId);
 
         return NextResponse.json({
             success: true,

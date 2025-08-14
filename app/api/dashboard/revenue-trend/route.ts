@@ -14,8 +14,6 @@ export async function GET() {
             ORDER BY month ASC
         `);
 
-        console.log('Database result:', result.rows);
-
         // Format data for chart
         const revenueData = result.rows.map(row => {
             // Extract year and month directly from the UTC date string
@@ -33,8 +31,6 @@ export async function GET() {
                 revenue: parseFloat(row.revenue)
             };
         });
-
-        console.log('Formatted revenue data:', revenueData);
 
         // Fill in missing months to ensure exactly 6 months ending with current month
         const filledData = generateSixMonthsData(revenueData);
@@ -65,7 +61,6 @@ function generateSixMonthsData(existingData: any[]) {
 
         const existingRecord = existingData.find(d => d.month === monthKey);
 
-        console.log(`Looking for ${monthKey}, found:`, existingRecord);
 
         result.push({
             month: monthKey,
@@ -73,6 +68,5 @@ function generateSixMonthsData(existingData: any[]) {
         });
     }
 
-    console.log('Final generated data:', result);
     return result;
 }

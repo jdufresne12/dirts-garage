@@ -77,12 +77,8 @@ export default function WaitingJobsTable({ onJobStarted }: WaitingJobsTableProps
                 onJobStarted();
             }
 
-            // Show success message (optional)
-            console.log(`Job ${job.id} started successfully`);
-
         } catch (error) {
             console.error('Error starting job:', error);
-            // You might want to show an error message to the user here
             alert('Failed to start job. Please try again.');
         } finally {
             setStartingJobId(null);

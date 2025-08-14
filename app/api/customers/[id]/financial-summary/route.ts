@@ -1,14 +1,12 @@
 // app/api/customers/[id]/financial-summary/route.ts
-import { NextResponse, NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
 import { pgPool } from '@/app/lib/db';
 
 export async function GET(
-    request: NextRequest,
     { params }: { params: { id: string } }
 ) {
     try {
         const customerId = params.id;
-        console.log('Fetching financial summary for customer ID:', customerId);
 
         // Get comprehensive financial summary
         const query = `
@@ -69,7 +67,6 @@ export async function GET(
             total_job_costs: parseFloat(summary.total_job_costs) || 0
         };
 
-        console.log('Financial summary:', financialSummary);
         return NextResponse.json(financialSummary);
 
     } catch (error) {

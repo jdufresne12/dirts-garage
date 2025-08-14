@@ -71,7 +71,6 @@ export default function JobSteps({ job_id, jobSteps, setJobSteps }: JobStepsProp
     };
 
     const handleAddStep = async (stepData: JobStep) => {
-        console.log(stepData)
         try {
             const response = await fetch('/api/jobs/job-steps', {
                 method: 'POST',
@@ -96,7 +95,6 @@ export default function JobSteps({ job_id, jobSteps, setJobSteps }: JobStepsProp
     };
 
     const handleUpdateStep = async (stepData: JobStep) => {
-        console.log(stepData);
         try {
             const response = await fetch(`/api/jobs/job-steps/${stepData.id}`, {
                 method: 'PUT',
@@ -120,7 +118,6 @@ export default function JobSteps({ job_id, jobSteps, setJobSteps }: JobStepsProp
     };
 
     const handleDeleteStep = async (id: string) => {
-        console.log(id);
         try {
             // First, delete the job step
             const deleteResponse = await fetch(`/api/jobs/job-steps/${id}`, {

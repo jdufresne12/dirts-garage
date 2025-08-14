@@ -72,8 +72,6 @@ export default function JobNotes({ job_id, Notes, setNotes }: JobNotesProps) {
     };
 
     const handleRemovingNote = async (noteId: string) => {
-        console.log(Notes.find(n => n.id === noteId));
-
         try {
             const response = await fetch(`/api/jobs/notes/${noteId}`, {
                 method: 'DELETE',

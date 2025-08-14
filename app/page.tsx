@@ -49,8 +49,8 @@ export default function Dashboard() {
     try {
       const response = await fetch('/api/dashboard/analytics');
       if (!response.ok) throw new Error('Failed to fetch analytics');
+
       const data = await response.json();
-      console.log('Analytics data:', data); // Debug log
       setAnalytics(data);
     } catch (error) {
       console.error('Error fetching analytics:', error);

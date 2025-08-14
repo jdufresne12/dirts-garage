@@ -118,7 +118,6 @@ export default function AddVehicleModal({
 
         try {
             let response;
-            console.log(formData)
 
             if (isEditMode) {
                 response = await fetch(`/api/vehicles/${formData.id}`, {

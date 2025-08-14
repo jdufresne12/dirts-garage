@@ -44,7 +44,6 @@ export default function parts({ parts, setParts, job_id }: PartsProps) {
     }
 
     const handleModalSave = async (part: Part) => {
-        console.log(part);
         part.job_id = job_id;
 
         try {
@@ -93,8 +92,6 @@ export default function parts({ parts, setParts, job_id }: PartsProps) {
     };
 
     const handlePartRemoval = async (partId: string) => {
-        console.log(partId);
-
         try {
             const response = await fetch(`/api/jobs/parts/${partId}`, {
                 method: 'DELETE',

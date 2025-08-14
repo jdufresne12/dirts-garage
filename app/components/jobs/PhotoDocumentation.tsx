@@ -202,8 +202,6 @@ export default function PhotoDocumentation({ job_id }: PhotoDocumentationProps) 
         }
 
         try {
-            console.log('Attempting to delete photo with ID:', photoId);
-
             const response = await fetch('/api/media/delete', {
                 method: 'DELETE',
                 headers: {
@@ -213,18 +211,11 @@ export default function PhotoDocumentation({ job_id }: PhotoDocumentationProps) 
             });
 
             const data = await response.json();
-            console.log('Delete response:', data);
 
             if (response.ok && data.success) {
-                // Remove photo from state
                 setPhotos(prev => prev.filter(p => p.id !== photoId));
-
-                // Close modal if deleted photo was selected
-                if (selectedPhotoIndex !== null && photos[selectedPhotoIndex]?.id === photoId) {
+                if (selectedPhotoIndex !== null && photos[selectedPhotoIndex]?.id === photoId)
                     setSelectedPhotoIndex(null);
-                }
-
-                console.log('Photo deleted successfully');
             } else {
                 console.error('Delete failed:', data);
                 alert('Failed to delete media: ' + (data.error || 'Unknown error'));
@@ -393,9 +384,6 @@ export default function PhotoDocumentation({ job_id }: PhotoDocumentationProps) 
                                     sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 20vw"
                                     onError={(e) => {
                                         console.error('Next.js Image error:', e);
-                                    }}
-                                    onLoad={() => {
-                                        console.log('Next.js Image loaded:', photo.fileName);
                                     }}
                                     priority
                                 />

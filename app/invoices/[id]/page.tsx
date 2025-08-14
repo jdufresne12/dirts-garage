@@ -61,10 +61,6 @@ export default function InvoiceDetailPage() {
         }
     }, [invoiceId]);
 
-    useEffect(() => {
-        console.log(payments)
-    }, [payments])
-
     const loadInvoice = async () => {
         setIsLoading(true);
         setError(null);
@@ -116,7 +112,6 @@ export default function InvoiceDetailPage() {
             if (response.ok) {
                 const paymentsData = await response.json();
                 setPayments(paymentsData);
-                console.log(paymentsData)
             }
         } catch (error) {
             console.error('Error loading payments:', error);
