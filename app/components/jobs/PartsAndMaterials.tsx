@@ -9,7 +9,7 @@ interface PartsProps {
     setParts: React.Dispatch<React.SetStateAction<Part[] | undefined>>;
 }
 
-export default function parts({ parts, setParts, job_id }: PartsProps) {
+export default function PartsAndMaterials({ parts, setParts, job_id }: PartsProps) {
     const [showAddPartModal, setShowAddPartModal] = useState(false);
     const [selectedPart, setSelectedPart] = useState<Part | null>(null);
     const [showPartInfo, setShowPartInfo] = useState<boolean[]>(new Array(parts.length).fill(false));

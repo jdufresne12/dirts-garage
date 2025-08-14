@@ -154,7 +154,7 @@ export default function Navbar({ isMobile }: NavbarProps) {
                             />
                         </div>
                         <span className="text-md lg:text-xl font-bold text-orange-400 truncate">
-                            Dirt's Garage
+                            Dirt&apos;s Garage
                         </span>
                     </div>
                 )}
