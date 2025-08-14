@@ -203,6 +203,7 @@ interface Payment {
     updated_at?: string;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 interface S3LoaderParams {
     src: string;
     width: number;

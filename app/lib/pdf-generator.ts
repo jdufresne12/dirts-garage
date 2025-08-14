@@ -105,7 +105,7 @@ export class InvoicePDFGenerator {
         console.log(yPosition)
 
         // Footer Notes
-        this.addFooter(invoice.notes || '', businessInfo);
+        this.addFooter(invoice.notes || '');
 
         return this.doc.output('blob');
     }
@@ -406,7 +406,7 @@ export class InvoicePDFGenerator {
         return yPosition + 10;
     }
 
-    private addFooter(notes: string, _businessInfo: BusinessInfo): void {
+    private addFooter(notes: string): void {
         const footerStartY = this.pageHeight - 35; // More space from bottom
 
         // Notes section - positioned better
