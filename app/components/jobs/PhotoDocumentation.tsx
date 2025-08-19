@@ -11,7 +11,6 @@ interface Photo {
 }
 
 const S3_BASE_URL = 'https://dirts-garage.s3.us-east-1.amazonaws.com';
-// Custom loader for S3
 const s3Loader = ({ src, width, quality }: S3LoaderParams) => {
     return `${S3_BASE_URL}/${src}?w=${width}&q=${quality || 75}`
 }
@@ -350,7 +349,6 @@ export default function PhotoDocumentation({ job_id }: PhotoDocumentationProps) 
                     type="file"
                     multiple
                     accept="image/*,video/*"
-                    capture="environment"
                     onChange={handleFileUpload}
                     className="hidden"
                 />
