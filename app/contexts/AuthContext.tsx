@@ -26,7 +26,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     useEffect(() => {
         const checkAuthStatus = async () => {
             try {
-                showLoading('Authenticating...');
                 const response = await fetch('/api/auth/check');
 
                 if (response.ok) {
@@ -37,8 +36,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 }
             } catch (error) {
                 console.error('Auth check failed:', error);
-            } finally {
-                hideLoading();
             }
         };
 
