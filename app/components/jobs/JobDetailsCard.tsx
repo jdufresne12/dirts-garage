@@ -1,6 +1,7 @@
 'use client'
 import React, { useState } from 'react';
-import { Edit, Calendar, DollarSign, AlertCircle, CheckCircle, Clock, Flag, Save, X } from 'lucide-react';
+import { Edit, Calendar, DollarSign, AlertCircle, CheckCircle, Clock, Flag, Save, X, Trash } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 interface JobDetailsCardProps {
     job: Job;
@@ -8,7 +9,9 @@ interface JobDetailsCardProps {
 }
 
 export default function JobDetailsCard({ job, onJobUpdate }: JobDetailsCardProps) {
+    const router = useRouter();
     const [isEditing, setIsEditing] = useState(false);
+    const [isDeleting, setIsDeleting] = useState(false);
     const [editForm, setEditForm] = useState({
         title: job.title,
         description: job.description,
@@ -18,7 +21,7 @@ export default function JobDetailsCard({ job, onJobUpdate }: JobDetailsCardProps
         start_date: job.start_date || '',
         estimated_completion: job.estimated_completion || '',
         completion_date: job.completion_date || '',
-        estimated_cost: job.estimated_cost,
+        estimated_cost: job.estimated_cost || 0,
         actual_cost: job.actual_cost || 0,
         waiting_reason: job.waiting_reason || '',
     });
@@ -43,6 +46,60 @@ export default function JobDetailsCard({ job, onJobUpdate }: JobDetailsCardProps
             waiting_reason: job.waiting_reason || '',
         });
         setIsEditing(false);
+    };
+
+    const handleDelete = async () => {
+        // First confirmation
+        const confirmMessage = `Are you sure you want to delete "${job.title}"?\n\nThis will permanently delete:\n• The job and all its details\n• All invoices and payments\n\nThis action cannot be undone.`;
+        if (!confirm(confirmMessage)) {
+            return;
+        }
+
+        // Confirmation requiring typing "DELETE"
+        const typeConfirm = prompt(`To confirm deletion of "${job.title}", please type "DELETE" (all caps):`);
+        if (typeConfirm !== "DELETE") {
+            alert("Deletion cancelled. You must type 'DELETE' exactly to confirm.");
+            return;
+        }
+
+        setIsDeleting(true);
+        try {
+            const response = await fetch(`/api/jobs/${job.id}`, {
+                method: 'DELETE'
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+
+                if (response.status === 409) {
+                    alert(`Cannot delete job: ${errorData.message || 'There are still references to this job in the database.'}`);
+                } else {
+                    throw new Error(errorData.message || 'Failed to delete job');
+                }
+                return;
+            }
+
+            const result = await response.json();
+
+            // Show success message with details
+            const deletionSummary = `Job "${job.title}" deleted successfully!\n
+            \nDeleted items:\n• Job details\n• ${result.deletedCounts.jobSteps || 0} job steps\n• ${result.deletedCounts.parts || 0} parts\n• ${result.deletedCounts.notes || 0} notes\n• ${result.deletedCounts.invoices || 0} invoices (with related payments)`;
+
+            if (result.s3DeletionDetails && result.s3DeletionDetails.length > 0) {
+                alert(`${deletionSummary}\n\n⚠️ Note: Some media files failed to delete. Let Johnny know of this issue as well a the Job Number (#${job.id})`);
+            } else {
+                alert(deletionSummary);
+            }
+
+            // Navigate back to jobs list
+            router.push('/jobs');
+
+        } catch (error) {
+            console.error('Failed to delete job:', error);
+            alert(`Failed to delete job: ${error instanceof Error ? error.message : 'Unknown error occurred'}`);
+        } finally {
+            setIsDeleting(false);
+        }
     };
 
     const getStatusBadge = (status: string) => {
@@ -129,8 +186,17 @@ export default function JobDetailsCard({ job, onJobUpdate }: JobDetailsCardProps
 
             {/* Save/Cancel buttons when editing */}
             {isEditing && (
-                <div className="flex justify-center items-center gap-2 mb-2">
-                    <span className='text-xl font font-medium sm:font-bold'>Edit Job Details</span>
+                <div className="flex justify-between items-center mb-4">
+                    <div className="flex-1 text-center">
+                        <span className="text-xl font-bold">Edit Job Details</span>
+                    </div>
+                    <button
+                        onClick={handleCancel}
+                        disabled={isDeleting}
+                        className={'text-gray-400 hover:scale-110 cursor-pointer'}
+                    >
+                        <X className="size-5" />
+                    </button>
                 </div>
             )}
 
@@ -138,7 +204,7 @@ export default function JobDetailsCard({ job, onJobUpdate }: JobDetailsCardProps
             <div className="mb-6">
                 {isEditing ? (
                     <div className="space-y-4">
-                        <span className="flex border-b-1 border-gray-300 text-lg font-semibold mb-4">Basic Details</span>
+                        <span className="flex border-b-1 border-gray-300 text-lg mb-4 md:font-semibold">Basic Details</span>
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
                             <input
@@ -154,24 +220,24 @@ export default function JobDetailsCard({ job, onJobUpdate }: JobDetailsCardProps
                             <textarea
                                 value={editForm.description}
                                 onChange={(e) => setEditForm(prev => ({ ...prev, description: e.target.value }))}
-                                rows={3}
+                                rows={5}
                                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                             />
                         </div>
 
-                        <span className="flex border-b-1 border-gray-300 text-lg font-semibold pt-6 mb-4">Tracking Info</span>
+                        <span className="flex border-b-1 border-gray-300 text-lg pt-6 mb-4 md:font-semibold">Tracking Info</span>
                         <div className="grid grid-cols-4 gap-4 mb-6">
                             <div className='grid col-span-2 md:col-span-1'>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
                                 <select
                                     value={editForm.status}
-                                    onChange={(e) => setEditForm(prev => ({ ...prev, status: e.target.value }))}
+                                    onChange={(e) => setEditForm(prev => ({ ...prev, status: e.target.value, start_date: e.target.value === 'In Progress' ? formatDateEdit(new Date().toISOString()) : prev.start_date }))}
                                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                                 >
                                     <option value="In Progress">In Progress</option>
                                     <option value="Waiting">Waiting</option>
                                     <option value="On Hold">On Hold</option>
-                                    <option value="Payment">Payment</option>
+                                    {/* <option value="Payment">Payment</option> */}
                                     <option value="Completed">Completed</option>
                                 </select>
                             </div>
@@ -194,7 +260,7 @@ export default function JobDetailsCard({ job, onJobUpdate }: JobDetailsCardProps
                     <div>
                         <h1 className="text-2xl font-bold text-gray-900">{job.title}</h1>
                         <span className="text-sm font-medium text-gray-500">Job #{job.id}</span>
-                        <p className="text-gray-600 leading-relaxed mt-2">{job.description}</p>
+                        <p className="text-gray-600 leading-relaxed mt-2 whitespace-pre-line">{job.description}</p>
                     </div>
                 )}
             </div>
@@ -203,7 +269,7 @@ export default function JobDetailsCard({ job, onJobUpdate }: JobDetailsCardProps
                 <>
                     <div className="flex flex-col lg:flex-row gap-6 pt-6 border-gray-200">
                         <div className="flex-1 lg:w-3/4">
-                            <span className="flex border-b border-gray-300 text-lg font-semibold mb-4 pb-2">Dates & Deadlines</span>
+                            <span className="flex border-b border-gray-300 text-lg mb-4 pb-2 md:font-semibold">Dates & Deadlines</span>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">Estimated Start</label>
@@ -248,7 +314,7 @@ export default function JobDetailsCard({ job, onJobUpdate }: JobDetailsCardProps
                         </div>
 
                         <div className="lg:w-1/4">
-                            <span className="flex border-b border-gray-300 text-lg font-semibold mb-4 pb-2">Costs</span>
+                            <span className="flex border-b border-gray-300 text-lg mb-4 pb-2 md:font-semibold">Costs</span>
                             <div className="space-y-4">
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">Estimated Cost</label>
@@ -256,39 +322,52 @@ export default function JobDetailsCard({ job, onJobUpdate }: JobDetailsCardProps
                                         <DollarSign className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
                                         <input
                                             type="number"
-                                            value={editForm.estimated_cost}
+                                            value={editForm.estimated_cost === 0 ? '' : editForm.estimated_cost}
                                             onChange={(e) => {
-                                                const value = parseFloat(e.target.value);
-                                                setEditForm(prev => ({
-                                                    ...prev,
-                                                    estimated_cost: isNaN(value) ? 0 : parseFloat(value.toFixed(2))
-                                                }));
+                                                const value = e.target.value;
+                                                if (value === '' || value === null) {
+                                                    setEditForm(prev => ({ ...prev, estimated_cost: 0 }));
+                                                } else {
+                                                    const numValue = parseFloat(value);
+                                                    setEditForm(prev => ({
+                                                        ...prev,
+                                                        estimated_cost: isNaN(numValue) ? 0 : parseFloat(numValue.toFixed(2))
+                                                    }));
+                                                }
                                             }}
                                             className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                                             step="0.01"
                                             min="0"
+                                            placeholder="0.00"
                                         />
                                     </div>
                                 </div>
 
+                                {/* Actual Cost - Fixed Version */}
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">Actual Cost</label>
                                     <div className="relative">
                                         <DollarSign className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
                                         <input
                                             type="number"
-                                            value={editForm.actual_cost}
+                                            value={editForm.actual_cost === 0 ? '' : editForm.actual_cost}
                                             onChange={(e) => {
-                                                const value = parseFloat(e.target.value);
-                                                setEditForm(prev => ({
-                                                    ...prev,
-                                                    actual_cost: isNaN(value) ? 0 : parseFloat(value.toFixed(2))
-                                                }));
+                                                const value = e.target.value;
+                                                if (value === '' || value === null) {
+                                                    setEditForm(prev => ({ ...prev, actual_cost: 0 }));
+                                                } else {
+                                                    const numValue = parseFloat(value);
+                                                    setEditForm(prev => ({
+                                                        ...prev,
+                                                        actual_cost: isNaN(numValue) ? 0 : parseFloat(numValue.toFixed(2))
+                                                    }));
+                                                }
                                             }}
                                             className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-500"
                                             step="0.01"
                                             min="0"
                                             disabled={job.status !== 'In Progress'}
+                                            placeholder="0.00"
                                         />
                                     </div>
                                 </div>
@@ -386,24 +465,35 @@ export default function JobDetailsCard({ job, onJobUpdate }: JobDetailsCardProps
 
             {/* Save/Cancel buttons when editing */}
             {isEditing && (
-                <div className="flex justify-end gap-2 mt-8">
+                <div className="flex justify-between gap-2 mt-8 pt-4 border-t border-gray-200 sticky bottom-0 bg-white">
+                    <button
+                        onClick={handleDelete}
+                        disabled={isDeleting}
+                        className="flex items-center gap-1 px-3 py-2 rounded-md border border-red-400 bg-white text-red-500 hover:bg-red-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                        <Trash className="size-4" />
+                        Delete
+                    </button>
                     <button
                         onClick={handleSave}
-                        className="flex items-center gap-1 px-3 py-2 bg-orange-400 text-white rounded-md hover:bg-orange-500 transition-colors"
+                        disabled={isDeleting}
+                        className="flex items-center gap-1 px-3 py-2 bg-orange-400 text-white rounded-md hover:bg-orange-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         <Save className="size-4" />
                         Save
                     </button>
-                    <button
-                        onClick={handleCancel}
-                        className="flex items-center gap-1 px-3 py-2 rounded-md border border-gray-300 bg-white text-gray-500 hover:bg-gray-200 transition-colors"
-                    >
-                        <X className="size-4" />
-                        Cancel
-                    </button>
+                </div>
+            )}
+
+            {/* Loading overlay when deleting */}
+            {isDeleting && (
+                <div className="absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center rounded-lg">
+                    <div className="text-center">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-red-500 mx-auto mb-2"></div>
+                        <p className="text-sm text-gray-600">Deleting job...</p>
+                    </div>
                 </div>
             )}
         </div>
     );
-
 };

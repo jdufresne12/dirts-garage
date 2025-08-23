@@ -7,7 +7,8 @@ import {
     Plus,
     Wrench,
     FileText,
-    ChevronLeft
+    ChevronLeft,
+    Trash2
 } from 'lucide-react';
 
 import VehicleCard from '@/app/components/customers/VehicleCard';
@@ -16,12 +17,15 @@ import CustomerInformation from '@/app/components/customers/CustomerInformation'
 import CustomerOverview from '@/app/components/customers/CustomerOverview';
 import JobsTable from '@/app/components/customers/JobsTable';
 import InvoicesTable from '@/app/components/customers/InvoicesTable';
+import { useRouter } from 'next/navigation';
 
 const CustomerDetailsPage = () => {
     const { id } = useParams();
+    const router = useRouter();
 
     const [activeTab, setActiveTab] = useState<string>('jobs');
     const [isEditing, setIsEditing] = useState<boolean>(false);
+    const [isDeleting, setIsDeleting] = useState<boolean>(false);
     const [showAddVehicle, setShowAddVehicle] = useState<boolean>(false);
     const [initCustomerData, setInitCustomerData] = useState<Customer | undefined>();
     const [customerData, setCustomerData] = useState<Customer | undefined>();
@@ -130,7 +134,6 @@ const CustomerDetailsPage = () => {
         }
     }, [id, fetchJobs, fetchInvoices]);
 
-    // Fetch financial summary when customer data is loaded
     useEffect(() => {
         if (customerData?.id) {
             fetchFinancialSummary();
@@ -165,6 +168,73 @@ const CustomerDetailsPage = () => {
     const handleCancel = () => {
         setIsEditing(false);
         setCustomerData(initCustomerData);
+    };
+
+    const handleDelete = async () => {
+        const confirmMessage = `Are you sure you want to delete ${customerData?.first_name} ${customerData?.last_name}? This will remove their data from all associated jobs and invoices.\n\n This action cannot be undone.`;
+        if (!confirm(confirmMessage)) return;
+
+        setIsDeleting(true);
+        try {
+            const response = await fetch(`/api/customers/${customerData!.id}`, {
+                method: 'DELETE'
+            });
+
+            if (!response.ok) {
+                // Handle specific status codes
+                if (response.status === 404) {
+                    throw new Error('Customer not found');
+                }
+                const errorText = await response.text();
+                throw new Error(errorText || `Failed to delete ${customerData?.first_name} ${customerData?.last_name}`);
+            }
+
+            // Success - redirect to customers page
+            router.push('/customers');
+
+        } catch (error) {
+            console.error(`Failed to delete customer:`, error);
+            alert(`Failed to delete ${customerData?.first_name} ${customerData?.last_name}. Please try again.`);
+        } finally {
+            setIsDeleting(false);
+        }
+    };
+
+    const handleUpdateVehicle = (vehicle: Vehicle, remove: boolean = false) => {
+        if (remove) {
+            setCustomerData(prev => {
+                if (!prev || !prev.vehicles) return prev;
+
+                const updatedVehicles = prev.vehicles.filter(v => v.id !== vehicle.id);
+
+                return {
+                    ...prev,
+                    vehicles: updatedVehicles
+                };
+            });
+        } else if (customerData?.vehicles?.find(v => v.id === vehicle.id)) {
+            setCustomerData(prev => {
+                if (!prev || !prev.vehicles) return prev;
+
+                const updatedVehicles = prev.vehicles.map(v =>
+                    v.id === vehicle.id ? vehicle : v
+                );
+
+                return {
+                    ...prev,
+                    vehicles: updatedVehicles
+                };
+            });
+        } else {
+            setCustomerData(prev => {
+                if (!prev) return prev;
+
+                return {
+                    ...prev,
+                    vehicles: [...(prev.vehicles || []), vehicle],
+                };
+            });
+        }
     };
 
     const getStatusBadge = (status: string) => {
@@ -203,32 +273,6 @@ const CustomerDetailsPage = () => {
         }
     };
 
-    const handleAddVehicle = (vehicle: Vehicle) => {
-        if (customerData?.vehicles?.find(v => v.id === vehicle.id)) {
-            setCustomerData(prev => {
-                if (!prev || !prev.vehicles) return prev;
-
-                const updatedVehicles = prev.vehicles.map(v =>
-                    v.id === vehicle.id ? vehicle : v
-                );
-
-                return {
-                    ...prev,
-                    vehicles: updatedVehicles
-                };
-            });
-        } else {
-            setCustomerData(prev => {
-                if (!prev) return prev;
-
-                return {
-                    ...prev,
-                    vehicles: [...(prev.vehicles || []), vehicle],
-                };
-            });
-        }
-    };
-
     if (!customerData && !isInitialLoading) {
         return (
             <div className="min-h-screen bg-gray-50 p-6 flex items-center justify-center">
@@ -238,7 +282,7 @@ const CustomerDetailsPage = () => {
                 </div>
             </div>
         );
-    } else if (isInitialLoading) {
+    } else if (isInitialLoading || isDeleting) {
         return (
             <div className="w-full h-3/4 flex items-center justify-center">
                 <div className="bg-white rounded-lg p-8 shadow-xl flex flex-col items-center max-w-sm w-full mx-4">
@@ -251,7 +295,7 @@ const CustomerDetailsPage = () => {
                         priority
                     />
                     <div className="text-lg text-gray-700 font-medium text-center">
-                        Loading customer data...
+                        {isDeleting ? "Deleting customer and attached data" : "Loading customer data..."}
                     </div>
 
                     {/* Progress dots */}
@@ -269,7 +313,7 @@ const CustomerDetailsPage = () => {
             <div className="min-h-screen bg-gray-50 p-6">
                 {/* Header */}
                 <div className="mt-2 mb-4 md:mb-6">
-                    <div className="flex flex-col md:flex-row md:items-center justify-between">
+                    <div className="flex flex-row justify-between">
                         <div className="flex">
                             <Link className="flex items-center md:items-baseline md:p-1" href="/customers">
                                 <ChevronLeft className="size-4 font-bold text-black md:size-6 lg:size-8 hover:text-gray-800 hover:scale-110" />
@@ -278,6 +322,16 @@ const CustomerDetailsPage = () => {
                                 <h1 className="text-xl md:text-2xl lg:text-3xl font-bold text-gray-900">Customer Details</h1>
                                 <p className="text-xs md:text-sm text-gray-600 mt-1">Manage customer information and history</p>
                             </div>
+                        </div>
+                        <div>
+                            <button
+                                type="button"
+                                onClick={handleDelete}
+                                className="flex items-center gap-2 px-3 py-2 text-sm text-red-600 rounded-lg sm:border sm:border-red-300 hover:bg-red-50"
+                            >
+                                <Trash2 className="size-5 sm:size-4" />
+                                <span className='hidden sm:inline'>Delete Customer</span>
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -318,7 +372,7 @@ const CustomerDetailsPage = () => {
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         {customerData.vehicles && customerData.vehicles.length > 0 ? (
                             customerData.vehicles.map(vehicle => (
-                                <VehicleCard key={vehicle.id} vehicle={vehicle} customer_id={customerData.id} onUpdate={handleAddVehicle} />
+                                <VehicleCard key={vehicle.id} vehicle={vehicle} customer_id={customerData.id} onUpdate={handleUpdateVehicle} />
                             ))
                         ) : (
                             <div className="col-span-full text-center py-8 text-gray-500">
@@ -376,7 +430,7 @@ const CustomerDetailsPage = () => {
                 <AddVehicleModal
                     isOpen={showAddVehicle}
                     onClose={() => setShowAddVehicle(false)}
-                    onSubmit={handleAddVehicle}
+                    onSubmit={handleUpdateVehicle}
                     customer_id={customerData.id}
                 />
             </div>

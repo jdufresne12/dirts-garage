@@ -67,8 +67,12 @@ export default function ActiveJobsTable() {
                                     </span>
                                 </div>
                                 <div className="flex justify-between items-center text-xs text-gray-500">
-                                    <p>Started: {new Date(job.startedDate).toLocaleDateString()}</p>
-                                    <p>Due: {new Date(job.estimatedCompletion).toLocaleDateString()}</p>
+                                    {job.startedDate &&
+                                        <p>Started: {new Date(job.startedDate).toLocaleDateString()}</p>
+                                    }
+                                    {job.estimatedCompletion &&
+                                        <p>Due: {new Date(job.estimatedCompletion).toLocaleDateString()}</p>
+                                    }
                                 </div>
                             </div>
                         ))}

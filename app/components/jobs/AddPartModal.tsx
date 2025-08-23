@@ -117,7 +117,7 @@ export default function AddPartModal({ isOpen, partData, job_id, onClose, onSave
         // Handle number fields
         if (type === "number") {
             if (name === "quantity") {
-                newValue = value === "" ? 1 : parseInt(value, 10) || 1;
+                newValue = value === "" ? 0 : parseInt(value, 10) || 1;
             } else if (name === "price") {
                 newValue = value === "" ? 0 : parseFloat(value) || 0;
             }
@@ -297,7 +297,7 @@ export default function AddPartModal({ isOpen, partData, job_id, onClose, onSave
                                     min="1"
                                     step="1"
                                     placeholder="1"
-                                    value={formData.quantity || ''}
+                                    value={formData.quantity === 0 ? '' : formData.quantity}
                                     onChange={handleInputChange}
                                     className={`w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500 ${errors.quantity ? 'border-red-500' : 'border-gray-300'
                                         }`}

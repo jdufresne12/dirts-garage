@@ -18,6 +18,29 @@ export async function GET(_req: Request, context: { params: { id: string } }) {
     }
 }
 
+export async function DELETE(_req: Request, { params }: { params: { id: string } }) {
+    const { id } = await params;
+
+    try {
+        const result = await pgPool.query(
+            'DELETE FROM vehicles WHERE id = $1 RETURNING *',
+            [id]
+        );
+
+        if (result.rowCount === 0) {
+            return new NextResponse('Vehicle not found', { status: 404 });
+        }
+
+        return NextResponse.json({
+            message: 'Vehicle deleted successfully',
+            deletedNote: result.rows[0]
+        });
+    } catch (error) {
+        console.error(`DELETE /api/vehicles/${id} error:`, error);
+        return new NextResponse('Failed to delete vehicle', { status: 500 });
+    }
+}
+
 export async function PUT(req: Request, { params }: { params: { id: string } }) {
     const { id } = await params;
     const body = await req.json();

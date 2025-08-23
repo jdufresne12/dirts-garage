@@ -41,7 +41,7 @@ export default function LayoutWrapper({ children }: LayoutWrapperProps) {
 
     // Render with Navbar
     return (
-        <div className="flex h-screen overflow-hidden">
+        <div className="h-screen sm:flex sm:overflow-hidden">
             <Navbar isMobile={isMobile} />
             <main className={`flex-1 min-w-0 overflow-y-auto ${isMobile ? 'pt-16' : ''}`}>
                 {children}

@@ -33,6 +33,39 @@ export async function GET(_req: Request, context: { params: { id: string } }) {
     }
 }
 
+export async function DELETE(_req: Request, { params }: { params: { id: string } }) {
+    const { id } = await params;
+    const client = await pgPool.connect();
+
+    try {
+        await client.query('BEGIN');
+
+        // Delete vehicles first
+        await client.query('DELETE FROM vehicles WHERE customer_id = $1', [id]);
+
+        // Then delete customer
+        const result = await client.query('DELETE FROM customers WHERE id = $1 RETURNING *', [id]);
+
+        if (result.rowCount === 0) {
+            await client.query('ROLLBACK');
+            return new NextResponse('Customer not found', { status: 404 });
+        }
+
+        await client.query('COMMIT');
+
+        return NextResponse.json({
+            message: 'Customer deleted successfully',
+            deletedCustomer: result.rows[0]
+        });
+    } catch (error) {
+        await client.query('ROLLBACK');
+        console.error(`DELETE /api/customers/${id} error:`, error);
+        return new NextResponse('Failed to delete customer', { status: 500 });
+    } finally {
+        client.release();
+    }
+}
+
 export async function PUT(req: Request, { params }: { params: { id: string } }) {
     const { id } = await params;
     const body = await req.json();

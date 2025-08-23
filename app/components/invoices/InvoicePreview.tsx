@@ -128,19 +128,21 @@ export default function InvoicePreview({
 
             {/* Bill To & Vehicle Info */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8 mb-6 md:mb-8">
-                <div>
-                    <h3 className="font-semibold text-gray-900 mb-2">Bill To:</h3>
-                    <div className="text-gray-700 text-sm md:text-base">
-                        <p className="font-medium">{customer.first_name} {customer.last_name}</p>
-                        {customer.address && <p>{customer.address}</p>}
-                        {customer.city && customer.state && customer.zipcode && (
-                            <p>{customer.city}, {customer.state} {customer.zipcode}</p>
-                        )}
-                        <p>{customer.phone}</p>
-                        <p>{customer.email}</p>
-                    </div>
-                </div>
 
+                {customer && (
+                    <div>
+                        <h3 className="font-semibold text-gray-900 mb-2">Bill To:</h3>
+                        <div className="text-gray-700 text-sm md:text-base">
+                            <p className="font-medium">{customer.first_name} {customer.last_name}</p>
+                            {customer.address && <p>{customer.address}</p>}
+                            {customer.city && customer.state && customer.zipcode && (
+                                <p>{customer.city}, {customer.state} {customer.zipcode}</p>
+                            )}
+                            {customer.phone && <p>{customer.phone}</p>}
+                            {customer.email && <p>{customer.email}</p>}
+                        </div>
+                    </div>
+                )}
                 {vehicle && (
                     <div>
                         <h3 className="font-semibold text-gray-900 mb-2">Vehicle:</h3>

@@ -6,10 +6,9 @@ import {
     Download,
     Edit,
     Eye,
-    Mail,
+    Trash2,
     CreditCard,
     Plus,
-    Trash2,
     DollarSign,
     Receipt,
     X
@@ -44,6 +43,7 @@ export default function InvoiceDetailPage() {
     const [payments, setPayments] = useState<Payment[]>([]);
     const [isLoadingPayments, setIsLoadingPayments] = useState(false);
     const [isProcessingPayment, setIsProcessingPayment] = useState(false);
+    const [isDeleting, setIsDeleting] = useState(false);
 
     // Payment form state
     const [paymentForm, setPaymentForm] = useState({
@@ -157,6 +157,39 @@ export default function InvoiceDetailPage() {
             alert('Failed to generate PDF. Please try again.');
         } finally {
             setIsProcessingPDF(false);
+        }
+    };
+
+    const handleDeleteInvoice = async () => {
+        if (!invoice) return;
+
+        const confirmMessage = `Are you sure you want to delete Invoice ${invoice.id}? This action cannot be undone.`;
+        if (!confirm(confirmMessage)) return;
+
+        setIsDeleting(true);
+        try {
+            const response = await fetch(`/api/invoices/${invoice.id}`, {
+                method: 'DELETE'
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to delete invoice');
+            }
+
+            alert('Invoice deleted successfully!');
+
+            // Navigate back to the job page if we have a job_id, otherwise go to invoices list
+            if (invoice.job_id) {
+                router.push(`/jobs/${invoice.job_id}`);
+            } else {
+                router.push('/invoices');
+            }
+
+        } catch (error) {
+            console.error('Failed to delete invoice:', error);
+            alert('Failed to delete invoice. Please try again.');
+        } finally {
+            setIsDeleting(false);
         }
     };
 
@@ -362,11 +395,12 @@ export default function InvoiceDetailPage() {
                                 </button>
 
                                 <button
-                                    onClick={() => alert('Email functionality coming soon!')}
-                                    className="w-full flex items-center justify-center px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+                                    onClick={handleDeleteInvoice}
+                                    disabled={isDeleting}
+                                    className="w-full flex items-center justify-center px-4 py-2 border border-red-300 text-red-700 rounded-lg hover:bg-red-50 disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
-                                    <Mail className="mr-2" size={16} />
-                                    Email Invoice
+                                    <Trash2 className="mr-2" size={16} />
+                                    {isDeleting ? 'Deleting...' : 'Delete Invoice'}
                                 </button>
                             </div>
                         </div>

@@ -3,10 +3,6 @@ export const generateUniqueID = (): string => {
     return `${uuid}`;
 }
 
-export const checkNoActiveJobs = (customer: Customer) => {
-    return customer.status === "none" || customer.status === "Completed" || customer.status === "Waiting" ? true : false;
-}
-
 export const formatPhoneNumber = (value: string) => {
     // Remove all non-digit characters
     let digits = value.replace(/\D/g, '');
@@ -191,7 +187,6 @@ export const STATUSES = {
 
 export default {
     generateUniqueID,
-    checkNoActiveJobs,
     formatPhoneNumber,
     displayDateAndTimeLong,
     displayDateAndTimeShort,

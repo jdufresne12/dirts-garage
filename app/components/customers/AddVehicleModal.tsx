@@ -7,7 +7,7 @@ import helpers from "@/app/utils/helpers";
 interface AddVehicleModalProps {
     isOpen: boolean;
     onClose: () => void;
-    onSubmit?: (vehicleData: Vehicle) => void;
+    onSubmit?: (vehicleData: Vehicle, remove?: boolean) => void;
     customer_id: string;
     vehicle?: Vehicle;
 }
@@ -35,7 +35,8 @@ export default function AddVehicleModal({
         mileage: vehicle?.mileage ?? 0,
     });
     const [errors, setErrors] = useState<Partial<Record<keyof Vehicle, string>>>({});
-    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+    const [isDeleting, setIsDeleting] = useState<boolean>(false);
 
     useEffect(() => {
         if (!isOpen) {
@@ -94,7 +95,7 @@ export default function AddVehicleModal({
 
         // Handle number fields
         if (type === "number") {
-            newValue = value === "" ? "" : parseInt(value, 10);
+            newValue = value === "" ? 0 : parseInt(value, 10);
         }
 
         setFormData((prev) => ({
@@ -153,6 +154,29 @@ export default function AddVehicleModal({
         }
     };
 
+    const handleDelete = async () => {
+        const confirmMessage = `Are you sure you want to delete this vehicle? This will remove the vehicle from all associated jobs and invoices.\n\n This action cannot be undone.`;
+        if (!confirm(confirmMessage)) return;
+
+        setIsDeleting(true);
+        try {
+            const response = await fetch(`/api/vehicles/${vehicle!.id}`, {
+                method: 'DELETE'
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to delete vehicle');
+            }
+
+        } catch (error) {
+            console.error('Failed to delete vehicle:', error);
+            alert('Failed to delete this vehicle. Please try again.');
+        } finally {
+            setIsDeleting(false);
+            onSubmit?.(vehicle!, true);
+        }
+    };
+
     if (!isOpen) return null;
 
     return (
@@ -167,7 +191,7 @@ export default function AddVehicleModal({
                 <button
                     onClick={onClose}
                     className="text-gray-400 hover:text-gray-600"
-                    disabled={isSubmitting}
+                    disabled={isSubmitting || isDeleting}
                 >
                     <X className="h-6 w-6" />
                 </button>
@@ -186,7 +210,7 @@ export default function AddVehicleModal({
                                 value={formData.year}
                                 onChange={handleInputChange}
                                 className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 ${errors.year ? "border-red-500" : "border-gray-300"}`}
-                                disabled={isSubmitting}
+                                disabled={isSubmitting || isDeleting}
                             />
                             {errors.year && <p className="text-sm text-red-600">{errors.year}</p>}
                         </div>
@@ -200,7 +224,7 @@ export default function AddVehicleModal({
                                 value={formData.make}
                                 onChange={handleInputChange}
                                 className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 ${errors.make ? "border-red-500" : "border-gray-300"}`}
-                                disabled={isSubmitting}
+                                disabled={isSubmitting || isDeleting}
                             />
                             {errors.make && <p className="text-sm text-red-600">{errors.make}</p>}
                         </div>
@@ -214,7 +238,7 @@ export default function AddVehicleModal({
                                 value={formData.model}
                                 onChange={handleInputChange}
                                 className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 ${errors.model ? "border-red-500" : "border-gray-300"}`}
-                                disabled={isSubmitting}
+                                disabled={isSubmitting || isDeleting}
                             />
                             {errors.model && <p className="text-sm text-red-600">{errors.model}</p>}
                         </div>
@@ -229,7 +253,7 @@ export default function AddVehicleModal({
                                 value={formData.engine}
                                 onChange={handleInputChange}
                                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
-                                disabled={isSubmitting}
+                                disabled={isSubmitting || isDeleting}
                             />
                         </div>
                         <div>
@@ -240,7 +264,7 @@ export default function AddVehicleModal({
                                 value={formData.transmission}
                                 onChange={handleInputChange}
                                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
-                                disabled={isSubmitting}
+                                disabled={isSubmitting || isDeleting}
                             />
                         </div>
                     </div>
@@ -251,10 +275,10 @@ export default function AddVehicleModal({
                             <input
                                 type="number"
                                 name="mileage"
-                                value={formData.mileage}
+                                value={formData.mileage || ''}
                                 onChange={handleInputChange}
                                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
-                                disabled={isSubmitting}
+                                disabled={isSubmitting || isDeleting}
                             />
                         </div>
                         <div>
@@ -267,28 +291,32 @@ export default function AddVehicleModal({
                                 value={formData.vin}
                                 onChange={handleInputChange}
                                 className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 ${errors.vin ? "border-red-500" : "border-gray-300"}`}
-                                disabled={isSubmitting}
+                                disabled={isSubmitting || isDeleting}
                             />
                         </div>
                     </div>
                 </div>
 
-                <div className="flex justify-end space-x-3 mt-8 pt-6 border-t border-gray-200">
-                    <button
-                        type="button"
-                        onClick={onClose}
-                        className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 disabled:opacity-50"
-                        disabled={isSubmitting}
-                    >
-                        Cancel
-                    </button>
-                    <button
-                        type="submit"
-                        className="px-4 py-2 text-sm font-medium text-white bg-orange-500 border border-transparent rounded-lg hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 disabled:opacity-50 disabled:cursor-not-allowed"
-                        disabled={isSubmitting}
-                    >
-                        {isSubmitting ? "Saving..." : isEditMode ? "Update Vehicle" : "Add Vehicle"}
-                    </button>
+                <div className="flex justify-between mt-8 pt-6 border-t border-gray-200">
+                    {isEditMode && (
+                        <button
+                            type="button"
+                            onClick={handleDelete}
+                            className="px-4 py-2 text-sm font-medium text-red-600 bg-white border border-red-300 rounded-lg hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                            disabled={isSubmitting || isDeleting}
+                        >
+                            Delete Vehicle
+                        </button>
+                    )}
+                    <div className="flex space-x-3">
+                        <button
+                            type="submit"
+                            className="px-4 py-2 text-sm font-medium text-white bg-orange-500 border border-transparent rounded-lg hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                            disabled={isSubmitting || isDeleting}
+                        >
+                            {isSubmitting ? "Saving..." : isEditMode ? "Update Vehicle" : "Add Vehicle"}
+                        </button>
+                    </div>
                 </div>
             </form>
         </Modal>

@@ -1,5 +1,15 @@
 import { NextResponse } from 'next/server';
 import { pgPool } from '@/app/lib/db';
+import { S3Client, ListObjectsV2Command, DeleteObjectsCommand } from '@aws-sdk/client-s3';
+
+// Initialize S3 client
+const s3Client = new S3Client({
+    region: process.env.S3_REGION!,
+    credentials: {
+        accessKeyId: process.env.S3_ACCESS_KEY_ID!,
+        secretAccessKey: process.env.S3_SECRET_ACCESS_KEY!,
+    },
+});
 
 export async function GET(_req: Request, context: { params: { id: string } }) {
     const { id } = await context.params;
@@ -170,5 +180,184 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
     } catch (error) {
         console.error(`PUT /api/jobs/${id} error:`, error);
         return new NextResponse('Failed to update job', { status: 500 });
+    }
+}
+
+export async function DELETE(_req: Request, { params }: { params: { id: string } }) {
+    const { id } = await params;
+
+    const client = await pgPool.connect();
+    try {
+        await client.query('BEGIN');
+
+        // Check if job exists and get basic info
+        const jobCheck = await client.query('SELECT * FROM jobs WHERE id = $1', [id]);
+        if (jobCheck.rows.length === 0) {
+            await client.query('ROLLBACK');
+            return new NextResponse('Job not found', { status: 404 });
+        }
+
+        // Get counts for logging purposes
+        const countsQuery = `
+            SELECT 
+                (SELECT COUNT(*) FROM invoices WHERE job_id = $1) as invoice_count,
+                (SELECT COUNT(*) FROM job_steps WHERE job_id = $1) as job_step_count,
+                (SELECT COUNT(*) FROM parts WHERE job_id = $1) as part_count,
+                (SELECT COUNT(*) FROM notes WHERE job_id = $1) as note_count,
+                (SELECT COUNT(*) FROM media WHERE job_id = $1) as media_count
+        `;
+
+        const counts = await client.query(countsQuery, [id]);
+        const deletionStats = counts.rows[0];
+
+        // 1. Delete media files from S3 and database
+        let deletedMediaCount = 0;
+        let s3DeletionErrors = [];
+
+        try {
+            // Get all media files for this job from database
+            const mediaResult = await client.query(
+                'SELECT id, file_key FROM media WHERE job_id = $1',
+                [id]
+            );
+
+            if (mediaResult.rows.length > 0) {
+                const objectsToDelete = mediaResult.rows.map(media => ({ Key: media.file_key }));
+
+                // S3 batch delete supports up to 1000 objects per request
+                const batchSize = 1000;
+                for (let i = 0; i < objectsToDelete.length; i += batchSize) {
+                    const batch = objectsToDelete.slice(i, i + batchSize);
+
+                    try {
+                        const deleteParams = {
+                            Bucket: 'dirts-garage',
+                            Delete: {
+                                Objects: batch,
+                                Quiet: false // Set to false to get detailed response
+                            }
+                        };
+
+                        const deleteResult = await s3Client.send(new DeleteObjectsCommand(deleteParams));
+                        if (deleteResult.Errors && deleteResult.Errors.length > 0) {
+                            console.error('S3 deletion errors:', deleteResult.Errors);
+                            s3DeletionErrors.push(...deleteResult.Errors);
+                        }
+
+                    } catch (batchError) {
+                        console.error(`Failed to delete batch ${i / batchSize + 1}:`, batchError);
+                        s3DeletionErrors.push({
+                            Key: `batch_${i / batchSize + 1}`,
+                            Code: 'BatchDeleteFailed',
+                            Message: batchError instanceof Error ? batchError.message : 'Unknown error'
+                        });
+                    }
+                }
+
+                // Delete media records from database
+                const mediaDbResult = await client.query(
+                    'DELETE FROM media WHERE job_id = $1 RETURNING id',
+                    [id]
+                );
+                deletedMediaCount = mediaDbResult.rowCount || 0;
+            }
+        } catch (mediaError) {
+            console.error('Error during media deletion:', mediaError);
+        }
+
+        // 2. Delete invoices (triggers will handle related payments, line_items, and change_logs)
+        const invoicesResult = await client.query(
+            'DELETE FROM invoices WHERE job_id = $1 RETURNING id',
+            [id]
+        );
+
+        // 3. Delete job steps
+        const jobStepsResult = await client.query(
+            'DELETE FROM job_steps WHERE job_id = $1 RETURNING id',
+            [id]
+        );
+
+        // 4. Delete parts
+        const partsResult = await client.query(
+            'DELETE FROM parts WHERE job_id = $1 RETURNING id',
+            [id]
+        );
+
+        // 5. Delete notes
+        const notesResult = await client.query(
+            'DELETE FROM notes WHERE job_id = $1 RETURNING id',
+            [id]
+        );
+
+        // 6. Finally delete the job itself
+        const jobResult = await client.query(
+            'DELETE FROM jobs WHERE id = $1 RETURNING *',
+            [id]
+        );
+
+        await client.query('COMMIT');
+
+        const deletionSummary = {
+            job: jobResult.rows[0],
+            deletedCounts: {
+                media: deletedMediaCount,
+                invoices: invoicesResult.rowCount, // Triggers handle payments, line_items, change_logs
+                jobSteps: jobStepsResult.rowCount,
+                parts: partsResult.rowCount,
+                notes: notesResult.rowCount,
+                s3Errors: s3DeletionErrors.length
+            },
+            originalCounts: {
+                media: parseInt(deletionStats.media_count),
+                invoices: parseInt(deletionStats.invoice_count),
+                jobSteps: parseInt(deletionStats.job_step_count),
+                parts: parseInt(deletionStats.part_count),
+                notes: parseInt(deletionStats.note_count)
+            },
+            s3DeletionDetails: s3DeletionErrors.length > 0 ? s3DeletionErrors : undefined
+        };
+
+        return NextResponse.json({
+            success: true,
+            message: 'Job and all associated data deleted successfully',
+            ...deletionSummary
+        });
+
+    } catch (error) {
+        await client.query('ROLLBACK');
+        console.error(`DELETE /api/jobs/${id} error:`, error);
+
+        // Provide specific error information
+        if (error instanceof Error) {
+            if (error.message.includes('foreign key constraint')) {
+                return new NextResponse(
+                    JSON.stringify({
+                        error: 'Foreign key constraint violation',
+                        message: 'Unable to delete job due to database constraints. There may be additional references not handled by this API.',
+                        details: error.message
+                    }),
+                    {
+                        status: 409,
+                        headers: { 'Content-Type': 'application/json' }
+                    }
+                );
+            }
+
+            return new NextResponse(
+                JSON.stringify({
+                    error: 'Deletion failed',
+                    message: error.message,
+                    stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+                }),
+                {
+                    status: 500,
+                    headers: { 'Content-Type': 'application/json' }
+                }
+            );
+        }
+
+        return new NextResponse('Failed to delete job', { status: 500 });
+    } finally {
+        client.release();
     }
 }

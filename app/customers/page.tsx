@@ -6,8 +6,6 @@ import { Phone, Mail, Search, Plus, Users } from 'lucide-react';
 
 import AddCustomerModal from '../components/customers/AddCustomerModal';
 import customerHelpers from '../utils/customerHelpers';
-import helpers from '../utils/helpers';
-
 
 export default function CustomersPage() {
     const [initCustomers, setInitCustomers] = useState<Customer[]>([]);
@@ -135,13 +133,40 @@ export default function CustomersPage() {
                 job.status != 'Completed' &&
                 job.status != 'none'
             )
-            return activeJob ? activeJob.title : "No Active Jobs";
+            return activeJob ? activeJob.title : null;
+        }
+    }
+
+    const getWaitingJob = (customer: Customer) => {
+        if (customer.jobs && customer.jobs.length > 0) {
+            const waitingJob = customer.jobs.find((job: Job) => job.status === 'Waiting');
+            return waitingJob ? waitingJob.title : null;
         }
     }
 
     const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setSearchTerm(e.target.value);
     };
+
+    const JobSection: React.FC<{ customer: Customer }> = ({ customer }) => {
+        const currentJob = getCurrentJob(customer);
+        const waitingJob = currentJob === null ? getWaitingJob(customer) : null;
+        if (waitingJob !== null) {
+            return (
+                <div className='border-t border-gray-200 mt-3'>
+                    <div className="text-sm font-semibold text-gray-500 mt-3 mb-1">Waiting Job</div>
+                    <div className="text-sm text-gray-900">{waitingJob}</div>
+                </div>
+            )
+        } else {
+            return (
+                <div className='border-t border-gray-200 mt-3'>
+                    <div className="text-sm font-semibold text-gray-500 mt-3 mb-1">Current Job</div>
+                    <div className="text-sm text-gray-900">{currentJob || "No Active Jobs"}</div>
+                </div>
+            )
+        }
+    }
 
     return (
         <div className="min-h-screen bg-gray-50 w-full overflow-x-hidden">
@@ -207,38 +232,27 @@ export default function CustomersPage() {
                                     href={`/customers/${customer.id}`}
                                 >
                                     {/* Header with name and status */}
-                                    <div className="flex items-start justify-between mb-4">
-                                        <div className="flex-1 min-w-0">
-                                            <h3 className="font-semibold text-gray-900 truncate">{customer.first_name} {customer.last_name}</h3>
-                                            <span className={`${getStatusBadge(getStatusText(customer))} mt-2 inline-block`}>
-                                                {getStatusText(customer)}
-                                            </span>
-                                        </div>
+                                    <div className="flex items-center justify-between mb-2">
+                                        <h3 className="font-semibold text-gray-900 truncate">{customer.first_name} {customer.last_name}</h3>
+                                        <span className={`${getStatusBadge(getStatusText(customer))} inline-block`}>
+                                            {getStatusText(customer)}
+                                        </span>
                                     </div>
 
                                     {/* Contact Information */}
-                                    <div className="space-y-2 mb-4">
+                                    <div className="space-y-2 mb-6">
                                         <div className="flex items-center text-sm text-gray-600">
                                             <Phone className="size-4 mr-2 text-gray-400 flex-shrink-0" />
-                                            <span className="truncate">{customer.phone}</span>
+                                            <span className="truncate">{customer.phone ? customer.phone : "Not Provided"}</span>
                                         </div>
                                         <div className="flex items-center text-sm text-gray-600">
                                             <Mail className="size-4 mr-2 text-gray-400 flex-shrink-0" />
-                                            <span className="truncate">{customer.email}</span>
+                                            <span className="truncate">{customer.email ? customer.email : "Not Provided"}</span>
                                         </div>
                                     </div>
 
-                                    {/* Current Project */}
-                                    {!helpers.checkNoActiveJobs(customer) ? (
-                                        <div>
-                                            <div className="text-xs text-gray-500 mb-1">Current Project</div>
-                                            <div className="text-sm font-medium text-gray-900">{getCurrentJob(customer) || "No Active Jobs"}</div>
-                                        </div>
-                                    ) : (
-                                        <div>
-                                            <div className="text-sm text-gray-400">No active projects</div>
-                                        </div>
-                                    )}
+                                    {/* Current/Waiting Project */}
+                                    <JobSection customer={customer} />
                                 </Link>
                             )) : (
                                 <div className="col-span-full flex flex-col items-center justify-center min-h-[30vh]">
