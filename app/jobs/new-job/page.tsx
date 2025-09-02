@@ -43,6 +43,10 @@ export default function NewJob() {
         description: false
     });
 
+    // useEffect(() => {
+    //     console.log(jobForm)
+    // }, [jobForm])
+
     useEffect(() => {
         fetch('/api/customers')
             .then(res => res.json())
@@ -425,6 +429,7 @@ export default function NewJob() {
                                                 type="date"
                                                 value={jobForm.estimated_start_date}
                                                 onChange={(e) => setJobForm(prev => ({ ...prev, estimated_start_date: e.target.value }))}
+                                                placeholder='mm/dd/yyyy'
                                                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                                             />
                                         </div>

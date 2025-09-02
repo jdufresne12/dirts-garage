@@ -315,8 +315,8 @@ const CustomerDetailsPage = () => {
                 <div className="mt-2 mb-4 md:mb-6">
                     <div className="flex flex-row justify-between">
                         <div className="flex">
-                            <Link className="flex items-center md:items-baseline md:p-1" href="/customers">
-                                <ChevronLeft className="size-4 font-bold text-black md:size-6 lg:size-8 hover:text-gray-800 hover:scale-110" />
+                            <Link className="flex items-center md:p-1" href="/customers">
+                                <ChevronLeft className="size-5 font-bold text-black md:size-6 lg:size-8 hover:text-gray-800 hover:scale-110" />
                             </Link>
                             <div className='ml-5'>
                                 <h1 className="text-xl md:text-2xl lg:text-3xl font-bold text-gray-900">Customer Details</h1>
