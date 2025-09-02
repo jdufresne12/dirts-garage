@@ -144,7 +144,7 @@ export default function CostSummary({
         <>
             <div className="bg-white rounded-lg border border-gray-200 p-4 mb-6">
                 <div className="flex items-center justify-between mb-4">
-                    <h3 className="font-semibold">Cost Summary</h3>
+                    <h3 className="font-semibold">Estimated Cost Summary</h3>
                     {syncStatus.needed && existingInvoice && (
                         <button
                             onClick={handleSyncInvoice}

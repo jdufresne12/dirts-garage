@@ -227,7 +227,7 @@ export default function InvoiceGenerationModal({
             setHasUnsavedChanges(false);
             setIsInitialized(true);
         }
-    }, [isOpen, mode, existingInvoice, stableInvoiceId, jobData.id, jobData.title, customer.id, isInitialized, generateLineItemsFromJob, calculateTotals]);
+    }, [isOpen, mode, existingInvoice, stableInvoiceId, jobData.id, jobData.title, customer?.id, isInitialized, generateLineItemsFromJob, calculateTotals]);
 
     useEffect(() => {
         if (!isOpen) {

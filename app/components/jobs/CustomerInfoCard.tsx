@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { Edit, Phone, Mail, MapPin } from 'lucide-react';
 import AddCustomerModal from '../customers/AddCustomerModal';
+import { useRouter } from 'next/navigation';
 
 interface CustomerInfoProps {
     customer?: Customer;
@@ -9,6 +10,8 @@ interface CustomerInfoProps {
 }
 
 export default function CustomerInfo({ customer, handleUpdate }: CustomerInfoProps) {
+    const router = useRouter();
+
     const [isEditing, setIsEditing] = useState<boolean>(customer ? false : true);
     const [selectedCustomerId, setSelectedCustomerId] = useState<string>('');
     const [showAddCustomerModal, setShowAddCustomerModal] = useState<boolean>(false);
@@ -119,8 +122,8 @@ export default function CustomerInfo({ customer, handleUpdate }: CustomerInfoPro
 
     return (
         <div className="bg-white rounded-lg border border-gray-200 p-4">
-            <div className="flex items-center justify-between mb-4">
-                <h3 className="font-semibold">
+            <div className="flex items-center justify-between">
+                <h3 className="font-semibold hover:cursor-pointer" onClick={() => router.push(`/customers/${customer.id}`)}>
                     {customer.first_name || customer.first_name} {customer.last_name || customer.last_name}
                 </h3>
                 <button
@@ -131,20 +134,31 @@ export default function CustomerInfo({ customer, handleUpdate }: CustomerInfoPro
                 </button>
             </div>
 
-            <div className="space-y-3 text-sm text-gray-600">
-                <div className="flex items-center">
-                    <Phone className="size-4 mr-2" />
-                    {customer.phone}
+            {(customer.phone || customer.email || customer.address) &&
+                <div
+                    onClick={() => router.push(`/customers/${customer.id}`)}
+                    className="space-y-3 text-sm text-gray-600 mt-4 hover:cursor-pointer"
+                >
+                    {customer.phone && (
+                        <div className="flex items-center">
+                            <Phone className="size-4 mr-2" />
+                            {customer.phone}
+                        </div>
+                    )}
+                    {customer.email && (
+                        <div className="flex items-center">
+                            <Mail className="size-4 mr-2" />
+                            {customer.email}
+                        </div>
+                    )}
+                    {customer.address && (
+                        <div className="flex items-start">
+                            <MapPin className="size-4 mr-2 mt-0.5" />
+                            {customer.address}
+                        </div>
+                    )}
                 </div>
-                <div className="flex items-center">
-                    <Mail className="size-4 mr-2" />
-                    {customer.email}
-                </div>
-                <div className="flex items-start">
-                    <MapPin className="size-4 mr-2 mt-0.5" />
-                    {customer.address}
-                </div>
-            </div>
+            }
         </div>
     );
 }

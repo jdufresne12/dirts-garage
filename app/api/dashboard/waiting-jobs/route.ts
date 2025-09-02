@@ -39,8 +39,8 @@ export async function GET() {
             vehicle: row.year && row.make && row.model ? `${row.year} ${row.make} ${row.model}` : 'No Vehicle',
             status: row.status,
             createdDate: row.created_at,
-            priority: row.priority || 'medium',
-            waitingReason: row.waiting_reason || 'Waiting for parts/approval'
+            priority: row.priority || 'Low',
+            waitingReason: row.waiting_reason || ''
         }));
 
         return NextResponse.json(waitingJobs);

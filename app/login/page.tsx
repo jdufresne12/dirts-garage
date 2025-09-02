@@ -48,7 +48,7 @@ function LoginForm() {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-950 py-12 px-4 sm:px-6 lg:px-8">
+        <div className="h-screen flex items-center justify-center bg-gray-950 py-12 px-4 sm:px-6 lg:px-8">
             <div className="max-w-md w-full space-y-8">
                 <div>
                     <Image
@@ -87,18 +87,16 @@ function LoginForm() {
                                 disabled={isLoading}
                             />
                         </div>
-                        <div className="relative">
-                            <label htmlFor="password" className="sr-only">
-                                Password
-                            </label>
+                        <div className="relative flex items-center">
+                            <label htmlFor="password" className="sr-only">Password</label>
                             <input
                                 id="password"
                                 name="password"
                                 type={showPassword ? "text" : "password"}
                                 required
                                 autoComplete="current-password"
-                                className="relative block w-full px-3 py-2 pr-10 border border-gray-600 placeholder-gray-400 text-white bg-gray-800 rounded-b-md 
-                                    focus:outline-none focus:ring-orange-400 focus:border-orange-400 focus:z-10 sm:text-sm"
+                                className="block w-full px-3 py-2 border border-gray-600 placeholder-gray-400 text-white bg-gray-800 rounded-b-md 
+            focus:outline-none focus:ring-orange-400 focus:border-orange-400 sm:text-sm"
                                 placeholder="Password"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
@@ -106,7 +104,7 @@ function LoginForm() {
                             />
                             <button
                                 type="button"
-                                className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                                className="absolute right-3"
                                 onClick={() => setShowPassword(!showPassword)}
                                 disabled={isLoading}
                             >
@@ -117,6 +115,7 @@ function LoginForm() {
                                 )}
                             </button>
                         </div>
+
                     </div>
 
                     {error && (

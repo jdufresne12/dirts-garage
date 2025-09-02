@@ -80,15 +80,15 @@ export default function AddCustomerModal({ isOpen, onClose, onSubmit }: AddCusto
             newErrors.last_name = "Last name is required";
         }
 
-        if (!formData.email.trim()) {
-            newErrors.email = "Email is required";
-        } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-            newErrors.email = "Email is invalid";
-        }
+        // if (!formData.email.trim()) {
+        //     newErrors.email = "Email is required";
+        // } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+        //     newErrors.email = "Email is invalid";
+        // }
 
-        if (!formData.phone.trim()) {
-            newErrors.phone = "Phone is required";
-        }
+        // if (!formData.phone.trim()) {
+        //     newErrors.phone = "Phone is required";
+        // }
 
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
@@ -223,7 +223,7 @@ export default function AddCustomerModal({ isOpen, onClose, onSubmit }: AddCusto
                     <div>
                         <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
                             <Mail className="inline h-4 w-4 mr-1" />
-                            Email *
+                            Email
                         </label>
                         <input
                             type="email"
@@ -245,7 +245,7 @@ export default function AddCustomerModal({ isOpen, onClose, onSubmit }: AddCusto
                     <div>
                         <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-2">
                             <Phone className="inline h-4 w-4 mr-1" />
-                            Phone Number *
+                            Phone Number
                         </label>
                         <input
                             type="tel"

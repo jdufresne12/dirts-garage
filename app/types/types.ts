@@ -105,7 +105,7 @@ interface Invoice {
     amount_paid: number;
     status: string;
     paid_date?: string;
-    customer_id: string;
+    customer_id: string | null;
     job_id: string;
     customer?: Customer | null;
     job?: Job | null;

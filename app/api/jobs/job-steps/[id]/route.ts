@@ -5,7 +5,7 @@ export async function GET(_req: Request, context: { params: { id: string } }) {
     const { id } = await context.params;
 
     try {
-        const result = await pgPool.query('SELECT * FROM job_steps WHERE job_id = $1 ORDER BY "order" ASC', [id]);
+        const result = await pgPool.query('SELECT * FROM job_steps WHERE job_id = $1 ORDER BY created_at ASC', [id]);
 
         // Parse numeric fields before returning
         const parsedRows = result.rows.map(row => ({

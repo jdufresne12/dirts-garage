@@ -137,7 +137,7 @@ export default function VehicleInfo({ vehicle, handleUpdate, customer_id }: vehi
     else if (vehicle) {
         return (
             <div className="bg-white rounded-lg border border-gray-200 p-4">
-                <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center justify-between">
                     <h3 className="font-semibold">{vehicle.year} {vehicle.make} {vehicle.model}</h3>
                     <button
                         onClick={() => setIsEditing(true)}
@@ -147,14 +147,16 @@ export default function VehicleInfo({ vehicle, handleUpdate, customer_id }: vehi
                     </button>
                 </div>
 
-                <div className="space-y-3">
-                    <div className="text-sm text-gray-600 space-y-1">
-                        <p><strong>Engine:</strong> {vehicle.engine || 'N/A'}</p>
-                        <p><strong>Transmission:</strong> {vehicle.transmission || 'N/A'}</p>
-                        <p><strong>Mileage:</strong> {vehicle.mileage || 'N/A'}</p>
-                        <p><strong>VIN:</strong> {vehicle.vin || 'N/A'}</p>
+                {(vehicle.engine || vehicle.engine || vehicle.engine) &&
+                    <div className="space-y-3 mt-4">
+                        <div className="text-sm text-gray-600 space-y-1">
+                            {vehicle.engine && <p><strong>Engine:</strong> {vehicle.engine}</p>}
+                            {vehicle.transmission && <p><strong>Transmission:</strong> {vehicle.transmission}</p>}
+                            {vehicle.mileage !== 0 && <p><strong>Mileage:</strong> {vehicle.mileage}</p>}
+                            {vehicle.vin && <p><strong>VIN:</strong> {vehicle.vin}</p>}
+                        </div>
                     </div>
-                </div>
+                }
             </div>
         )
     }

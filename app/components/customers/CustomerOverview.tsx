@@ -23,41 +23,57 @@ const CustomerOverview: React.FC<CustomerOverviewProps> = ({
         else if (jobs.find(job => job.status === "Waiting"))
             return "Waiting";
         else return "None";
-    }
+    };
 
     return (
-        <div className="hidden md:block bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
-            <h3 className="text-xl font-semibold text-gray-900 mb-4">Customer Overview</h3>
+        <div className="hidden md:block bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6 ">
+            {/* Header */}
+            <div className="flex flex-col items-start mb-6">
+                <h3 className="text-2xl font-bold text-gray-900">
+                    Customer Overview
+                </h3>
+                <span
+                    className={`mt-2 px-3 py-2 text-sm rounded ${getStatusBadge(getStatus())}`}
+                >
+                    {getStatus()}
+                </span>
+            </div>
 
-            <div className="space-y-8">
-                <div>
-                    <label className="text-sm font-medium text-gray-700 mb-2 block">Status</label>
-                    <span className={`px-2 py-1 rounded text-xs font-medium ${getStatusBadge(getStatus())}`}>
-                        {getStatus()}
-                    </span>
+            {/* Main Grid Section */}
+            <div className="flex flex-col justify-center flex-grow space-y-6">
+                {/* First Row */}
+                <div className="grid grid-cols-2 gap-6">
+                    <div className="bg-gray-50 rounded-lg p-4 shadow-sm flex flex-col items-center">
+                        <p className="text-gray-500 text-sm">Vehicles</p>
+                        <p className="text-2xl font-extrabold text-gray-900 mt-1">
+                            {customerData.vehicles?.length || 0}
+                        </p>
+                    </div>
+                    <div className="bg-gray-50 rounded-lg p-4 shadow-sm flex flex-col items-center">
+                        <p className="text-gray-500 text-sm">Jobs</p>
+                        <p className="text-2xl font-extrabold text-gray-900 mt-1">
+                            {jobs?.length || 0}
+                        </p>
+                    </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                    <div>
-                        <label className="text-sm font-medium text-gray-700 mb-2 block">Total Vehicles</label>
-                        <p className="text-2xl font-bold text-gray-900">{customerData.vehicles?.length || 0}</p>
-                    </div>
-                    <div>
-                        <label className="text-sm font-medium text-gray-700 mb-2 block">Total Jobs</label>
-                        <p className="text-2xl font-bold text-gray-900">{jobs?.length || 0}</p>
-                    </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                    <div>
-                        <label className="text-sm font-medium text-gray-700 mb-2 block">Total Spent</label>
-                        <p className="text-xl font-bold text-green-600">
+                {/* Second Row */}
+                <div className="grid grid-cols-2 gap-6">
+                    <div className="bg-green-50 rounded-lg p-4 shadow-sm flex flex-col items-center">
+                        <p className="text-gray-600 text-sm">Spent</p>
+                        <p className="text-xl font-bold text-green-600 mt-1">
                             ${totalSpent.toLocaleString()}
                         </p>
                     </div>
-                    <div>
-                        <label className="text-sm font-medium text-gray-700 mb-2 block">Amount Owed</label>
-                        <p className={`text-xl font-bold ${amountOwed > 0 ? 'text-red-600' : 'text-green-600'}`}>
+                    <div
+                        className={`rounded-lg p-4 shadow-sm flex flex-col items-center ${amountOwed > 0 ? 'bg-red-50' : 'bg-green-50'
+                            }`}
+                    >
+                        <p className="text-gray-600 text-sm">Owed</p>
+                        <p
+                            className={`text-xl font-bold mt-1 ${amountOwed > 0 ? 'text-red-600' : 'text-green-600'
+                                }`}
+                        >
                             ${amountOwed.toLocaleString()}
                         </p>
                     </div>

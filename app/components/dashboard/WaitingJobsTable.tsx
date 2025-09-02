@@ -113,7 +113,7 @@ export default function WaitingJobsTable({ onJobStarted }: WaitingJobsTableProps
                                         <h4 className="font-medium text-gray-900">{job.customer}</h4>
                                         <p className="text-sm text-gray-600">{job.vehicle}</p>
                                         <p className="text-sm text-gray-600">{job.title}</p>
-                                        <p className="text-xs text-gray-500 mt-2">{job.waitingReason}</p>
+                                        {job.waitingReason && <p className="text-xs text-gray-500 mt-2">{job.waitingReason}</p>}
                                     </div>
                                     <span className={`px-2 py-1 rounded-full text-xs font-medium ${getPriorityColor(job.priority)}`}>
                                         {job.priority}

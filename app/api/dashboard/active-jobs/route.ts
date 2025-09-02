@@ -9,7 +9,7 @@ export async function GET() {
                 j.id,
                 j.title,
                 j.status,
-                j.created_at,
+                j.start_date,
                 j.estimated_completion,
                 c.first_name,
                 c.last_name,
@@ -30,7 +30,7 @@ export async function GET() {
             customer: row.first_name && row.last_name ? `${row.first_name} ${row.last_name}` : 'Unknown Customer',
             vehicle: row.year && row.make && row.model ? `${row.year} ${row.make} ${row.model}` : 'No Vehicle',
             status: row.status,
-            startedDate: row.created_at,
+            startedDate: row.start_date,
             estimatedCompletion: row.estimated_completion
         }));
 

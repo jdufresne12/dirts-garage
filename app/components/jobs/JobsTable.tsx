@@ -242,7 +242,7 @@ const JobsTable: React.FC<JobsTableProps> = ({ searchTerm, currentPage, itemsPer
                                         </td>
                                         {/* Hide additional columns on mobile */}
                                         <td className="hidden md:table-cell px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                            {activeTab === 'Waiting' && (job.estimated_start_date || 'Unknown')}
+                                            {activeTab === 'Waiting' && (formatDate(job.estimated_start_date) || 'TBD')}
                                             {activeTab === 'Completed' && formatDate(job.completion_date || job.estimated_completion)}
                                             {activeTab !== 'Completed' && activeTab !== 'Waiting' && formatDate(job.estimated_completion)}
                                         </td>

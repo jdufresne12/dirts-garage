@@ -57,6 +57,10 @@ export class InvoicePDFGenerator {
         yPosition = this.addHeader(businessInfo, invoice, yPosition);
 
         // Customer Info & Vehicle Info
+        // if(customer){
+        //     yPosition = this.addCustomerInfo(customer, vehicle, yPosition);
+        // }
+
         yPosition = this.addCustomerInfo(customer, vehicle, yPosition);
 
         const lineItemsCount = invoice.line_items?.length || 0;
@@ -191,25 +195,27 @@ export class InvoicePDFGenerator {
         this.doc.setTextColor(0, 0, 0);
         this.doc.text('Bill To:', leftColumn, yPosition);
 
-        let leftY = yPosition + 8;
-        this.doc.setFontSize(10);
-        this.doc.setFont('helvetica', 'normal');
-        this.doc.text(`${customer.first_name} ${customer.last_name}`, leftColumn, leftY);
-        leftY += 5;
-
-        if (customer.address) {
-            this.doc.text(customer.address, leftColumn, leftY);
+        let leftY = yPosition + (customer ? 8 : 20);
+        if (customer) {
+            this.doc.setFontSize(10);
+            this.doc.setFont('helvetica', 'normal');
+            this.doc.text(`${customer.first_name} ${customer.last_name}`, leftColumn, leftY);
             leftY += 5;
-        }
 
-        if (customer.city && customer.state && customer.zipcode) {
-            this.doc.text(`${customer.city}, ${customer.state} ${customer.zipcode}`, leftColumn, leftY);
+            if (customer.address) {
+                this.doc.text(customer.address, leftColumn, leftY);
+                leftY += 5;
+            }
+
+            if (customer.city && customer.state && customer.zipcode) {
+                this.doc.text(`${customer.city}, ${customer.state} ${customer.zipcode}`, leftColumn, leftY);
+                leftY += 5;
+            }
+
+            this.doc.text(customer.phone, leftColumn, leftY);
             leftY += 5;
+            this.doc.text(customer.email, leftColumn, leftY);
         }
-
-        this.doc.text(customer.phone, leftColumn, leftY);
-        leftY += 5;
-        this.doc.text(customer.email, leftColumn, leftY);
 
         // Vehicle section (if exists)
         let rightY = yPosition;

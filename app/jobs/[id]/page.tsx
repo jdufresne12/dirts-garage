@@ -130,9 +130,9 @@ const JobDetailsPage = () => {
             <div className="flex items-center pt-8 sm:pt-5 pl-5 pb-1">
                 <Link
                     href="/jobs"
-                    className="flex justify-center items-center h-8 w-fit px-2 rounded-lg bg-orange-400 gap-1 text-white font-sans hover:text-orange-400"
+                    className="flex justify-center items-center h-8 w-fit px-2 rounded-lg bg-orange-400 gap-1 text-white font-sans hover:bg-orange-500 hover:scale-102"
                 >
-                    <ArrowLeft className="size-5 hover:scale-110" /> back to all jobs
+                    <ArrowLeft className="size-5" /> back to all jobs
                 </Link>
             </div>
 

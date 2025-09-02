@@ -1,10 +1,15 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { AuthProvider } from './contexts/AuthContext';
 import "./globals.css";
 import LayoutWrapper from "./layoutWrapper";
 import { LoadingProvider } from "./contexts/LoadingContext";
 import Loading from "./components/Loading";
+
+export const viewport: Viewport = {
+  themeColor: 'oklch(27.9% 0.041 260.031)',
+}
+
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
