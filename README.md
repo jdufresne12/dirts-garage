@@ -95,6 +95,7 @@ A comprehensive garage management system designed to streamline automotive repai
 ### Known Issues
 
 - [ ] (MOBILE) Invoice Generation Modal display issues on mobile devices
+- [ ] (MOBILE/WEB) Uploading images takes very long/inefficient
 
 ### Future Enhancements
 
