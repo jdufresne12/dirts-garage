@@ -159,16 +159,16 @@ export default function CostSummary({
                 <div className="space-y-2 text-sm">
                     <div className="flex justify-between">
                         <span>Parts & Materials:</span>
-                        <span>${costSummary.partsAndMaterials.toLocaleString()}</span>
+                        <span>${costSummary.partsAndMaterials.toFixed(2).toLocaleString()}</span>
                     </div>
                     <div className="flex justify-between">
                         <span>Labor ({Number(costSummary.hours)} hours):</span>
-                        <span>${costSummary.labor.toLocaleString()}</span>
+                        <span>${costSummary.labor.toFixed(2).toLocaleString()}</span>
                     </div>
                     <hr className="my-2" />
                     <div className="flex justify-between font-bold text-lg">
                         <span>Total:</span>
-                        <span>${total.toLocaleString()}</span>
+                        <span>${total.toFixed(2).toLocaleString()}</span>
                     </div>
                 </div>
 

@@ -352,7 +352,7 @@ export default function InvoiceEditor({
                                 type="number"
                                 min="0"
                                 step="0.01"
-                                value={laborSettings.hourly_rate}
+                                value={laborSettings.hourly_rate == 0 ? 0 : (laborSettings.hourly_rate)}
                                 onChange={(e) => handleLaborSettingChange('hourly_rate', parseFloat(e.target.value))}
                                 className="w-full px-3 py-2 text-sm md:text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
                             />
@@ -429,7 +429,7 @@ export default function InvoiceEditor({
                                                     type="number"
                                                     min="0"
                                                     step="0.001"
-                                                    value={item.quantity}
+                                                    value={item.quantity != 0 ? String(item.quantity).replace(/^0+/, "") : 0}
                                                     onChange={(e) => updateLineItem(item.id, {
                                                         quantity: parseFloat(e.target.value) || 0
                                                     })}
@@ -443,7 +443,7 @@ export default function InvoiceEditor({
                                                     type="number"
                                                     min="0"
                                                     step="0.01"
-                                                    value={item.rate}
+                                                    value={item.rate != 0 ? String(item.rate).replace(/^0+/, "") : 0}
                                                     onChange={(e) => updateLineItem(item.id, {
                                                         rate: parseFloat(e.target.value) || 0
                                                     })}
@@ -548,7 +548,7 @@ export default function InvoiceEditor({
                                     type="number"
                                     min="0"
                                     step="0.01"
-                                    value={newItem.rate}
+                                    value={newItem.rate != 0 ? String(newItem.rate).replace(/^0+/, "") : 0}
                                     onChange={(e) => setNewItem(prev => ({
                                         ...prev,
                                         rate: parseFloat(e.target.value) || 0
@@ -599,7 +599,7 @@ export default function InvoiceEditor({
                             type="number"
                             min="0"
                             step="0.01"
-                            value={invoice.discount_amount}
+                            value={invoice.discount_amount != 0 ? String(invoice.discount_amount).replace(/^0+/, "") : 0}
                             onChange={(e) => updateInvoiceField('discount_amount', parseFloat(e.target.value) || 0)}
                             className="w-full px-3 py-2 text-sm md:text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
                         />
@@ -613,7 +613,7 @@ export default function InvoiceEditor({
                             min="0"
                             max="100"
                             step="0.1"
-                            value={invoice.tax_rate}
+                            value={invoice.tax_rate != 0 ? String(invoice.tax_rate).replace(/^0+/, "") : 0}
                             onChange={(e) => updateInvoiceField('tax_rate', parseFloat(e.target.value) || 0)}
                             className="w-full px-3 py-2 text-sm md:text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
                         />

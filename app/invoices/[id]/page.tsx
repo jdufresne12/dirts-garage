@@ -19,7 +19,7 @@ import { handlePDFGeneration } from '@/app/lib/pdf-generator';
 import Loading from '@/app/components/Loading';
 
 const businessInfo = {
-    name: "Dirt's Garage",
+    name: "J&J Machine and Auto",
     address: "154 South Parliman rd",
     city: "Lagrangeville",
     state: "NY",
