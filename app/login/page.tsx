@@ -53,14 +53,14 @@ function LoginForm() {
                 <div>
                     <Image
                         src="/gear.png"
-                        alt="Dirt's Garage Logo"
+                        alt="J&J Machine and Auto Logo"
                         width={500}
                         height={500}
                         className="mx-auto size-40 mb-15 slow-spin"
                         priority
                     />
                     <h2 className="mt-6 text-center text-3xl font-extrabold text-orange-400">
-                        Dirt&apos;s Garage
+                        J&J Machine and Auto
                     </h2>
                     <p className="mt-2 text-center text-sm text-white">
                         Welcome back! Please sign in to your account.

@@ -53,13 +53,13 @@ export default function Navbar({ isMobile }: NavbarProps) {
                         <div className="flex items-center space-x-3 min-w-0">
                             <Image
                                 src="/gear.png"
-                                alt="Dirt&apos;s Garage Logo"
-                                width={28}
-                                height={28}
+                                alt="J&J Machine and Auto Logo"
+                                width={50}
+                                height={50}
                                 className="flex-shrink-0"
                                 priority
                             />
-                            <span className="text-lg font-bold text-orange-400 truncate">Dirt&apos;s Garage</span>
+                            <span className="text-lg font-bold text-orange-400 truncate">J&J</span>
                         </div>
                         <button
                             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -143,15 +143,15 @@ export default function Navbar({ isMobile }: NavbarProps) {
                         <div className="flex-shrink-0">
                             <Image
                                 src="/gear.png"
-                                alt="Dirt's Garage Logo"
-                                width={28}
-                                height={28}
+                                alt="J&J Machine and Auto Logo"
+                                width={40}
+                                height={40}
                                 className="size-4 lg:size-6"
                                 priority
                             />
                         </div>
                         <span className="text-md lg:text-xl font-bold text-orange-400 truncate">
-                            Dirt&apos;s Garage
+                            J&J Machine and Auto
                         </span>
                     </div>
                 )}

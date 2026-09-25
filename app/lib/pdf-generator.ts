@@ -460,7 +460,7 @@ export async function handlePDFGeneration(
     action: 'download' | 'preview' | 'email' = 'download'
 ): Promise<void> {
     const businessInfo = {
-        name: "Dirt's Garage",
+        name: "J&J Machine and Auto",
         address: "154 South Parliman rd",
         city: "Lagrangeville",
         state: "NY",

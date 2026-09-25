@@ -13,7 +13,7 @@ export default function Loading() {
             <div className="bg-white rounded-lg p-8 shadow-xl flex flex-col items-center max-w-sm w-full mx-4">
                 <Image
                     src="/gear.png"
-                    alt="Dirt's Garage Logo"
+                    alt="J&J Machine and Auto Logo"
                     width={500}
                     height={500}
                     className="size-20 mb-4 slow-spin"
